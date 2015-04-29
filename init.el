@@ -1,3 +1,4 @@
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -19,22 +20,26 @@
              '("melpa" . "http://melpa.org/packages/") t)
 (package-initialize)
 
+
+
 (defun require-packages (&rest packages)
   (dolist (package packages)
     (unless (package-installed-p package)
       (package-install package))
     (require package)))
 
-(require-packages 'helm)
-(require 'helm-config)
-(helm-mode 1)
-(global-set-key (kbd "M-x") 'helm-M-x)
-(setq helm-M-x-fuzzy-match t)
-(global-set-key (kbd "C-x b") 'helm-mini)
-(setq helm-buffers-fuzzy-matching t
-      helm-recentf-fuzzy-match    t)
+;; (require-packages 'helm)
+;; (require 'helm-config)
+;; (helm-mode 1)
+;; (global-set-key (kbd "M-x") 'helm-M-x)
+;; (setq helm-M-x-fuzzy-match t)
+;; (global-set-key (kbd "C-x b") 'helm-mini)
+;; (setq helm-buffers-fuzzy-matching t
+;;       helm-recentf-fuzzy-match    t)
 
 (require-packages 'clojure-mode)
+(add-hook 'clojure-mode-hook 'show-paren-mode)
+(add-hook 'emacs-lisp-mode-hook 'show-paren-mode)
 
 (require-packages 'projectile 'helm 'helm-projectile)
 (projectile-global-mode)
@@ -44,13 +49,14 @@
 (require-packages 'clojure-mode 'paredit)
 (add-hook 'clojure-mode-hook 'paredit-mode)
 (add-hook 'emacs-lisp-mode-hook 'paredit-mode)
-(add-hook 'emacs-lisp-mode-hook 'company-mode)
+
 
 ;; Copy PATH from the environment to emacs
 (require-packages 'exec-path-from-shell)
 (when (memq window-system '(mac ns))
   (exec-path-from-shell-initialize))
 
+(setq magit-last-seen-setup-instructions "1.4.0")
 (require-packages 'magit)
 (set-variable 'magit-emacsclient-executable "/usr/local/Cellar/emacs/24.3/bin/emacsclient")
 (global-set-key (kbd "C-x g") 'magit-status)
@@ -84,6 +90,8 @@
 (require-packages 'iedit)
 (define-key cider-mode-map (kbd "C-c C-y") 'iedit-mode)
 
+(add-hook 'cider-mode-hook #'eldoc-mode)
+
 (require-packages 'company)
 (add-hook 'cider-repl-mode-hook #'company-mode)
 (add-hook 'cider-mode-hook #'company-mode)
@@ -94,6 +102,16 @@
 (global-set-key [f3] 'highlight-symbol-next)
 (global-set-key [(shift f3)] 'highlight-symbol-prev)
 
+(defun insert-current-date-time ()
+  (interactive)
+  (when (use-region-p)
+    (delete-region (region-beginning) (region-end)))
+  (insert (format-time-string "%_e %_m %_Y %_H %_M" (current-time))))
+(define-key clojure-mode-map (kbd "C-c C-d") 'insert-current-date-time)
+
+
+;; Delete selection
+(delete-selection-mode 1)
 
 ;;; Set command as meta
 (setq mac-option-key-is-meta nil
@@ -110,4 +128,8 @@
 
 (setq split-height-threshold 0)
 (setq split-width-threshold nil)
+
+;; hide tool bar
+(tool-bar-mode -1)
+
 
