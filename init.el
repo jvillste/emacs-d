@@ -61,6 +61,7 @@
 
 (require-packages 'clojure-mode 'paredit)
 (add-hook 'clojure-mode-hook 'paredit-mode)
+(add-hook 'cider-repl-mode-hook 'paredit-mode)
 (add-hook 'emacs-lisp-mode-hook 'paredit-mode)
 
 
