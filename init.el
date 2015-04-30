@@ -15,18 +15,31 @@
  '(region ((t (:background "dark green")))))
 
 
+
 (require 'package)
-(add-to-list 'package-archives
-             '("melpa" . "http://melpa.org/packages/") t)
-(package-initialize)
-
-
 
 (defun require-packages (&rest packages)
   (dolist (package packages)
     (unless (package-installed-p package)
       (package-install package))
     (require package)))
+
+;; (add-to-list 'package-archives
+;;              '("melpa-stable" . "http://stable.melpa.org/packages/") t)
+
+(add-to-list 'package-archives
+	     '("melpa" . "http://melpa.org/packages/") t)
+
+(package-initialize)
+
+;; (require-packages 'package-filter)
+
+;; (require 'melpa)
+;; (setq package-archive-enable-alist '(("melpa"
+;;                                       iedit-mode
+;;                                       melpa)))
+;;(package-refresh-contents)
+
 
 (require-packages 'helm)
 (require 'helm-config)
@@ -61,17 +74,18 @@
 (set-variable 'magit-emacsclient-executable "/usr/local/Cellar/emacs/24.3/bin/emacsclient")
 (global-set-key (kbd "C-x g") 'magit-status)
 
-(require-packages 'clj-refactor)
-(add-hook 'clojure-mode-hook (lambda ()
-                               (clj-refactor-mode 1)
-                               (cljr-add-keybindings-with-prefix "C-c C-m")))
+;; (require-packages 'clj-refactor)
+;; (add-hook 'clojure-mode-hook (lambda ()
+;;                                (clj-refactor-mode 1)
+;;                                (cljr-add-keybindings-with-prefix "C-c C-m")))
 
 (require-packages 'recentf)
 (recentf-mode 1)
 (setq recentf-max-menu-items 25)
 (global-set-key "\C-x\ \C-r" 'recentf-open-files)
 
-(require-packages 'cider)
+(add-to-list 'load-path "~/.emacs.d/vendor/cider/")
+(require 'cider)
 
 (setq cider-auto-select-error-buffer nil)
 
@@ -112,7 +126,7 @@
   (when (use-region-p)
     (delete-region (region-beginning) (region-end)))
   (insert (format-time-string "%_e %_m %_Y %_H %_M" (current-time))))
-(define-key clojure-mode-map (kbd "C-c C-d") 'insert-current-date-time)
+(define-key clojure-mode-map (kbd "C-c d") 'insert-current-date-time)
 
 
 ;; Delete selection
@@ -141,5 +155,5 @@
   (interactive)
   (save-excursion
     (indent-region (point-min) (point-max) nil)))
-(global-set-key (kbd "C-c M-n") 'indent-buffer)
+(global-set-key (kbd "C-c n") 'indent-buffer)
 
