@@ -28,14 +28,14 @@
       (package-install package))
     (require package)))
 
-;; (require-packages 'helm)
-;; (require 'helm-config)
-;; (helm-mode 1)
-;; (global-set-key (kbd "M-x") 'helm-M-x)
-;; (setq helm-M-x-fuzzy-match t)
-;; (global-set-key (kbd "C-x b") 'helm-mini)
-;; (setq helm-buffers-fuzzy-matching t
-;;       helm-recentf-fuzzy-match    t)
+(require-packages 'helm)
+(require 'helm-config)
+(helm-mode 1)
+(global-set-key (kbd "M-x") 'helm-M-x)
+(setq helm-M-x-fuzzy-match t)
+(global-set-key (kbd "C-x b") 'helm-mini)
+(setq helm-buffers-fuzzy-matching t
+      helm-recentf-fuzzy-match    t)
 
 (require-packages 'clojure-mode)
 (add-hook 'clojure-mode-hook 'show-paren-mode)
@@ -73,6 +73,8 @@
 
 (require-packages 'cider)
 
+(setq cider-auto-select-error-buffer nil)
+
 (define-key cider-mode-map (kbd "<f9>") 'cider-restart)
 
 (defun load-cider-buffer ()
@@ -94,7 +96,10 @@
 
 (require-packages 'company)
 (add-hook 'cider-repl-mode-hook #'company-mode)
-(add-hook 'cider-mode-hook #'company-mode)
+(add-hook 'clojure-mode-hook #'company-mode)
+(add-hook 'emacs-lisp-mode-hook #'company-mode)
+
+(define-key clojure-mode-map (kbd "C-<tab>") 'company-complete)
 
 (require-packages 'highlight-symbol)
 (set 'highlight-symbol-idle-delay 0.1)
@@ -132,4 +137,9 @@
 ;; hide tool bar
 (tool-bar-mode -1)
 
+(defun indent-buffer ()
+  (interactive)
+  (save-excursion
+    (indent-region (point-min) (point-max) nil)))
+(global-set-key (kbd "C-c M-n") 'indent-buffer)
 
