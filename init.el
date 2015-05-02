@@ -85,6 +85,8 @@
 (setq recentf-max-menu-items 25)
 (global-set-key "\C-x\ \C-r" 'recentf-open-files)
 
+
+;; cider is loaded as a git submodule to get a stable version
 (add-to-list 'load-path "~/.emacs.d/vendor/cider/")
 (require 'cider)
 
@@ -107,7 +109,7 @@
 (require-packages 'iedit)
 (define-key cider-mode-map (kbd "C-c C-y") 'iedit-mode)
 
-(add-hook 'cider-mode-hook #'eldoc-mode)
+(add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
 
 (require-packages 'company)
 (add-hook 'cider-repl-mode-hook #'company-mode)
@@ -158,3 +160,4 @@
     (indent-region (point-min) (point-max) nil)))
 (global-set-key (kbd "C-c n") 'indent-buffer)
 
+(auto-revert-mode 1)
