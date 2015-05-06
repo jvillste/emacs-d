@@ -95,12 +95,6 @@
 (require 'cider)
 
 
-;; cider refresh
-(defun cider-refresh ()
-  (interactive)
-  (save-buffer)
-  (cider-interactive-eval "(require 'midje.repl)(require 'flow-gl.refresh)(flow-gl.refresh/refresh)"))
-(global-set-key (kbd "C-c l") 'cider-refresh)
 
 (setq cider-auto-select-error-buffer nil)
 
@@ -112,11 +106,33 @@
   (cider-load-buffer))
 (define-key cider-mode-map (kbd "C-c C-k") 'load-cider-buffer)
 
+(defun set-start-ns ()
+  (interactive)
+  (setq start-ns (cider-current-ns))
+  (message "start-ns is now '%s'" start-ns))
+(define-key cider-mode-map (kbd "C-c l b") 'set-start-ns)
+
 (defun cider-start ()
   (interactive)
-  (cider-repl-set-ns (cider-current-ns))
-  (cider-interactive-eval "(start)"))
-(define-key cider-mode-map (kbd "<f7>") 'cider-start)
+  (let ((start-ns (if start-ns
+		      start-ns
+		    (cider-current-ns))))
+    (message "using start-ns '%s'" start-ns)
+    (cider-interactive-eval (concat "(" start-ns "/start)"))))
+(define-key cider-mode-map (kbd "C-c l s") 'cider-start)
+
+(defun cider-refresh ()
+  (interactive)
+  (save-buffer)
+  (cider-interactive-eval "(require 'flow-gl.refresh)(flow-gl.refresh/refresh)"))
+(global-set-key (kbd "C-c l l") 'cider-refresh)
+
+(defun cider-refresh-and-start ()
+  (interactive)
+  (cider-refresh)
+  (cider-start))
+(global-set-key (kbd "C-c l r") 'cider-refresh-and-start)
+
 
 (require-packages 'iedit)
 (define-key cider-mode-map (kbd "C-c C-y") 'iedit-mode)
