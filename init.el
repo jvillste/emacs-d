@@ -45,6 +45,10 @@
 (require 'helm-config)
 (helm-mode 1)
 (global-set-key (kbd "M-x") 'helm-M-x)
+
+(define-key helm-find-files-map (kbd "<tab>") 'helm-execute-persistent-action)
+(define-key helm-find-files-map (kbd "C-z") 'helm-select-action)
+
 (setq helm-M-x-fuzzy-match t)
 (global-set-key (kbd "C-x b") 'helm-mini)
 (setq helm-buffers-fuzzy-matching t
@@ -89,6 +93,14 @@
 ;; cider is loaded as a git submodule to get a stable version
 (add-to-list 'load-path "~/.emacs.d/vendor/cider/")
 (require 'cider)
+
+
+;; cider refresh
+(defun cider-refresh ()
+  (interactive)
+  (save-buffer)
+  (cider-interactive-eval "(require 'midje.repl)(require 'flow-gl.refresh)(flow-gl.refresh/refresh)"))
+(global-set-key (kbd "C-c l") 'cider-refresh)
 
 (setq cider-auto-select-error-buffer nil)
 
@@ -161,3 +173,19 @@
 (global-set-key (kbd "C-c n") 'indent-buffer)
 
 (auto-revert-mode 1)
+
+
+(defun delete-this-buffer-and-file ()
+  "Removes file connected to current buffer and kills buffer."
+  (interactive)
+  (let ((filename (buffer-file-name))
+        (buffer (current-buffer))
+        (name (buffer-name)))
+    (if (not (and filename (file-exists-p filename)))
+        (error "Buffer '%s' is not visiting a file!" name)
+      (when (yes-or-no-p "Are you sure you want to remove this file? ")
+        (delete-file filename)
+        (kill-buffer buffer)
+        (message "File '%s' successfully removed" filename)))))
+
+(global-set-key (kbd "C-c r") 'delete-this-buffer-and-file)
