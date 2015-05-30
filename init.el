@@ -102,7 +102,7 @@
 
 (setq cider-auto-select-error-buffer nil)
 
-(define-key cider-mode-map (kbd "<f9>") 'cider-restart)
+(define-key cider-mode-map (kbd "C-c s") 'cider-restart)
 
 (defun load-cider-buffer ()
   (interactive)
