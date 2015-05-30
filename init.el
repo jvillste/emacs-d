@@ -41,6 +41,10 @@
 ;;(package-refresh-contents)
 
 
+(require-packages 'hydra)
+
+
+
 (require-packages 'helm)
 (require 'helm-config)
 (helm-mode 1)
@@ -148,9 +152,11 @@
 
 (require-packages 'highlight-symbol)
 (set 'highlight-symbol-idle-delay 0.1)
-(global-set-key [(meta f3)] 'highlight-symbol-mode)
-(global-set-key [f3] 'highlight-symbol-next)
-(global-set-key [(shift f3)] 'highlight-symbol-prev)
+(global-set-key (kbd "C-c h") 'highlight-symbol-mode)
+(defhydra hydra-highlight-symbol (global-map "C-c j")
+  "highlight-symbol"
+  ("n" highlight-symbol-next "next")
+  ("p" highlight-symbol-prev "previous"))
 
 (defun insert-current-date-time ()
   (interactive)
@@ -205,3 +211,6 @@
         (message "File '%s' successfully removed" filename)))))
 
 (global-set-key (kbd "C-c r") 'delete-this-buffer-and-file)
+
+;; disable backups
+(setq make-backup-files nil)
