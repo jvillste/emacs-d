@@ -86,6 +86,7 @@
 ;; (require-packages 'clj-refactor)
 ;; (add-hook 'clojure-mode-hook (lambda ()
 ;;                                (clj-refactor-mode 1)
+;; 			       (yas-minor-mode 1) ; for adding require/use/import
 ;;                                (cljr-add-keybindings-with-prefix "C-c C-m")))
 
 (require-packages 'recentf)
