@@ -215,3 +215,16 @@
 
 ;; disable backups
 (setq make-backup-files nil)
+
+;; org mode
+
+(defhydra hydra-org-structure (org-mode-map "M-p")
+  "org-structure"
+  ("n" org-metadown "down")
+  ("M-n" org-shiftmetadown "down")
+  ("p" org-metaup "up")
+  ("M-p" org-shiftmetaup "up")
+  ("f" org-metaright "right")
+  ("M-f" org-shiftmetaright "right")
+  ("b" org-metaleft "left")
+  ("M-b" org-shiftmetaleft "left"))
