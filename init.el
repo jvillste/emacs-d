@@ -44,6 +44,12 @@
 (require-packages 'hydra)
 
 
+(require-packages 'markdown-mode)
+
+(add-hook 'markdown-mode-hook
+	  (lambda ()
+	    (visual-line-mode)))
+
 
 (require-packages 'helm)
 (require 'helm-config)
@@ -98,6 +104,11 @@
 ;; cider is loaded as a git submodule to get a stable version
 (add-to-list 'load-path "~/.emacs.d/vendor/cider/")
 (require 'cider)
+
+
+(add-to-list 'load-path "~/.emacs.d/vendor/highlight2clipboard/")
+(require 'highlight2clipboard)
+
 
 
 
@@ -220,17 +231,21 @@
 
 (defhydra hydra-org-structure (org-mode-map "M-p")
   "org-structure"
+
   ("n" org-metadown "down")
   ("M-n" org-shiftmetadown "down")
+  
   ("p" org-metaup "up")
   ("M-p" org-shiftmetaup "up")
+  
   ("f" org-metaright "right")
   ("M-f" org-shiftmetaright "right")
+  
   ("b" org-metaleft "left")
   ("M-b" org-shiftmetaleft "left"))
 
-(setq org-startup-indented t)
 
+(setq org-startup-indented t)
 
 (require-packages 'multi-web-mode)
 (setq mweb-default-major-mode 'html-mode)
@@ -240,3 +255,25 @@
     (css-mode "<style[^>]*>" "</style>")))
 (setq mweb-filename-extensions '("php" "htm" "html" "ctp" "phtml" "php4" "php5" "html"))
 (multi-web-global-mode 1)
+
+;; Htmlize
+
+(require-packages 'htmlize)
+(require 'htmlize)
+
+
+(defun html-to-file ()
+  (interactive)
+  (htmlize-file (buffer-file-name) "~/Downloads/htmlize.html"))
+
+(defun region-to-html-file ()
+  (interactive)
+  (let ((html-buffer (htmlize-region (region-beginning) (region-end))))
+    (set-buffer html-buffer)
+    (write-file "~/Downloads/htmlize.html")))
+
+;; path
+
+(setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin"))
+(setq exec-path (append exec-path '("/usr/local/bin")))
+
