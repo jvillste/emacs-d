@@ -1,3 +1,4 @@
+(load-file "local.el")
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -73,10 +74,23 @@
 (setq projectile-completion-system 'helm)
 (helm-projectile-on)
 
-(require-packages 'clojure-mode 'paredit)
+(require-packages 'clojure-mode)
+
+;; paredit
+
+(require-packages 'paredit)
 (add-hook 'clojure-mode-hook 'paredit-mode)
 (add-hook 'cider-repl-mode-hook 'paredit-mode)
 (add-hook 'emacs-lisp-mode-hook 'paredit-mode)
+
+;; (defun my-paredit-nonlisp ()
+;;   "Turn on paredit mode for non-lisps."
+;;   (interactive)
+;;   (set (make-local-variable 'paredit-space-for-delimiter-predicates)
+;;        '((lambda (endp delimiter) nil)))
+;;   (paredit-mode 1))
+
+;; (add-hook 'web-mode-hook 'my-paredit-nonlisp)
 
 
 ;; Copy PATH from the environment to emacs
@@ -149,9 +163,14 @@
   (cider-start))
 (global-set-key (kbd "C-c l r") 'cider-refresh-and-start)
 
+(define-key cider-mode-map (kbd "M-.")
+  (lambda ()
+    (interactive)
+    (cider-find-var 0)))
 
 (require-packages 'iedit)
-(define-key cider-mode-map (kbd "C-c C-y") 'iedit-mode)
+;; (define-key cider-mode-map (kbd "C-c C-y") 'iedit-mode)
+(global-set-key (kbd "C-c C-y") 'iedit-mode)
 
 (add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
 
@@ -247,14 +266,22 @@
 
 (setq org-startup-indented t)
 
-(require-packages 'multi-web-mode)
-(setq mweb-default-major-mode 'html-mode)
-(setq mweb-tags 
-  '((php-mode "<\\?php\\|<\\? \\|<\\?=" "\\?>")
-    (js-mode  "<script[^>]*>" "</script>")
-    (css-mode "<style[^>]*>" "</style>")))
-(setq mweb-filename-extensions '("php" "htm" "html" "ctp" "phtml" "php4" "php5" "html"))
-(multi-web-global-mode 1)
+
+;; web mode
+
+;; (require-packages 'multi-web-mode)
+;; (setq mweb-default-major-mode 'html-mode)
+;; (setq mweb-tags 
+;;       '((php-mode "<\\?php\\|<\\? \\|<\\?=" "\\?>")
+;; 	(js-mode  "<script[^>]*>" "</script>")
+;; 	(css-mode "<style[^>]*>" "</style>")))
+;; (setq mweb-filename-extensions '("php" "htm" "html" "ctp" "phtml" "php4" "php5" "html"))
+;; (multi-web-global-mode 1)
+
+(require-packages 'web-mode)
+;; (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.jsx?\\'" . web-mode))
+(setq web-mode-enable-auto-quoting nil)
 
 ;; Htmlize
 
@@ -277,3 +304,41 @@
 (setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin"))
 (setq exec-path (append exec-path '("/usr/local/bin")))
 
+;; node repl
+
+(require-packages 'nodejs-repl)
+(define-key web-mode-map (kbd "C-c C-k") 'nodejs-repl-send-buffer)
+(define-key web-mode-map (kbd "C-c C-c") 'nodejs-repl-send-region)
+(define-key web-mode-map (kbd "C-c C-z") 'nodejs-repl)
+
+
+;; from http://emacsredux.com/blog/2013/05/04/rename-file-and-buffer/
+
+(defun rename-file-and-buffer ()
+  "Rename the current buffer and file it is visiting."
+  (interactive)
+  (let ((filename (buffer-file-name)))
+    (if (not (and filename (file-exists-p filename)))
+        (message "Buffer is not visiting a file!")
+      (let ((new-name (read-file-name "New name: " filename)))
+        (cond
+         ((vc-backend filename) (vc-rename-file filename new-name))
+         (t
+          (rename-file filename new-name t)
+          (set-visited-file-name new-name t t)))))))
+
+
+;; avy
+
+(require-packages 'avy)
+(global-set-key (kbd "C-c C-u") 'avy-goto-char-2)
+(define-key cider-mode-map (kbd "C-c C-u") 'avy-goto-char-2)
+
+
+
+
+
+;; scala
+
+(require-packages 'scala-mode)
+(add-to-list 'auto-mode-alist '("\\.scala\\'" . scala-mode))
