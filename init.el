@@ -1,4 +1,5 @@
 
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -177,6 +178,12 @@
   (insert (format-time-string "%_e %_m %_Y %_H %_M" (current-time))))
 (define-key clojure-mode-map (kbd "C-c d") 'insert-current-date-time)
 
+(defun insert-ventoline ()
+  (interactive)
+  (insert (concat "{:time [" (format-time-string "%_e %_m %_Y %_H %_M" (current-time)) "] :ventoline 2}")))
+(define-key clojure-mode-map (kbd "C-c i v") 'insert-ventoline)
+
+
 
 ;; Delete selection
 (delete-selection-mode 1)
@@ -250,9 +257,9 @@
 (require-packages 'multi-web-mode)
 (setq mweb-default-major-mode 'html-mode)
 (setq mweb-tags 
-  '((php-mode "<\\?php\\|<\\? \\|<\\?=" "\\?>")
-    (js-mode  "<script[^>]*>" "</script>")
-    (css-mode "<style[^>]*>" "</style>")))
+      '((php-mode "<\\?php\\|<\\? \\|<\\?=" "\\?>")
+	(js-mode  "<script[^>]*>" "</script>")
+	(css-mode "<style[^>]*>" "</style>")))
 (setq mweb-filename-extensions '("php" "htm" "html" "ctp" "phtml" "php4" "php5" "html"))
 (multi-web-global-mode 1)
 
