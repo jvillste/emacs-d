@@ -1,4 +1,4 @@
-(load-file "local.el")
+(load-file "~/.emacs.d/local.el")
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -65,6 +65,8 @@
 (setq helm-buffers-fuzzy-matching t
       helm-recentf-fuzzy-match    t)
 
+(global-set-key (kbd "C-x C-f") 'helm-find-files)
+
 (require-packages 'clojure-mode)
 (add-hook 'clojure-mode-hook 'show-paren-mode)
 (add-hook 'emacs-lisp-mode-hook 'show-paren-mode)
@@ -118,6 +120,7 @@
 ;; cider is loaded as a git submodule to get a stable version
 (add-to-list 'load-path "~/.emacs.d/vendor/cider/")
 (require 'cider)
+(require 'cider-macroexpansion)
 
 
 (add-to-list 'load-path "~/.emacs.d/vendor/highlight2clipboard/")
@@ -125,22 +128,37 @@
 
 
 
+(setq cider-test-infer-test-ns (lambda (ns) ns))
 
 (setq cider-auto-select-error-buffer nil)
+
+(add-hook 'cider-mode-hook 'eldoc-mode)
 
 (define-key cider-mode-map (kbd "C-c s") 'cider-restart)
 
 (defun load-cider-buffer ()
   (interactive)
   (save-buffer)
+;;  (cider-interactive-eval (concat "(let [ns '" (cider-current-ns) "] (doseq [alias (keys (ns-aliases ns))] (ns-unalias ns alias)))"))
   (cider-load-buffer))
 (define-key cider-mode-map (kbd "C-c C-k") 'load-cider-buffer)
+(define-key clojure-mode-map (kbd "C-c C-k") 'load-cider-buffer)
+
+
+(defun remove-and-load-cider-buffer ()
+  (interactive)
+  (save-buffer)
+  (cider-interactive-eval (concat "(remove-ns '" (cider-current-ns) ")"))
+  (cider-load-buffer))
+(define-key cider-mode-map (kbd "C-c C-S-k") 'remove-and-load-cider-buffer)
+(define-key clojure-mode-map (kbd "C-c C-S-k") 'remove-and-load-cider-buffer)
+
 
 (defun set-start-ns ()
   (interactive)
   (setq start-ns (cider-current-ns))
   (message "start-ns is now '%s'" start-ns))
-(define-key cider-mode-map (kbd "C-c l b") 'set-start-ns)
+(define-key cider-mode-map (kbd "C-o C-b") 'set-start-ns)
 
 (defun cider-start ()
   (interactive)
@@ -149,30 +167,60 @@
 		    (cider-current-ns))))
     (message "using start-ns '%s'" start-ns)
     (cider-interactive-eval (concat "(" start-ns "/start)"))))
-(define-key cider-mode-map (kbd "C-c l s") 'cider-start)
+(define-key cider-mode-map (kbd "C-o C-s") 'cider-start)
 
-(defun cider-refresh ()
-  (interactive)
-  (save-buffer)
-  (cider-interactive-eval "(require 'flow-gl.refresh)(flow-gl.refresh/refresh)"))
-(global-set-key (kbd "C-c l l") 'cider-refresh)
 
-(defun cider-refresh-and-start ()
+(defun cider-pprint-start ()
   (interactive)
-  (cider-refresh)
-  (cider-start))
-(global-set-key (kbd "C-c l r") 'cider-refresh-and-start)
+  (let ((start-ns (if start-ns
+		      start-ns
+		    (cider-current-ns))))
+    (message "using start-ns '%s'" start-ns)
+    (cider--pprint-eval-form (concat "(" start-ns "/start)"))))
+(define-key cider-mode-map (kbd "C-c l p") 'cider-pprint-start)
+
+(define-key cider-mode-map (kbd "C-o C-p") 'cider-pprint-eval-defun-at-point)
+
+
+
+;; (defun cider-refresh ()
+;;   (interactive)
+;;   (save-buffer)
+;;   (cider-interactive-eval "(require 'flow-gl.refresh)(flow-gl.refresh/refresh)"))
+;; (global-set-key (kbd "C-c l l") 'cider-refresh)
+
+;; (defun cider-refresh-and-start ()
+;;   (interactive)
+;;   (cider-refresh)
+;;   (cider-start))
+;; (global-set-key (kbd "C-c l r") 'cider-refresh-and-start)
 
 (define-key cider-mode-map (kbd "M-.")
   (lambda ()
     (interactive)
     (cider-find-var 0)))
 
+
+(defun figwheel-start ()
+  (interactive)
+  (cider-interactive-eval  "(use 'figwheel-sidecar.repl-api)")
+  (cider-interactive-eval  "(start-figwheel!)")
+  (cider-interactive-eval  "(cljs-repl)"))
+
+(define-key cider-repl-mode-map (kbd "C-c l f") 'figwheel-start)
+
+(defun run-tests ()
+  (interactive)
+  (load-cider-buffer)
+  (cider-test-run-ns-tests nil))
+
+;; (define-key cider-mode-map (kbd "C-c l t") 'run-tests)
+(define-key cider-mode-map (kbd "C-o C-f") 'run-tests)
+
 (require-packages 'iedit)
 ;; (define-key cider-mode-map (kbd "C-c C-y") 'iedit-mode)
 (global-set-key (kbd "C-c C-y") 'iedit-mode)
 
-(add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
 
 (require-packages 'company)
 (add-hook 'cider-repl-mode-hook #'company-mode)
@@ -195,6 +243,8 @@
     (delete-region (region-beginning) (region-end)))
   (insert (format-time-string "%_e %_m %_Y %_H %_M" (current-time))))
 (define-key clojure-mode-map (kbd "C-c d") 'insert-current-date-time)
+
+
 
 
 ;; Delete selection
@@ -243,8 +293,24 @@
 
 (global-set-key (kbd "C-c r") 'delete-this-buffer-and-file)
 
-;; disable backups
-(setq make-backup-files nil)
+;; backup and autosave files
+
+
+(defconst backup-directory (expand-file-name "~/.emacs.backups/"))
+
+(setq backup-directory-alist
+      `((".*" . ,backup-directory)))
+
+(setq auto-save-file-name-transforms
+      `((".*" ,backup-directory t)))
+
+(setq auto-save-list-file-prefix backup-directory)
+
+(setq delete-old-versions t
+      kept-new-versions 6
+      kept-old-versions 2
+      version-control t)
+
 
 ;; org mode
 
@@ -265,6 +331,11 @@
 
 
 (setq org-startup-indented t)
+
+(define-key org-mode-map (kbd "C-c k") 'org-cut-subtree)
+(define-key org-mode-map (kbd "C-c y") 'org-paste-subtree)
+
+
 
 
 ;; web mode
@@ -328,17 +399,38 @@
           (set-visited-file-name new-name t t)))))))
 
 
+
+;; kill spaces
+
+(defun kill-spaces ()
+  (interactive)
+  (just-one-space -1))
+
+(global-set-key (kbd "C-M-k") 'kill-spaces)
+
+
 ;; avy
 
 (require-packages 'avy)
-(global-set-key (kbd "C-c C-u") 'avy-goto-char-2)
-(define-key cider-mode-map (kbd "C-c C-u") 'avy-goto-char-2)
-
-
-
-
+(global-set-key (kbd "M-j") 'avy-goto-char-2)
+(define-key cider-mode-map (kbd "M-j") 'avy-goto-char-2)
+(define-key outline-mode-map (kbd "M-j") 'avy-goto-char-2)
 
 ;; scala
 
 (require-packages 'scala-mode)
 (add-to-list 'auto-mode-alist '("\\.scala\\'" . scala-mode))
+
+;; rust
+
+(require-packages 'rust-mode)
+
+;; pixie
+
+(add-to-list 'auto-mode-alist '("\\.pxi\\'" . pixie-mode))
+(add-hook 'pixie-mode-hook #'inf-clojure-minor-mode)
+
+;; disable suspend frame
+
+(global-unset-key (kbd "C-z"))
+(put 'erase-buffer 'disabled nil)
