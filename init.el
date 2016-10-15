@@ -274,14 +274,14 @@
 (setq org-startup-indented t)
 
 
-(require-packages 'multi-web-mode)
-(setq mweb-default-major-mode 'html-mode)
-(setq mweb-tags 
-      '((php-mode "<\\?php\\|<\\? \\|<\\?=" "\\?>")
-	(js-mode  "<script[^>]*>" "</script>")
-	(css-mode "<style[^>]*>" "</style>")))
-(setq mweb-filename-extensions '("php" "htm" "html" "ctp" "phtml" "php4" "php5" "html"))
-(multi-web-global-mode 1)
+;; (require-packages 'multi-web-mode)
+;; (setq mweb-default-major-mode 'html-mode)
+;; (setq mweb-tags 
+;;       '((php-mode "<\\?php\\|<\\? \\|<\\?=" "\\?>")
+;; 	(js-mode  "<script[^>]*>" "</script>")
+;; 	(css-mode "<style[^>]*>" "</style>")))
+;; (setq mweb-filename-extensions '("php" "htm" "html" "ctp" "phtml" "php4" "php5" "html"))
+;; (multi-web-global-mode 1)
 
 ;; web mode
 
