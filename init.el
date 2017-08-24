@@ -16,8 +16,6 @@
  '(highlight-symbol-face ((t (:background "forest green" :foreground "black"))))
  '(region ((t (:background "dark green")))))
 
-
-
 (require 'package)
 
 (defun require-packages (&rest packages)
@@ -86,6 +84,13 @@
 (add-hook 'cider-repl-mode-hook 'paredit-mode)
 (add-hook 'emacs-lisp-mode-hook 'paredit-mode)
 
+(defhydra paredit-mode-map (global-map "C-c l")
+  "move-parens"
+  ("f" paredit-forward-slurp-sexp "forward slurp")
+  ("d" paredit-forward-barf-sexp "forward barf")
+  ("a" paredit-backward-slurp-sexp "backward slurp")
+  ("s" paredit-backward-barf-sexp "backward barf"))
+
 ;; (defun my-paredit-nonlisp ()
 ;;   "Turn on paredit mode for non-lisps."
 ;;   (interactive)
@@ -100,6 +105,10 @@
 (require-packages 'exec-path-from-shell)
 (when (memq window-system '(mac ns))
   (exec-path-from-shell-initialize))
+
+
+(require-packages 'git-gutter)
+(global-git-gutter-mode +1)
 
 (setq magit-last-seen-setup-instructions "1.4.0")
 (require-packages 'magit)
@@ -137,14 +146,16 @@
 
 (define-key cider-mode-map (kbd "C-c s") 'cider-restart)
 
-(defun load-cider-buffer ()
+(defun init-el-cider-load-buffer ()
   (interactive)
   (save-buffer)
-;;  (cider-interactive-eval (concat "(let [ns '" (cider-current-ns) "] (doseq [alias (keys (ns-aliases ns))] (ns-unalias ns alias)))"))
+  ;;  (cider-interactive-eval (concat "(let [ns '" (cider-current-ns) "] (doseq [alias (keys (ns-aliases ns))] (ns-unalias ns alias)))"))
   (cider-load-buffer))
-(define-key cider-mode-map (kbd "C-c C-k") 'load-cider-buffer)
-(define-key clojure-mode-map (kbd "C-c C-k") 'load-cider-buffer)
+(define-key cider-mode-map (kbd "C-c C-k") 'init-el-cider-load-buffer)
+(define-key clojure-mode-map (kbd "C-c C-k") 'init-el-cider-load-buffer)
 
+(define-key clojure-mode-map (kbd "C-o C-c") 'comment-region)
+(define-key clojure-mode-map (kbd "C-o C-d") 'uncomment-region)
 
 (defun remove-and-load-cider-buffer ()
   (interactive)
@@ -155,21 +166,33 @@
 (define-key clojure-mode-map (kbd "C-c C-S-k") 'remove-and-load-cider-buffer)
 
 
-(defun set-start-ns ()
+(defun init-el-set-start-ns ()
   (interactive)
   (setq start-ns (cider-current-ns))
   (message "start-ns is now '%s'" start-ns))
-(define-key cider-mode-map (kbd "C-o C-b") 'set-start-ns)
+(define-key cider-mode-map (kbd "C-o C-b") 'init-el-set-start-ns)
 
-(defun cider-start ()
+(defun init-el-start ()
   (interactive)
   (let ((start-ns (if start-ns
 		      start-ns
 		    (cider-current-ns))))
     (message "using start-ns '%s'" start-ns)
     (cider-interactive-eval (concat "(" start-ns "/start)"))))
-(define-key cider-mode-map (kbd "C-o C-s") 'cider-start)
+(define-key cider-mode-map (kbd "C-o C-s") 'init-el-start)
 
+(defun init-el-set-refresh-ns ()
+  (interactive)
+  (setq init-el-refresh-ns (cider-current-ns))
+  (message "refresh-ns is now '%s'" init-el-refresh-ns))
+(define-key cider-mode-map (kbd "C-o C-t") 'init-el-set-refresh-ns)
+
+(defun init-el-refresh ()
+  (interactive)
+  (message "using refresh-ns '%s'" init-el-refresh-ns)
+  (cider-interactive-eval (concat "(require '" init-el-refresh-ns ")"))
+  (cider-interactive-eval (concat "(" init-el-refresh-ns "/start)")))
+(define-key cider-mode-map (kbd "C-o C-r") 'init-el-refresh)
 
 (defun cider-pprint-start ()
   (interactive)
@@ -212,7 +235,7 @@
 
 (defun run-tests ()
   (interactive)
-  (load-cider-buffer)
+  (init-el-cider-load-buffer)
   (cider-test-run-ns-tests nil))
 
 ;; (define-key cider-mode-map (kbd "C-c l t") 'run-tests)
@@ -428,9 +451,9 @@
 ;; avy
 
 (require-packages 'avy)
-(global-set-key (kbd "M-j") 'avy-goto-char-2)
-(define-key cider-mode-map (kbd "M-j") 'avy-goto-char-2)
-(define-key outline-mode-map (kbd "M-j") 'avy-goto-char-2)
+(global-set-key (kbd "M-j") 'avy-goto-char-timer)
+(define-key cider-mode-map (kbd "M-j") 'avy-goto-char-timer)
+(define-key outline-mode-map (kbd "M-j") 'avy-goto-char-timer)
 
 ;; scala
 
@@ -450,3 +473,12 @@
 
 (global-unset-key (kbd "C-z"))
 (put 'erase-buffer 'disabled nil)
+
+
+
+;; projects
+
+(defun open-argumentica ()
+  ""
+  (interactive)
+  (find-file "/Users/jukka/src/argumentica/src/argumentica/db.clj"))
