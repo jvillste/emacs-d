@@ -40,6 +40,8 @@
 ;;                                       melpa)))
 ;;(package-refresh-contents)
 
+(global-unset-key (kbd "C-o"))
+
 
 (require-packages 'hydra)
 
@@ -170,7 +172,7 @@
   (interactive)
   (setq start-ns (cider-current-ns))
   (message "start-ns is now '%s'" start-ns))
-(define-key cider-mode-map (kbd "C-o C-b") 'init-el-set-start-ns)
+(define-key cider-mode-map (kbd "C-o C-n") 'init-el-set-start-ns)
 
 (defun init-el-start ()
   (interactive)
@@ -201,9 +203,9 @@
 		    (cider-current-ns))))
     (message "using start-ns '%s'" start-ns)
     (cider--pprint-eval-form (concat "(" start-ns "/start)"))))
-(define-key cider-mode-map (kbd "C-c l p") 'cider-pprint-start)
+(define-key cider-mode-map (kbd "C-o C-p") 'cider-pprint-start)
 
-(define-key cider-mode-map (kbd "C-o C-p") 'cider-pprint-eval-defun-at-point)
+;; (define-key cider-mode-map (kbd "C-o C-p") 'cider-pprint-eval-defun-at-point)
 
 
 
@@ -482,3 +484,8 @@
   ""
   (interactive)
   (find-file "/Users/jukka/src/argumentica/src/argumentica/db.clj"))
+
+
+;; c/++
+
+(require-packages 'ggtags)
