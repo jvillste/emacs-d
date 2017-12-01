@@ -270,14 +270,6 @@
   (insert (format-time-string "%_e %_m %_Y %_H %_M" (current-time))))
 (define-key clojure-mode-map (kbd "C-c d") 'insert-current-date-time)
 
-(defun insert-ventoline ()
-  (interactive)
-  (insert (concat "{:time [" (format-time-string "%_e %_m %_Y %_H %_M" (current-time)) "] :ventoline 2}")))
-(define-key clojure-mode-map (kbd "C-c i v") 'insert-ventoline)
-
-
-
-
 
 ;; Delete selection
 (delete-selection-mode 1)
@@ -305,7 +297,16 @@
   (interactive)
   (save-excursion
     (indent-region (point-min) (point-max) nil)))
-(global-set-key (kbd "C-c n") 'indent-buffer)
+(global-set-key (kbd "C-c b") 'indent-buffer)
+
+
+(defun indent-whole-sexp ()
+  (interactive)
+  (save-excursion
+    (beginning-of-defun)
+    (indent-sexp)))
+
+(define-key clojure-mode-map (kbd "C-c n") 'indent-whole-sexp)
 
 (auto-revert-mode 1)
 
@@ -324,6 +325,13 @@
         (message "File '%s' successfully removed" filename)))))
 
 (global-set-key (kbd "C-c r") 'delete-this-buffer-and-file)
+
+
+(defun other-window-backwards ()
+  (interactive)
+  (other-window -1))
+
+(global-set-key (kbd "C-x C-o") 'other-window-backwards)
 
 ;; backup and autosave files
 
