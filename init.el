@@ -134,6 +134,7 @@
 (require 'cider)
 (require 'cider-macroexpansion)
 
+;; (setq cider-lein-parameters "with-profile +dev repl :headless")
 
 (add-to-list 'load-path "~/.emacs.d/vendor/highlight2clipboard/")
 (require 'highlight2clipboard)
@@ -198,6 +199,7 @@
 
 (defun cider-pprint-start ()
   (interactive)
+  (init-el-cider-load-buffer)
   (let ((start-ns (if start-ns
 		      start-ns
 		    (cider-current-ns))))
@@ -208,6 +210,21 @@
 ;; (define-key cider-mode-map (kbd "C-o C-p") 'cider-pprint-eval-defun-at-point)
 
 
+(defun make-mark-sexp-for-eval ()
+  (interactive)
+  (setq make-marked-buffer (current-buffer))
+  (setq make-marked-sexp (cider-last-sexp)))
+
+(defun make-eval-marked-sexp ()
+  (interactive)
+  (if (and make-marked-buffer make-marked-sexp)
+      (with-current-buffer make-marked-buffer
+        (save-excursion
+          (cider--pprint-eval-form make-marked-sexp)))
+    (message "First mark sexp with `make-mark-sexp-for-eval`" 'font-lock-warning-face)))
+
+(define-key cider-mode-map (kbd "C-o C-e") 'make-mark-sexp-for-eval)
+(define-key cider-mode-map (kbd "C-o C-i") 'make-eval-marked-sexp)
 
 ;; (defun cider-refresh ()
 ;;   (interactive)
@@ -234,6 +251,33 @@
   (cider-interactive-eval  "(cljs-repl)"))
 
 (define-key cider-repl-mode-map (kbd "C-c l f") 'figwheel-start)
+
+(setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
+
+;; (setq cider-cljs-lein-repl "(println \"now evaluate: (do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl)))")
+
+(defun cider-kill ()
+  "Kill all cider buffers and processes"
+  (interactive)
+  (dolist (process (process-list))
+    (when (string-prefix-p "nrepl" (process-name process))
+      (set-process-sentinel process
+                            (lambda (proc evt) t))))
+  (dolist (buffer (buffer-list))
+    (when (string-prefix-p "*cider" (buffer-name buffer))
+      (kill-buffer buffer))
+    (when (string-prefix-p "*nrepl" (buffer-name buffer))
+      (kill-buffer buffer))))
+
+(global-set-key (kbd "C-c C-w") 'cider-kill)
+
+(defun force-cider-restart ()
+  (interactive)
+  (cider-kill)
+  (setq cider-lein-parameters "with-profile +dev repl :headless")
+  (cider-jack-in nil))
+
+
 
 (defun run-tests ()
   (interactive)
@@ -359,13 +403,13 @@
 
   ("n" org-metadown "down")
   ("M-n" org-shiftmetadown "down")
-  
+
   ("p" org-metaup "up")
   ("M-p" org-shiftmetaup "up")
-  
+
   ("f" org-metaright "right")
   ("M-f" org-shiftmetaright "right")
-  
+
   ("b" org-metaleft "left")
   ("M-b" org-shiftmetaleft "left"))
 
@@ -380,7 +424,7 @@
 
 ;; (require-packages 'multi-web-mode)
 ;; (setq mweb-default-major-mode 'html-mode)
-;; (setq mweb-tags 
+;; (setq mweb-tags
 ;;       '((php-mode "<\\?php\\|<\\? \\|<\\?=" "\\?>")
 ;; 	(js-mode  "<script[^>]*>" "</script>")
 ;; 	(css-mode "<style[^>]*>" "</style>")))
@@ -391,7 +435,7 @@
 
 ;; (require-packages 'multi-web-mode)
 ;; (setq mweb-default-major-mode 'html-mode)
-;; (setq mweb-tags 
+;; (setq mweb-tags
 ;;       '((php-mode "<\\?php\\|<\\? \\|<\\?=" "\\?>")
 ;; 	(js-mode  "<script[^>]*>" "</script>")
 ;; 	(css-mode "<style[^>]*>" "</style>")))
@@ -497,3 +541,7 @@
 ;; c/++
 
 (require-packages 'ggtags)
+
+;; whitespace
+
+;; (add-hook 'before-save-hook 'delete-trailing-whitespace)
