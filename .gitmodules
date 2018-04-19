@@ -4,3 +4,6 @@
 [submodule "vendor/highlight2clipboard"]
 	path = vendor/highlight2clipboard
 	url = git@github.com:Lindydancer/highlight2clipboard.git
+[submodule "vendor/clj-refactor.el"]
+	path = vendor/clj-refactor.el
+	url = https://github.com/clojure-emacs/clj-refactor.el.git

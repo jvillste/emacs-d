@@ -6,8 +6,25 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(ansi-color-names-vector ["black" "#d55e00" "#009e73" "#f8ec59" "#0072b2" "#cc79a7" "#56b4e9" "white"])
- '(custom-enabled-themes (quote (deeper-blue))))
+ '(ansi-color-names-vector
+   ["black" "#d55e00" "#009e73" "#f8ec59" "#0072b2" "#cc79a7" "#56b4e9" "white"])
+ '(cljr-auto-clean-ns nil)
+ '(cljr-favor-prefix-notation t)
+ '(cljr-magic-require-namespaces
+   (quote
+    (("io" . "clojure.java.io")
+     ("set" . "clojure.set")
+     ("string" . "clojure.string")
+     ("walk" . "clojure.walk")
+     ("zip" . "clojure.zip"))))
+ '(custom-enabled-themes (quote (deeper-blue)))
+ '(global-whitespace-mode t)
+ '(whitespace-action nil)
+ '(whitespace-line-column 1000)
+ '(whitespace-style
+   (quote
+    (face tabs trailing lines-tail space-before-tab empty space-after-tab tab-mark))))
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -43,6 +60,14 @@
 (global-unset-key (kbd "C-o"))
 
 
+;; cider is loaded as a git submodule to get a stable version
+(add-to-list 'load-path "~/.emacs.d/vendor/cider/")
+(require 'cider)
+(require 'cider-macroexpansion)
+
+(define-key cider-mode-map (kbd "C-o C-t C-t") 'cider-test-run-test)
+(define-key cider-mode-map (kbd "C-o C-t C-r") 'cider-test-rerun-test)
+
 (require-packages 'hydra)
 
 
@@ -76,6 +101,8 @@
 (projectile-global-mode)
 (setq projectile-completion-system 'helm)
 (helm-projectile-on)
+
+(global-set-key (kbd "C-o C-z") 'projectile-grep)
 
 (require-packages 'clojure-mode)
 
@@ -111,17 +138,24 @@
 
 (require-packages 'git-gutter)
 (global-git-gutter-mode +1)
+(define-key cider-mode-map (kbd "C-o C-h") 'git-gutter:popup-hunk)
 
 (setq magit-last-seen-setup-instructions "1.4.0")
 (require-packages 'magit)
 (set-variable 'magit-emacsclient-executable "/usr/local/Cellar/emacs/24.3/bin/emacsclient")
 (global-set-key (kbd "C-x g") 'magit-status)
 
-;; (require-packages 'clj-refactor)
-;; (add-hook 'clojure-mode-hook (lambda ()
-;;                                (clj-refactor-mode 1)
-;; 			       (yas-minor-mode 1) ; for adding require/use/import
-;;                                (cljr-add-keybindings-with-prefix "C-c C-m")))
+(add-to-list 'load-path "~/.emacs.d/vendor/clj-refactor.el/")
+(require 'clj-refactor)
+
+(add-hook 'clojure-mode-hook
+	  (lambda ()
+	    (clj-refactor-mode 1)
+	    (yas-minor-mode 1) ; for adding require/use/import
+	    (cljr-add-keybindings-with-prefix "C-o RET")))
+
+
+
 
 (require-packages 'recentf)
 (recentf-mode 1)
@@ -129,10 +163,6 @@
 (global-set-key "\C-x\ \C-r" 'recentf-open-files)
 
 
-;; cider is loaded as a git submodule to get a stable version
-(add-to-list 'load-path "~/.emacs.d/vendor/cider/")
-(require 'cider)
-(require 'cider-macroexpansion)
 
 ;; (setq cider-lein-parameters "with-profile +dev repl :headless")
 
@@ -141,7 +171,9 @@
 
 
 
-(setq cider-test-infer-test-ns (lambda (ns) ns))
+;; (setq cider-test-infer-test-ns (lambda (ns) ns))
+
+
 
 (setq cider-auto-select-error-buffer nil)
 
@@ -154,6 +186,7 @@
   (save-buffer)
   ;;  (cider-interactive-eval (concat "(let [ns '" (cider-current-ns) "] (doseq [alias (keys (ns-aliases ns))] (ns-unalias ns alias)))"))
   (cider-load-buffer))
+
 (define-key cider-mode-map (kbd "C-c C-k") 'init-el-cider-load-buffer)
 (define-key clojure-mode-map (kbd "C-c C-k") 'init-el-cider-load-buffer)
 
@@ -188,7 +221,7 @@
   (interactive)
   (setq init-el-refresh-ns (cider-current-ns))
   (message "refresh-ns is now '%s'" init-el-refresh-ns))
-(define-key cider-mode-map (kbd "C-o C-t") 'init-el-set-refresh-ns)
+;; (define-key cider-mode-map (kbd "C-o C-t") 'init-el-set-refresh-ns)
 
 (defun init-el-refresh ()
   (interactive)
@@ -210,6 +243,20 @@
 ;; (define-key cider-mode-map (kbd "C-o C-p") 'cider-pprint-eval-defun-at-point)
 
 
+(defun juvi-mark-function-for-eval ()
+  (interactive)
+  (setq juvi-marked-ns (cider-current-ns))
+  (setq juvi-marked-function (cider-last-sexp))
+  (message juvi-marked-function))
+
+(defun juvi-eval-marked-function ()
+  (interactive)
+  (init-el-cider-load-buffer)
+  (cider--pprint-eval-form (concat "(" juvi-marked-ns "/" juvi-marked-function ")")))
+
+(define-key cider-mode-map (kbd "C-M-o C-M-e") 'juvi-mark-function-for-eval)
+(define-key cider-mode-map (kbd "C-M-o C-M-i") 'juvi-eval-marked-function)
+
 (defun make-mark-sexp-for-eval ()
   (interactive)
   (setq make-marked-buffer (current-buffer))
@@ -223,8 +270,13 @@
           (cider--pprint-eval-form make-marked-sexp)))
     (message "First mark sexp with `make-mark-sexp-for-eval`" 'font-lock-warning-face)))
 
+(defun make-save-and-eval-marked-sexp ()
+  (interactive)
+  (init-el-cider-load-buffer)
+  (make-eval-marked-sexp))
+
 (define-key cider-mode-map (kbd "C-o C-e") 'make-mark-sexp-for-eval)
-(define-key cider-mode-map (kbd "C-o C-i") 'make-eval-marked-sexp)
+(define-key cider-mode-map (kbd "C-o C-i") 'make-save-and-eval-marked-sexp)
 
 ;; (defun cider-refresh ()
 ;;   (interactive)
@@ -259,17 +311,27 @@
 (defun cider-kill ()
   "Kill all cider buffers and processes"
   (interactive)
-  (dolist (process (process-list))
-    (when (string-prefix-p "nrepl" (process-name process))
-      (set-process-sentinel process
-                            (lambda (proc evt) t))))
-  (dolist (buffer (buffer-list))
-    (when (string-prefix-p "*cider" (buffer-name buffer))
-      (kill-buffer buffer))
-    (when (string-prefix-p "*nrepl" (buffer-name buffer))
-      (kill-buffer buffer))))
+  (let ((killed-any? nil))
+    (dolist (process (process-list))
+      (when (string-prefix-p "nrepl" (process-name process))
+        (setq killed-any? t)
+        (set-process-sentinel process
+                              (lambda (proc evt) t))))
+    (dolist (buffer (buffer-list))
+      (when (string-prefix-p "*cider" (buffer-name buffer))
+        (setq killed-any? t)
+        (kill-buffer buffer))
+      (when (string-prefix-p "*nrepl" (buffer-name buffer))
+        (setq killed-any? t)
+        (kill-buffer buffer)))
+    killed-any?))
 
 (global-set-key (kbd "C-c C-w") 'cider-kill)
+
+
+
+(define-key cider-mode-map (kbd "C-c s") 'cider-restart)
+
 
 (defun force-cider-restart ()
   (interactive)
@@ -286,6 +348,14 @@
 
 ;; (define-key cider-mode-map (kbd "C-c l t") 'run-tests)
 (define-key cider-mode-map (kbd "C-o C-f") 'run-tests)
+
+(defun run-current-ns-tests ()
+  (interactive)
+  (init-el-cider-load-buffer)
+  (cider-test-run-ns-tests t))
+
+(define-key cider-mode-map (kbd "C-o C-g") 'run-current-ns-tests)
+
 
 (require-packages 'iedit)
 ;; (define-key cider-mode-map (kbd "C-c C-y") 'iedit-mode)
@@ -426,8 +496,8 @@
 ;; (setq mweb-default-major-mode 'html-mode)
 ;; (setq mweb-tags
 ;;       '((php-mode "<\\?php\\|<\\? \\|<\\?=" "\\?>")
-;; 	(js-mode  "<script[^>]*>" "</script>")
-;; 	(css-mode "<style[^>]*>" "</style>")))
+;;	(js-mode  "<script[^>]*>" "</script>")
+;;	(css-mode "<style[^>]*>" "</style>")))
 ;; (setq mweb-filename-extensions '("php" "htm" "html" "ctp" "phtml" "php4" "php5" "html"))
 ;; (multi-web-global-mode 1)
 
@@ -437,8 +507,8 @@
 ;; (setq mweb-default-major-mode 'html-mode)
 ;; (setq mweb-tags
 ;;       '((php-mode "<\\?php\\|<\\? \\|<\\?=" "\\?>")
-;; 	(js-mode  "<script[^>]*>" "</script>")
-;; 	(css-mode "<style[^>]*>" "</style>")))
+;;	(js-mode  "<script[^>]*>" "</script>")
+;;	(css-mode "<style[^>]*>" "</style>")))
 ;; (setq mweb-filename-extensions '("php" "htm" "html" "ctp" "phtml" "php4" "php5" "html"))
 ;; (multi-web-global-mode 1)
 
@@ -517,6 +587,23 @@
 ;; rust
 
 (require-packages 'rust-mode)
+(require-packages 'racer)
+
+(require-packages 'company)
+(require 'rust-mode)
+(define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
+(setq company-tooltip-align-annotations t)
+
+(add-hook 'rust-mode-hook #'racer-mode)
+(add-hook 'racer-mode-hook #'eldoc-mode)
+(add-hook 'racer-mode-hook #'company-mode)
+
+(define-key rust-mode-map (kbd "C-c C-k")  (lambda () (interactive)
+					     (let ((default-directory (concat default-directory "..")))
+					       (message default-directory)
+					       (compile "../build.sh"))))
+
+
 
 ;; pixie
 
@@ -545,3 +632,7 @@
 ;; whitespace
 
 ;; (add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+
+;; auto-revert-mode
+(global-auto-revert-mode)
