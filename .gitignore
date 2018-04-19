@@ -4,3 +4,5 @@
 /projectile-bookmarks.eld
 *.DS_Store
 /local.el
+/projectile.cache
+/recentf~
