@@ -8,6 +8,7 @@
  ;; If there is more than one, they won't work right.
  '(ansi-color-names-vector
    ["black" "#d55e00" "#009e73" "#f8ec59" "#0072b2" "#cc79a7" "#56b4e9" "white"])
+ '(cider-save-files-on-cider-refresh t)
  '(cljr-auto-clean-ns nil)
  '(cljr-favor-prefix-notation t)
  '(cljr-magic-require-namespaces
@@ -217,18 +218,15 @@
     (cider-interactive-eval (concat "(" start-ns "/start)"))))
 (define-key cider-mode-map (kbd "C-o C-s") 'init-el-start)
 
-(defun init-el-set-refresh-ns ()
-  (interactive)
-  (setq init-el-refresh-ns (cider-current-ns))
-  (message "refresh-ns is now '%s'" init-el-refresh-ns))
-;; (define-key cider-mode-map (kbd "C-o C-t") 'init-el-set-refresh-ns)
-
 (defun init-el-refresh ()
   (interactive)
-  (message "using refresh-ns '%s'" init-el-refresh-ns)
-  (cider-interactive-eval (concat "(require '" init-el-refresh-ns ")"))
-  (cider-interactive-eval (concat "(" init-el-refresh-ns "/start)")))
+  (save-buffer)
+  (cider-refresh))
+
 (define-key cider-mode-map (kbd "C-o C-r") 'init-el-refresh)
+
+(setq cider-refresh-before-fn "dev/stop"
+      cider-refresh-after-fn "dev/start")
 
 (defun cider-pprint-start ()
   (interactive)
@@ -277,18 +275,6 @@
 
 (define-key cider-mode-map (kbd "C-o C-e") 'make-mark-sexp-for-eval)
 (define-key cider-mode-map (kbd "C-o C-i") 'make-save-and-eval-marked-sexp)
-
-;; (defun cider-refresh ()
-;;   (interactive)
-;;   (save-buffer)
-;;   (cider-interactive-eval "(require 'flow-gl.refresh)(flow-gl.refresh/refresh)"))
-;; (global-set-key (kbd "C-c l l") 'cider-refresh)
-
-;; (defun cider-refresh-and-start ()
-;;   (interactive)
-;;   (cider-refresh)
-;;   (cider-start))
-;; (global-set-key (kbd "C-c l r") 'cider-refresh-and-start)
 
 (define-key cider-mode-map (kbd "M-.")
   (lambda ()
@@ -636,3 +622,6 @@
 
 ;; auto-revert-mode
 (global-auto-revert-mode)
+
+;; misc
+(global-set-key (kbd "C-o C-b") 'previous-buffer)
