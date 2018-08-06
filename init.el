@@ -10,7 +10,7 @@
    ["black" "#d55e00" "#009e73" "#f8ec59" "#0072b2" "#cc79a7" "#56b4e9" "white"])
  '(cider-save-files-on-cider-refresh t)
  '(cljr-auto-clean-ns nil)
- '(cljr-favor-prefix-notation t)
+ '(cljr-favor-prefix-notation nil)
  '(cljr-magic-require-namespaces
    (quote
     (("io" . "clojure.java.io")
@@ -20,6 +20,7 @@
      ("zip" . "clojure.zip"))))
  '(custom-enabled-themes (quote (deeper-blue)))
  '(global-whitespace-mode t)
+ '(highlight-symbol-idle-delay 0.1)
  '(whitespace-action nil)
  '(whitespace-line-column 1000)
  '(whitespace-style
@@ -31,7 +32,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(highlight-symbol-face ((t (:background "forest green" :foreground "black"))))
+ '(highlight-symbol-face ((t (:background "forest green" :foreground "gray100"))))
  '(region ((t (:background "dark green")))))
 
 (require 'package)
@@ -47,6 +48,9 @@
 
 (add-to-list 'package-archives
 	     '("melpa" . "http://melpa.org/packages/") t)
+
+(add-to-list 'package-archives
+	     '("marmalade" . "http://marmalade-repo.org/packages/"))
 
 (package-initialize)
 
@@ -66,8 +70,15 @@
 (require 'cider)
 (require 'cider-macroexpansion)
 
-(define-key cider-mode-map (kbd "C-o C-t C-t") 'cider-test-run-test)
+(define-key cider-mode-map (kbd "C-o C-t C-t") (lambda ()
+						 (interactive)
+						 (cider-eval-defun-at-point)
+						 (cider-test-run-test)))
+
 (define-key cider-mode-map (kbd "C-o C-t C-r") 'cider-test-rerun-test)
+
+(define-key cider-mode-map (kbd "C-o C-t C-p") 'cider-test-run-project-tests)
+
 
 (require-packages 'hydra)
 
@@ -140,6 +151,7 @@
 (require-packages 'git-gutter)
 (global-git-gutter-mode +1)
 (define-key cider-mode-map (kbd "C-o C-h") 'git-gutter:popup-hunk)
+(define-key cider-mode-map (kbd "C-o C-j") 'git-gutter:revert-hunk)
 
 (setq magit-last-seen-setup-instructions "1.4.0")
 (require-packages 'magit)
@@ -294,23 +306,38 @@
 
 ;; (setq cider-cljs-lein-repl "(println \"now evaluate: (do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl)))")
 
+;; (defun cider-kill ()
+;;   "Kill all cider buffers and processes"
+;;   (interactive)
+;;   (let ((killed-any? nil))
+;;     (dolist (process (process-list))
+;;       (when (string-prefix-p "nrepl" (process-name process))
+;;         (setq killed-any? t)
+;;         (set-process-sentinel process
+;;                               (lambda (proc evt) t))))
+;;     (dolist (buffer (buffer-list))
+;;       (when (string-prefix-p "*cider" (buffer-name buffer))
+;;         (setq killed-any? t)
+;;         (kill-buffer buffer))
+;;       (when (string-prefix-p "*nrepl" (buffer-name buffer))
+;;         (setq killed-any? t)
+;;         (kill-buffer buffer)))
+;;     killed-any?))
+
+
 (defun cider-kill ()
-  "Kill all cider buffers and processes"
   (interactive)
-  (let ((killed-any? nil))
-    (dolist (process (process-list))
-      (when (string-prefix-p "nrepl" (process-name process))
-        (setq killed-any? t)
-        (set-process-sentinel process
-                              (lambda (proc evt) t))))
+  (dolist (process (process-list))
+    (when (string-prefix-p "nrepl-server" (process-name process))
+      (kill-process process)))
+  (let ((kill-buffer-query-functions '()))
     (dolist (buffer (buffer-list))
-      (when (string-prefix-p "*cider" (buffer-name buffer))
-        (setq killed-any? t)
-        (kill-buffer buffer))
-      (when (string-prefix-p "*nrepl" (buffer-name buffer))
-        (setq killed-any? t)
-        (kill-buffer buffer)))
-    killed-any?))
+      (when (string-prefix-p "*cider" (or (buffer-name buffer)
+					  ""))
+	(kill-buffer buffer))
+      (when (string-prefix-p "*nrepl" (or (buffer-name buffer)
+					  ""))
+	(kill-buffer buffer)))))
 
 (global-set-key (kbd "C-c C-w") 'cider-kill)
 
@@ -356,7 +383,6 @@
 (define-key clojure-mode-map (kbd "C-<tab>") 'company-complete)
 
 (require-packages 'highlight-symbol)
-(set 'highlight-symbol-idle-delay 0.1)
 (global-set-key (kbd "C-c h") 'highlight-symbol-mode)
 (defhydra hydra-highlight-symbol (global-map "C-c j")
   "highlight-symbol"
@@ -431,7 +457,12 @@
   (interactive)
   (other-window -1))
 
-(global-set-key (kbd "C-x C-o") 'other-window-backwards)
+(defhydra other-window (global-map "C-x C-o")
+  "other-window"
+  ("C-j" other-window-backwards "other window backwards")
+  ("C-k" other-window "other window"))
+
+;; (global-set-key (kbd "C-x C-o") 'other-window-backwards)
 
 ;; backup and autosave files
 
@@ -625,3 +656,15 @@
 
 ;; misc
 (global-set-key (kbd "C-o C-b") 'previous-buffer)
+
+
+;; slamhound
+(require-packages 'slamhound)
+
+;; wgrep
+
+(require-packages 'wgrep)
+
+;; easyPG https://www.emacswiki.org/emacs/EasyPG
+
+(epa-file-enable)
