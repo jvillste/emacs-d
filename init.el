@@ -8,6 +8,12 @@
  ;; If there is more than one, they won't work right.
  '(ansi-color-names-vector
    ["black" "#d55e00" "#009e73" "#f8ec59" "#0072b2" "#cc79a7" "#56b4e9" "white"])
+ '(beacon-blink-duration 0.6)
+ '(beacon-blink-when-focused t)
+ '(beacon-blink-when-point-moves-vertically 10)
+ '(beacon-color "Emacs")
+ '(beacon-mode t)
+ '(cider-refresh-show-log-buffer nil)
  '(cider-save-files-on-cider-refresh t)
  '(cljr-auto-clean-ns nil)
  '(cljr-favor-prefix-notation nil)
@@ -21,6 +27,10 @@
  '(custom-enabled-themes (quote (deeper-blue)))
  '(global-whitespace-mode t)
  '(highlight-symbol-idle-delay 0.1)
+ '(package-selected-packages
+   (quote
+    (beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections iedit hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
+ '(projectile-switch-project-action (quote helm-projectile-find-file))
  '(whitespace-action nil)
  '(whitespace-line-column 1000)
  '(whitespace-style
@@ -32,6 +42,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(helm-selection ((t (:background "purple4" :distant-foreground "black"))))
  '(highlight-symbol-face ((t (:background "forest green" :foreground "gray100"))))
  '(region ((t (:background "dark green")))))
 
@@ -49,8 +60,8 @@
 (add-to-list 'package-archives
 	     '("melpa" . "http://melpa.org/packages/") t)
 
-(add-to-list 'package-archives
-	     '("marmalade" . "http://marmalade-repo.org/packages/"))
+;; (add-to-list 'package-archives
+;; 	     '("marmalade" . "http://marmalade-repo.org/packages/"))
 
 (package-initialize)
 
@@ -66,9 +77,11 @@
 
 
 ;; cider is loaded as a git submodule to get a stable version
-(add-to-list 'load-path "~/.emacs.d/vendor/cider/")
+ (add-to-list 'load-path "~/.emacs.d/vendor/cider/")
 (require 'cider)
 (require 'cider-macroexpansion)
+;;(require-packages 'cider)
+;;(require 'cider-macroexpansion)
 
 (define-key cider-mode-map (kbd "C-o C-t C-t") (lambda ()
 						 (interactive)
@@ -91,6 +104,8 @@
 
 
 (require-packages 'helm)
+(require-packages 'wgrep-helm)
+
 (require 'helm-config)
 (helm-mode 1)
 (global-set-key (kbd "M-x") 'helm-M-x)
@@ -110,6 +125,7 @@
 (add-hook 'emacs-lisp-mode-hook 'show-paren-mode)
 
 (require-packages 'projectile 'helm 'helm-projectile)
+(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
 (projectile-global-mode)
 (setq projectile-completion-system 'helm)
 (helm-projectile-on)
@@ -293,6 +309,10 @@
     (interactive)
     (cider-find-var 0)))
 
+(defun juvi-pprint-sample ()
+  (interactive)
+  (cider--pprint-eval-form (concat "@dev/sample-atom")))
+(define-key cider-mode-map (kbd "C-o C-d") 'juvi-pprint-sample)
 
 (defun figwheel-start ()
   (interactive)
@@ -668,3 +688,6 @@
 ;; easyPG https://www.emacswiki.org/emacs/EasyPG
 
 (epa-file-enable)
+
+(require-packages 'beacon)
+(beacon-mode 1)
