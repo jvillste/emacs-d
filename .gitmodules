@@ -7,3 +7,6 @@
 [submodule "vendor/clj-refactor.el"]
 	path = vendor/clj-refactor.el
 	url = https://github.com/clojure-emacs/clj-refactor.el.git
+[submodule "vendor/beacon"]
+	path = vendor/beacon
+	url = https://github.com/Malabarba/beacon.git

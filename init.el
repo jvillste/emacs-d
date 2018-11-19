@@ -8,11 +8,13 @@
  ;; If there is more than one, they won't work right.
  '(ansi-color-names-vector
    ["black" "#d55e00" "#009e73" "#f8ec59" "#0072b2" "#cc79a7" "#56b4e9" "white"])
- '(beacon-blink-duration 0.6)
+ '(beacon-blink-delay 0.3)
+ '(beacon-blink-duration 0.1)
  '(beacon-blink-when-focused t)
  '(beacon-blink-when-point-moves-vertically 10)
  '(beacon-color "Emacs")
  '(beacon-mode t)
+ '(beacon-size 140)
  '(cider-refresh-show-log-buffer nil)
  '(cider-save-files-on-cider-refresh t)
  '(cljr-auto-clean-ns nil)
@@ -27,9 +29,11 @@
  '(custom-enabled-themes (quote (deeper-blue)))
  '(global-whitespace-mode t)
  '(highlight-symbol-idle-delay 0.1)
+ '(minimap-minimum-width 20)
+ '(minimap-width-fraction 0.05)
  '(package-selected-packages
    (quote
-    (beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections iedit hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
+    (minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections iedit hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
  '(projectile-switch-project-action (quote helm-projectile-find-file))
  '(whitespace-action nil)
  '(whitespace-line-column 1000)
@@ -44,6 +48,7 @@
  ;; If there is more than one, they won't work right.
  '(helm-selection ((t (:background "purple4" :distant-foreground "black"))))
  '(highlight-symbol-face ((t (:background "forest green" :foreground "gray100"))))
+ '(minimap-font-face ((t (:height 20 :family "DejaVu Sans Mono"))))
  '(region ((t (:background "dark green")))))
 
 (require 'package)
@@ -166,7 +171,12 @@
 
 (require-packages 'git-gutter)
 (global-git-gutter-mode +1)
-(define-key cider-mode-map (kbd "C-o C-h") 'git-gutter:popup-hunk)
+
+(defhydra hydra-highlight-symbol (global-map "C-o C-h")
+  "hunk"
+  ("n" git-gutter:next-hunk "next")
+  ("p" git-gutter:previous-hunk "previous"))
+
 (define-key cider-mode-map (kbd "C-o C-j") 'git-gutter:revert-hunk)
 
 (setq magit-last-seen-setup-instructions "1.4.0")
@@ -689,5 +699,8 @@
 
 (epa-file-enable)
 
-(require-packages 'beacon)
-(beacon-mode 1)
+;; (add-to-list 'load-path "~/.emacs.d/vendor/beacon/")
+;; (require 'beacon)
+;; (beacon-mode 1)
+
+(set-scroll-bar-mode 'left)
