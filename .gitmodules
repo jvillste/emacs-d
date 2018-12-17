@@ -10,3 +10,6 @@
 [submodule "vendor/beacon"]
 	path = vendor/beacon
 	url = https://github.com/Malabarba/beacon.git
+[submodule "vendor/iedit"]
+	path = vendor/iedit
+	url = https://github.com/victorhge/iedit

@@ -33,7 +33,7 @@
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
    (quote
-    (minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections iedit hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
+    (minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
  '(projectile-switch-project-action (quote helm-projectile-find-file))
  '(whitespace-action nil)
  '(whitespace-line-column 1000)
@@ -46,6 +46,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(default ((t (:inherit nil :stipple nil :background "#181a26" :foreground "gray80" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 150 :width normal :foundry "nil" :family "Menlo"))))
  '(helm-selection ((t (:background "purple4" :distant-foreground "black"))))
  '(highlight-symbol-face ((t (:background "forest green" :foreground "gray100"))))
  '(minimap-font-face ((t (:height 20 :family "DejaVu Sans Mono"))))
@@ -65,6 +66,9 @@
 (add-to-list 'package-archives
 	     '("melpa" . "http://melpa.org/packages/") t)
 
+(add-to-list 'package-archives
+	     '("melpa-stable" . "http://stable.melpa.org/packages/") t)
+
 ;; (add-to-list 'package-archives
 ;; 	     '("marmalade" . "http://marmalade-repo.org/packages/"))
 
@@ -82,11 +86,21 @@
 
 
 ;; cider is loaded as a git submodule to get a stable version
- (add-to-list 'load-path "~/.emacs.d/vendor/cider/")
-(require 'cider)
-(require 'cider-macroexpansion)
-;;(require-packages 'cider)
+;; (add-to-list 'load-path "~/.emacs.d/vendor/cider/")
+;; (require 'cider)
+;; (require 'cider-ns)
+;; (require 'cider-find)
+;; (require 'cider-macroexpansion)
+
+;; use stable cider version
+(add-to-list 'package-pinned-packages '(cider . "melpa-stable") t)
+(require-packages 'cider)
+
 ;;(require 'cider-macroexpansion)
+
+
+
+(define-key cider-mode-map (kbd "C-c C-i") 'cider-pprint-eval-last-sexp-to-comment)
 
 (define-key cider-mode-map (kbd "C-o C-t C-t") (lambda ()
 						 (interactive)
@@ -172,7 +186,7 @@
 (require-packages 'git-gutter)
 (global-git-gutter-mode +1)
 
-(defhydra hydra-highlight-symbol (global-map "C-o C-h")
+(defhydra hydra-gitgutter-hunk (global-map "C-o C-h")
   "hunk"
   ("n" git-gutter:next-hunk "next")
   ("p" git-gutter:previous-hunk "previous"))
@@ -259,7 +273,7 @@
 (defun init-el-refresh ()
   (interactive)
   (save-buffer)
-  (cider-refresh))
+  (cider-ns-refresh))
 
 (define-key cider-mode-map (kbd "C-o C-r") 'init-el-refresh)
 
@@ -400,7 +414,9 @@
 (define-key cider-mode-map (kbd "C-o C-g") 'run-current-ns-tests)
 
 
-(require-packages 'iedit)
+(add-to-list 'load-path "~/.emacs.d/vendor/iedit/")
+(require 'iedit)
+;;(require-packages 'iedit)
 ;; (define-key cider-mode-map (kbd "C-c C-y") 'iedit-mode)
 (global-set-key (kbd "C-c C-y") 'iedit-mode)
 
@@ -425,6 +441,14 @@
     (delete-region (region-beginning) (region-end)))
   (insert (format-time-string "%_e %_m %_Y %_H %_M" (current-time))))
 (define-key clojure-mode-map (kbd "C-c d") 'insert-current-date-time)
+
+(defun insert-debug-prn ()
+  (interactive)
+  (save-excursion
+    (insert "(prn ) ;; TODO: remove-me"))
+  (forward-char 5))
+(define-key clojure-mode-map (kbd "C-M-o C-M-p") 'insert-debug-prn)
+
 
 
 ;; Delete selection
@@ -680,6 +704,7 @@
 
 ;; (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
+(global-set-key (kbd "C-M-l") 'delete-trailing-whitespace)
 
 ;; auto-revert-mode
 (global-auto-revert-mode)
