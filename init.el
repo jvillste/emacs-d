@@ -15,8 +15,11 @@
  '(beacon-color "Emacs")
  '(beacon-mode t)
  '(beacon-size 140)
+ '(cider-ns-refresh-show-log-buffer nil)
  '(cider-refresh-show-log-buffer nil)
+ '(cider-repl-print-length 1000)
  '(cider-save-files-on-cider-refresh t)
+ '(cider-test-defining-forms (quote ("deftest" "defspec" "with-test")))
  '(cljr-auto-clean-ns nil)
  '(cljr-favor-prefix-notation nil)
  '(cljr-magic-require-namespaces
@@ -27,14 +30,18 @@
      ("walk" . "clojure.walk")
      ("zip" . "clojure.zip"))))
  '(custom-enabled-themes (quote (deeper-blue)))
+ '(ediff-merge-split-window-function (quote split-window-horizontally))
+ '(ediff-split-window-function (quote split-window-horizontally))
+ '(ediff-window-setup-function (quote ediff-setup-windows-plain))
  '(global-whitespace-mode t)
  '(highlight-symbol-idle-delay 0.1)
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
    (quote
-    (minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
+    (cider clj-refactor minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
  '(projectile-switch-project-action (quote helm-projectile-find-file))
+ '(undo-outer-limit 22000000)
  '(whitespace-action nil)
  '(whitespace-line-column 1000)
  '(whitespace-style
@@ -64,13 +71,13 @@
 ;;              '("melpa-stable" . "http://stable.melpa.org/packages/") t)
 
 (add-to-list 'package-archives
-	     '("melpa" . "http://melpa.org/packages/") t)
+             '("melpa" . "http://melpa.org/packages/") t)
 
 (add-to-list 'package-archives
-	     '("melpa-stable" . "http://stable.melpa.org/packages/") t)
+             '("melpa-stable" . "http://stable.melpa.org/packages/") t)
 
 ;; (add-to-list 'package-archives
-;; 	     '("marmalade" . "http://marmalade-repo.org/packages/"))
+;;           '("marmalade" . "http://marmalade-repo.org/packages/"))
 
 (package-initialize)
 
@@ -103,9 +110,9 @@
 (define-key cider-mode-map (kbd "C-c C-i") 'cider-pprint-eval-last-sexp-to-comment)
 
 (define-key cider-mode-map (kbd "C-o C-t C-t") (lambda ()
-						 (interactive)
-						 (cider-eval-defun-at-point)
-						 (cider-test-run-test)))
+                                                 (interactive)
+                                                 (cider-eval-defun-at-point)
+                                                 (cider-test-run-test)))
 
 (define-key cider-mode-map (kbd "C-o C-t C-r") 'cider-test-rerun-test)
 
@@ -118,8 +125,8 @@
 (require-packages 'markdown-mode)
 
 (add-hook 'markdown-mode-hook
-	  (lambda ()
-	    (visual-line-mode)))
+          (lambda ()
+            (visual-line-mode)))
 
 
 (require-packages 'helm)
@@ -191,21 +198,25 @@
   ("n" git-gutter:next-hunk "next")
   ("p" git-gutter:previous-hunk "previous"))
 
-(define-key cider-mode-map (kbd "C-o C-j") 'git-gutter:revert-hunk)
+(global-set-key (kbd "C-o C-j") 'git-gutter:revert-hunk)
 
 (setq magit-last-seen-setup-instructions "1.4.0")
 (require-packages 'magit)
 (set-variable 'magit-emacsclient-executable "/usr/local/Cellar/emacs/24.3/bin/emacsclient")
 (global-set-key (kbd "C-x g") 'magit-status)
 
-(add-to-list 'load-path "~/.emacs.d/vendor/clj-refactor.el/")
-(require 'clj-refactor)
+;; (add-to-list 'load-path "~/.emacs.d/vendor/clj-refactor.el/")
+;; (require 'clj-refactor)
+
+(add-to-list 'package-pinned-packages '(clj-refactor . "melpa-stable") t)
+(require-packages 'clj-refactor)
+
 
 (add-hook 'clojure-mode-hook
-	  (lambda ()
-	    (clj-refactor-mode 1)
-	    (yas-minor-mode 1) ; for adding require/use/import
-	    (cljr-add-keybindings-with-prefix "C-o RET")))
+          (lambda ()
+            (clj-refactor-mode 1)
+            (yas-minor-mode 1) ; for adding require/use/import
+            (cljr-add-keybindings-with-prefix "C-o RET")))
 
 
 
@@ -232,7 +243,7 @@
 
 (add-hook 'cider-mode-hook 'eldoc-mode)
 
-(define-key cider-mode-map (kbd "C-c s") 'cider-restart)
+(define-key cider-mode-map (kbd "C-c s") 'sesman-restart)
 
 (defun init-el-cider-load-buffer ()
   (interactive)
@@ -244,7 +255,7 @@
 (define-key clojure-mode-map (kbd "C-c C-k") 'init-el-cider-load-buffer)
 
 (define-key clojure-mode-map (kbd "C-o C-c") 'comment-region)
-(define-key clojure-mode-map (kbd "C-o C-d") 'uncomment-region)
+(define-key clojure-mode-map (kbd "C-o C-u") 'uncomment-region)
 
 (defun remove-and-load-cider-buffer ()
   (interactive)
@@ -264,11 +275,18 @@
 (defun init-el-start ()
   (interactive)
   (let ((start-ns (if start-ns
-		      start-ns
-		    (cider-current-ns))))
+                      start-ns
+                    (cider-current-ns))))
     (message "using start-ns '%s'" start-ns)
     (cider-interactive-eval (concat "(" start-ns "/start)"))))
 (define-key cider-mode-map (kbd "C-o C-s") 'init-el-start)
+
+(defun juvi-insert-conversion ()
+  (interactive)
+  (cider-interactive-eval (concat "(convert " (buffer-substring (mark) (point)) ")")
+                          (cider-insert-eval-handler))
+  ;;(delete-region (region-beginning) (region-end))
+  )
 
 (defun init-el-refresh ()
   (interactive)
@@ -277,6 +295,13 @@
 
 (define-key cider-mode-map (kbd "C-o C-r") 'init-el-refresh)
 
+(setq cider-refresh-before-fn
+      ;; "dev/stop"
+      "user/stop"
+      cider-refresh-after-fn
+      ;; "dev/start"
+      "user/start")
+
 (setq cider-refresh-before-fn "dev/stop"
       cider-refresh-after-fn "dev/start")
 
@@ -284,8 +309,8 @@
   (interactive)
   (init-el-cider-load-buffer)
   (let ((start-ns (if start-ns
-		      start-ns
-		    (cider-current-ns))))
+                      start-ns
+                    (cider-current-ns))))
     (message "using start-ns '%s'" start-ns)
     (cider--pprint-eval-form (concat "(" start-ns "/start)"))))
 (define-key cider-mode-map (kbd "C-o C-p") 'cider-pprint-start)
@@ -299,13 +324,20 @@
   (setq juvi-marked-function (cider-last-sexp))
   (message juvi-marked-function))
 
+(define-key cider-mode-map (kbd "C-M-o C-M-e") 'juvi-mark-function-for-eval)
+
 (defun juvi-eval-marked-function ()
   (interactive)
   (init-el-cider-load-buffer)
   (cider--pprint-eval-form (concat "(" juvi-marked-ns "/" juvi-marked-function ")")))
 
-(define-key cider-mode-map (kbd "C-M-o C-M-e") 'juvi-mark-function-for-eval)
 (define-key cider-mode-map (kbd "C-M-o C-M-i") 'juvi-eval-marked-function)
+
+(defun juvi-eval-function-at-point ()
+  (interactive)
+  (cider--pprint-eval-form (concat "(" (cider-current-ns) "/" (cider-last-sexp) ")")))
+
+(define-key cider-mode-map (kbd "M-o M-i") 'juvi-eval-function-at-point)
 
 (defun make-mark-sexp-for-eval ()
   (interactive)
@@ -377,17 +409,15 @@
   (let ((kill-buffer-query-functions '()))
     (dolist (buffer (buffer-list))
       (when (string-prefix-p "*cider" (or (buffer-name buffer)
-					  ""))
-	(kill-buffer buffer))
+                                          ""))
+        (kill-buffer buffer))
       (when (string-prefix-p "*nrepl" (or (buffer-name buffer)
-					  ""))
-	(kill-buffer buffer)))))
+                                          ""))
+        (kill-buffer buffer)))))
 
 (global-set-key (kbd "C-c C-w") 'cider-kill)
 
-
-
-(define-key cider-mode-map (kbd "C-c s") 'cider-restart)
+(define-key cider-mode-map (kbd "C-c s") 'sesman-restart)
 
 
 (defun force-cider-restart ()
@@ -567,8 +597,8 @@
 ;; (setq mweb-default-major-mode 'html-mode)
 ;; (setq mweb-tags
 ;;       '((php-mode "<\\?php\\|<\\? \\|<\\?=" "\\?>")
-;;	(js-mode  "<script[^>]*>" "</script>")
-;;	(css-mode "<style[^>]*>" "</style>")))
+;;      (js-mode  "<script[^>]*>" "</script>")
+;;      (css-mode "<style[^>]*>" "</style>")))
 ;; (setq mweb-filename-extensions '("php" "htm" "html" "ctp" "phtml" "php4" "php5" "html"))
 ;; (multi-web-global-mode 1)
 
@@ -578,8 +608,8 @@
 ;; (setq mweb-default-major-mode 'html-mode)
 ;; (setq mweb-tags
 ;;       '((php-mode "<\\?php\\|<\\? \\|<\\?=" "\\?>")
-;;	(js-mode  "<script[^>]*>" "</script>")
-;;	(css-mode "<style[^>]*>" "</style>")))
+;;      (js-mode  "<script[^>]*>" "</script>")
+;;      (css-mode "<style[^>]*>" "</style>")))
 ;; (setq mweb-filename-extensions '("php" "htm" "html" "ctp" "phtml" "php4" "php5" "html"))
 ;; (multi-web-global-mode 1)
 
@@ -670,9 +700,9 @@
 (add-hook 'racer-mode-hook #'company-mode)
 
 (define-key rust-mode-map (kbd "C-c C-k")  (lambda () (interactive)
-					     (let ((default-directory (concat default-directory "..")))
-					       (message default-directory)
-					       (compile "../build.sh"))))
+                                             (let ((default-directory (concat default-directory "..")))
+                                               (message default-directory)
+                                               (compile "../build.sh"))))
 
 
 
@@ -704,7 +734,13 @@
 
 ;; (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
-(global-set-key (kbd "C-M-l") 'delete-trailing-whitespace)
+(defun juvi-clean-white-space ()
+  (interactive)
+  (save-excursion
+    (delete-trailing-whitespace)
+    (untabify (point-min) (point-max))))
+
+(global-set-key (kbd "C-M-l") 'juvi-clean-white-space)
 
 ;; auto-revert-mode
 (global-auto-revert-mode)
