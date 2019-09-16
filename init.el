@@ -39,7 +39,7 @@
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
    (quote
-    (cider clj-refactor minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
+    (flx-ido rust-mode clj-refactor cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
  '(projectile-switch-project-action (quote helm-projectile-find-file))
  '(undo-outer-limit 22000000)
  '(whitespace-action nil)
@@ -96,9 +96,6 @@
 ;; (add-to-list 'load-path "~/.emacs.d/vendor/cider/")
 ;; (require 'cider)
 ;; (require 'cider-ns)
-;; (require 'cider-find)
-;; (require 'cider-macroexpansion)
-
 ;; use stable cider version
 (add-to-list 'package-pinned-packages '(cider . "melpa-stable") t)
 (require-packages 'cider)
@@ -153,10 +150,17 @@
 (require-packages 'projectile 'helm 'helm-projectile)
 (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
 (projectile-global-mode)
-(setq projectile-completion-system 'helm)
 (helm-projectile-on)
+;; (setq projectile-completion-system 'helm)
+;; (setq helm-projectile-fuzzy-match t)
+;; (setq helm-mode-fuzzy-match t)
+;; (helm-projectile-off)
+
+;; disable helm projectile grep for C-o C-z
+(define-key projectile-mode-map [remap projectile-grep] nil)
 
 (global-set-key (kbd "C-o C-z") 'projectile-grep)
+(global-set-key (kbd "C-o x") 'projectile-grep)
 
 (require-packages 'clojure-mode)
 
@@ -302,8 +306,11 @@
       ;; "dev/start"
       "user/start")
 
-(setq cider-refresh-before-fn "dev/stop"
-      cider-refresh-after-fn "dev/start")
+(setq cider-refresh-before-fn ;; "dev/stop"
+      "user/stop"
+      cider-refresh-after-fn ;; "dev/start"
+      "user/start"
+      )
 
 (defun cider-pprint-start ()
   (interactive)
@@ -480,6 +487,13 @@
 (define-key clojure-mode-map (kbd "C-M-o C-M-p") 'insert-debug-prn)
 
 
+(defun insert-comment-block ()
+  (interactive)
+  (save-excursion
+    (insert "(comment\n  \n)"))
+  (forward-char 11)
+  (indent-whole-sexp))
+(define-key clojure-mode-map (kbd "C-M-o C-M-n") 'insert-comment-block)
 
 ;; Delete selection
 (delete-selection-mode 1)
@@ -750,7 +764,7 @@
 
 
 ;; slamhound
-(require-packages 'slamhound)
+;; (require-packages 'slamhound)
 
 ;; wgrep
 
@@ -765,3 +779,5 @@
 ;; (beacon-mode 1)
 
 (set-scroll-bar-mode 'left)
+(put 'downcase-region 'disabled nil)
+(put 'upcase-region 'disabled nil)
