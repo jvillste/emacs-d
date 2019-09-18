@@ -490,7 +490,7 @@
 (defun insert-comment-block ()
   (interactive)
   (save-excursion
-    (insert "(comment\n  \n)"))
+    (insert "(comment\n  \n) ;; TODO: remove-me"))
   (forward-char 11)
   (indent-whole-sexp))
 (define-key clojure-mode-map (kbd "C-M-o C-M-n") 'insert-comment-block)
