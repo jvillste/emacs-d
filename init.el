@@ -16,6 +16,7 @@
  '(beacon-mode t)
  '(beacon-size 140)
  '(cider-ns-refresh-show-log-buffer nil)
+ '(cider-output-std-streams-to-popup t)
  '(cider-refresh-show-log-buffer nil)
  '(cider-repl-print-length 1000)
  '(cider-save-files-on-cider-refresh t)
@@ -39,8 +40,28 @@
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
    (quote
-    (flx-ido rust-mode clj-refactor cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
+    (intero flx-ido rust-mode clj-refactor cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
  '(projectile-switch-project-action (quote helm-projectile-find-file))
+ '(safe-local-variable-values
+   (quote
+    ((elisp-lint-indent-specs
+      (if-let* . 2)
+      (when-let* . 1)
+      (let* . defun)
+      (nrepl-dbind-response . 2)
+      (cider-save-marker . 1)
+      (cider-propertize-region . 1)
+      (cider-map-repls . 1)
+      (cider--jack-in . 1)
+      (cider--make-result-overlay . 1)
+      (insert-label . defun)
+      (insert-align-label . defun)
+      (insert-rect . defun)
+      (cl-defun . 2)
+      (with-parsed-tramp-file-name . 2)
+      (thread-first . 1)
+      (thread-last . 1))
+     (checkdoc-package-keywords-flag))))
  '(undo-outer-limit 22000000)
  '(whitespace-action nil)
  '(whitespace-line-column 1000)
@@ -93,12 +114,13 @@
 
 
 ;; cider is loaded as a git submodule to get a stable version
-;; (add-to-list 'load-path "~/.emacs.d/vendor/cider/")
+(add-to-list 'load-path "~/.emacs.d/vendor/cider/")
+(require-packages 'parseedn 'cider)
 ;; (require 'cider)
 ;; (require 'cider-ns)
 ;; use stable cider version
-(add-to-list 'package-pinned-packages '(cider . "melpa-stable") t)
-(require-packages 'cider)
+;; (add-to-list 'package-pinned-packages '(cider . "melpa-stable") t)
+
 
 ;;(require 'cider-macroexpansion)
 
@@ -261,6 +283,10 @@
 (define-key clojure-mode-map (kbd "C-o C-c") 'comment-region)
 (define-key clojure-mode-map (kbd "C-o C-u") 'uncomment-region)
 
+(define-key cider-mode-map (kbd "C-c C-p") 'cider-pprint-eval-last-sexp)
+
+
+
 (defun remove-and-load-cider-buffer ()
   (interactive)
   (save-buffer)
@@ -299,18 +325,11 @@
 
 (define-key cider-mode-map (kbd "C-o C-r") 'init-el-refresh)
 
-(setq cider-refresh-before-fn
-      ;; "dev/stop"
-      "user/stop"
-      cider-refresh-after-fn
-      ;; "dev/start"
-      "user/start")
+(setq cider-refresh-before-fn "dev/stop"
+      cider-refresh-after-fn "dev/start")
 
-(setq cider-refresh-before-fn ;; "dev/stop"
-      "user/stop"
-      cider-refresh-after-fn ;; "dev/start"
-      "user/start"
-      )
+;; (setq cider-refresh-before-fn  "user/stop"
+;;       cider-refresh-after-fn "user/start")
 
 (defun cider-pprint-start ()
   (interactive)
@@ -376,6 +395,12 @@
   (interactive)
   (cider--pprint-eval-form (concat "@dev/sample-atom")))
 (define-key cider-mode-map (kbd "C-o C-d") 'juvi-pprint-sample)
+
+(defun initel-eval-last-sexp ()
+  (interactive)
+  (cider-eval-last-sexp))
+
+(define-key cider-mode-map (kbd "S-<return>") 'cider-eval-last-sexp)
 
 (defun figwheel-start ()
   (interactive)
@@ -494,6 +519,14 @@
   (forward-char 11)
   (indent-whole-sexp))
 (define-key clojure-mode-map (kbd "C-M-o C-M-n") 'insert-comment-block)
+
+(defun yank-quoted-and-unquoted ()
+  (interactive)
+  (insert "'")
+  (yank)
+  (insert " ")
+  (yank))
+(define-key clojure-mode-map (kbd "C-M-o C-M-y") 'yank-quoted-and-unquoted)
 
 ;; Delete selection
 (delete-selection-mode 1)
@@ -781,3 +814,7 @@
 (set-scroll-bar-mode 'left)
 (put 'downcase-region 'disabled nil)
 (put 'upcase-region 'disabled nil)
+
+;; haskell
+(require-packages 'intero)
+(add-hook 'haskell-mode-hook 'intero-mode)
