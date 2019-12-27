@@ -719,6 +719,15 @@
 
 (global-set-key (kbd "C-M-k") 'kill-spaces)
 
+(defun just-one-space-in-region (beg end)
+  "replace all whitespace in the region with single spaces"
+  (interactive "r")
+  (save-excursion
+    (save-restriction
+      (narrow-to-region beg end)
+      (goto-char (point-min))
+      (while (re-search-forward "[ \n]+" nil t)
+        (replace-match " ")))))
 
 ;; avy
 
