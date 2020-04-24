@@ -34,14 +34,18 @@
  '(ediff-merge-split-window-function (quote split-window-horizontally))
  '(ediff-split-window-function (quote split-window-horizontally))
  '(ediff-window-setup-function (quote ediff-setup-windows-plain))
+ '(git-gutter:diff-option "-b")
+ '(global-git-gutter-mode t)
  '(global-whitespace-mode t)
  '(highlight-symbol-idle-delay 0.1)
+ '(mc/always-run-for-all t)
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
    (quote
     (intero flx-ido rust-mode clj-refactor cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
  '(projectile-switch-project-action (quote helm-projectile-find-file))
+ '(projectile-use-git-grep t)
  '(safe-local-variable-values
    (quote
     ((elisp-lint-indent-specs
@@ -74,7 +78,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :background "#181a26" :foreground "gray80" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 150 :width normal :foundry "nil" :family "Menlo"))))
+ '(default ((t (:inherit nil :stipple nil :background "#181a26" :foreground "gray80" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 180 :width normal :foundry "nil" :family "Menlo"))))
  '(helm-selection ((t (:background "purple4" :distant-foreground "black"))))
  '(highlight-symbol-face ((t (:background "forest green" :foreground "gray100"))))
  '(minimap-font-face ((t (:height 20 :family "DejaVu Sans Mono"))))
@@ -182,6 +186,7 @@
 (define-key projectile-mode-map [remap projectile-grep] nil)
 
 (global-set-key (kbd "C-o C-z") 'projectile-grep)
+(global-set-key (kbd "C-o C-v") 'helm-projectile-grep)
 (global-set-key (kbd "C-o x") 'projectile-grep)
 
 (require-packages 'clojure-mode)
@@ -325,11 +330,13 @@
 
 (define-key cider-mode-map (kbd "C-o C-r") 'init-el-refresh)
 
-(setq cider-refresh-before-fn "dev/stop"
-      cider-refresh-after-fn "dev/start")
+(defun set-refresh-to-dev ()
+  (interactive)
+  (setq cider-refresh-before-fn "dev/stop"
+        cider-refresh-after-fn "dev/start"))
 
-;; (setq cider-refresh-before-fn  "user/stop"
-;;       cider-refresh-after-fn "user/start")
+(setq cider-refresh-before-fn "user/stop"
+      cider-refresh-after-fn "user/start")
 
 (defun cider-pprint-start ()
   (interactive)
@@ -385,6 +392,12 @@
 
 (define-key cider-mode-map (kbd "C-o C-e") 'make-mark-sexp-for-eval)
 (define-key cider-mode-map (kbd "C-o C-i") 'make-save-and-eval-marked-sexp)
+
+(defun juvi-pprint-first ()
+  (interactive)
+  (cider--pprint-eval-form (concat "(first " (cider-last-sexp) ")")))
+
+(define-key cider-mode-map (kbd "M-p") 'juvi-pprint-first)
 
 (define-key cider-mode-map (kbd "M-.")
   (lambda ()
@@ -507,7 +520,7 @@
 (defun insert-debug-prn ()
   (interactive)
   (save-excursion
-    (insert "(prn ) ;; TODO: remove-me"))
+    (insert "(prn ) ;; TODO: remove-me\n"))
   (forward-char 5))
 (define-key clojure-mode-map (kbd "C-M-o C-M-p") 'insert-debug-prn)
 
@@ -515,7 +528,7 @@
 (defun insert-comment-block ()
   (interactive)
   (save-excursion
-    (insert "(comment\n  \n) ;; TODO: remove-me"))
+    (insert "(comment\n  \n) ;; TODO: remove-me\n"))
   (forward-char 11)
   (indent-whole-sexp))
 (define-key clojure-mode-map (kbd "C-M-o C-M-n") 'insert-comment-block)
@@ -709,7 +722,9 @@
           (rename-file filename new-name t)
           (set-visited-file-name new-name t t)))))))
 
+;; mark-sexp
 
+(global-set-key (kbd "C-M-m") 'mark-sexp)
 
 ;; kill spaces
 
@@ -728,6 +743,8 @@
       (goto-char (point-min))
       (while (re-search-forward "[ \n]+" nil t)
         (replace-match " ")))))
+
+(global-set-key (kbd "M-K") 'just-one-space-in-region)
 
 ;; avy
 
@@ -827,3 +844,16 @@
 ;; haskell
 (require-packages 'intero)
 (add-hook 'haskell-mode-hook 'intero-mode)
+
+;; multiple-cursors
+
+(require-packages 'multiple-cursors)
+
+(global-set-key (kbd "C-o C-k C-l") 'mc/edit-lines)
+(global-set-key (kbd "C-o C-k C-e") 'mc/edit-ends-of-lines)
+(global-set-key (kbd "C-o C-k C-f") 'mc/mark-all-like-this-in-defun)
+(global-set-key (kbd "C-o C-k C-s") 'mc/mark-all-symbols-like-this-in-defun)
+(global-set-key (kbd "C-o C-k C-a") 'mc/mark-all-symbols-like-this)
+(global-set-key (kbd "C-o C-k C-n") 'mc/mark-next-like-this)
+(global-set-key (kbd "C-o C-k C-r") 'mc/mark-all-in-region)
+(global-set-key (kbd "C-M-,") 'mc/mark-all-dwim)
