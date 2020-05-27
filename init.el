@@ -43,7 +43,7 @@
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
    (quote
-    (intero flx-ido rust-mode clj-refactor cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
+    (ace-mc intero flx-ido rust-mode clj-refactor cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
  '(projectile-switch-project-action (quote helm-projectile-find-file))
  '(projectile-use-git-grep t)
  '(safe-local-variable-values
@@ -83,7 +83,6 @@
  '(highlight-symbol-face ((t (:background "forest green" :foreground "gray100"))))
  '(minimap-font-face ((t (:height 20 :family "DejaVu Sans Mono"))))
  '(region ((t (:background "dark green")))))
-
 (require 'package)
 
 (defun require-packages (&rest packages)
@@ -140,6 +139,8 @@
 (define-key cider-mode-map (kbd "C-o C-t C-r") 'cider-test-rerun-test)
 
 (define-key cider-mode-map (kbd "C-o C-t C-p") 'cider-test-run-project-tests)
+
+
 
 
 (require-packages 'hydra)
@@ -346,7 +347,7 @@
                     (cider-current-ns))))
     (message "using start-ns '%s'" start-ns)
     (cider--pprint-eval-form (concat "(" start-ns "/start)"))))
-(define-key cider-mode-map (kbd "C-o C-p") 'cider-pprint-start)
+;; (define-key cider-mode-map (kbd "C-o C-p") 'cider-pprint-start)
 
 ;; (define-key cider-mode-map (kbd "C-o C-p") 'cider-pprint-eval-defun-at-point)
 
@@ -488,6 +489,23 @@
 
 (define-key cider-mode-map (kbd "C-o C-g") 'run-current-ns-tests)
 
+
+(defun juvi-eval-last-sexp-to-kill-ring (&optional custom-fill-column)
+  (interactive "p")
+  (cider-interactive-eval (cider-last-sexp)
+                          (nrepl-make-response-handler (current-buffer)
+                                                       (lambda (_buffer value)
+                                                         (kill-new value)                                                         )
+                                                       (lambda (_buffer out)
+                                                         (cider-emit-interactive-eval-output out))
+                                                       (lambda (_buffer err)
+                                                         (cider-emit-interactive-eval-err-output err))
+                                                       '())
+                          nil
+                          (cider--nrepl-print-request-map (or custom-fill-column
+                                                              fill-column))))
+
+(define-key cider-mode-map (kbd "C-o C-p") 'juvi-eval-last-sexp-to-kill-ring)
 
 (add-to-list 'load-path "~/.emacs.d/vendor/iedit/")
 (require 'iedit)
@@ -846,8 +864,7 @@
 (add-hook 'haskell-mode-hook 'intero-mode)
 
 ;; multiple-cursors
-
-(require-packages 'multiple-cursors)
+(require-packages 'multiple-cursors 'ace-mc)
 
 (global-set-key (kbd "C-o C-k C-l") 'mc/edit-lines)
 (global-set-key (kbd "C-o C-k C-e") 'mc/edit-ends-of-lines)
@@ -856,4 +873,18 @@
 (global-set-key (kbd "C-o C-k C-a") 'mc/mark-all-symbols-like-this)
 (global-set-key (kbd "C-o C-k C-n") 'mc/mark-next-like-this)
 (global-set-key (kbd "C-o C-k C-r") 'mc/mark-all-in-region)
+(global-set-key (kbd "C-o C-k C-c")
+                ;;'ace-mc-add-multiple-cursors
+                 'ace-mc-add-single-cursor
+                )
 (global-set-key (kbd "C-M-,") 'mc/mark-all-dwim)
+
+(global-unset-key (kbd "M-<down-mouse-1>"))
+(global-set-key (kbd "M-<mouse-1>") 'mc/add-cursor-on-click)
+
+;; (defhydra paredit-mode-map (global-map "C-o C-k")
+;;   "multiple-cursors"
+;;   ("l" mc/edit-lines "edit-lines")
+;;   ("n" mc/mark-next-like-this "mark-next-like-this"))
+
+;; (global-unset-key (kbd "C-o C-k C-n"))
