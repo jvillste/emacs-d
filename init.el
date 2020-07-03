@@ -1,5 +1,6 @@
 (load-file "~/.emacs.d/local.el")
 
+(package-initialize)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -30,6 +31,7 @@
      ("string" . "clojure.string")
      ("walk" . "clojure.walk")
      ("zip" . "clojure.zip"))))
+ '(cljr-warn-on-eval nil)
  '(custom-enabled-themes (quote (deeper-blue)))
  '(ediff-merge-split-window-function (quote split-window-horizontally))
  '(ediff-split-window-function (quote split-window-horizontally))
@@ -38,14 +40,22 @@
  '(global-git-gutter-mode t)
  '(global-whitespace-mode t)
  '(highlight-symbol-idle-delay 0.1)
+ '(ivy-height 30)
+ '(ivy-mode t)
+ '(ivy-use-virtual-buffers t)
+ '(ivy-virtual-abbreviate (quote full))
  '(mc/always-run-for-all t)
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
    (quote
-    (ace-mc intero flx-ido rust-mode clj-refactor cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
- '(projectile-switch-project-action (quote helm-projectile-find-file))
- '(projectile-use-git-grep t)
+    (clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
+ '(projectile-enable-caching t)
+ '(projectile-mode t nil (projectile))
+ '(projectile-use-git-grep nil)
+ '(recentf-max-menu-items 25)
+ '(recentf-max-saved-items 100)
+ '(recentf-mode t)
  '(safe-local-variable-values
    (quote
     ((elisp-lint-indent-specs
@@ -78,11 +88,11 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :background "#181a26" :foreground "gray80" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 180 :width normal :foundry "nil" :family "Menlo"))))
- '(helm-selection ((t (:background "purple4" :distant-foreground "black"))))
+ '(default ((t (:inherit nil :stipple nil :background "black" :foreground "light gray" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 150 :width normal :foundry "nil" :family "Menlo"))))
  '(highlight-symbol-face ((t (:background "forest green" :foreground "gray100"))))
  '(minimap-font-face ((t (:height 20 :family "DejaVu Sans Mono"))))
  '(region ((t (:background "dark green")))))
+
 (require 'package)
 
 (defun require-packages (&rest packages)
@@ -103,7 +113,7 @@
 ;; (add-to-list 'package-archives
 ;;           '("marmalade" . "http://marmalade-repo.org/packages/"))
 
-(package-initialize)
+
 
 ;; (require-packages 'package-filter)
 
@@ -123,7 +133,6 @@
 ;; (require 'cider-ns)
 ;; use stable cider version
 ;; (add-to-list 'package-pinned-packages '(cider . "melpa-stable") t)
-
 
 ;;(require 'cider-macroexpansion)
 
@@ -153,42 +162,45 @@
             (visual-line-mode)))
 
 
-(require-packages 'helm)
-(require-packages 'wgrep-helm)
+;; (require-packages 'helm)
+;; (require-packages 'wgrep-helm)
 
-(require 'helm-config)
-(helm-mode 1)
-(global-set-key (kbd "M-x") 'helm-M-x)
+;; (require 'helm-config)
+;; (helm-mode 1)
+;; (global-set-key (kbd "M-x") 'helm-M-x)
 
-(define-key helm-find-files-map (kbd "<tab>") 'helm-execute-persistent-action)
-(define-key helm-find-files-map (kbd "C-z") 'helm-select-action)
+;; (define-key helm-find-files-map (kbd "<tab>") 'helm-execute-persistent-action)
+;; (define-key helm-find-files-map (kbd "C-z") 'helm-select-action)
 
-(setq helm-M-x-fuzzy-match t)
-(global-set-key (kbd "C-x b") 'helm-mini)
-(setq helm-buffers-fuzzy-matching t
-      helm-recentf-fuzzy-match    t)
+;; (setq helm-M-x-fuzzy-match t)
+;; (global-set-key (kbd "C-x b") 'helm-mini)
+;; (setq helm-buffers-fuzzy-matching t
+;;       helm-recentf-fuzzy-match    t)
 
-(global-set-key (kbd "C-x C-f") 'helm-find-files)
+;; (global-set-key (kbd "C-x C-f") 'helm-find-files)
 
 (require-packages 'clojure-mode)
 (add-hook 'clojure-mode-hook 'show-paren-mode)
 (add-hook 'emacs-lisp-mode-hook 'show-paren-mode)
 
-(require-packages 'projectile 'helm 'helm-projectile)
+(require-packages 'ivy)
+(ivy-mode)
+(setq ivy-use-virtual-buffers t)
+
+(require-packages 'projectile)
 (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+(setq projectile-indexing-method 'native)
+(setq projectile-completion-system 'ivy)
 (projectile-global-mode)
-(helm-projectile-on)
-;; (setq projectile-completion-system 'helm)
+(global-set-key (kbd "C-o C-z") 'projectile-grep)
+
+;; (helm-projectile-on)
 ;; (setq helm-projectile-fuzzy-match t)
 ;; (setq helm-mode-fuzzy-match t)
-;; (helm-projectile-off)
-
 ;; disable helm projectile grep for C-o C-z
-(define-key projectile-mode-map [remap projectile-grep] nil)
+;; (define-key projectile-mode-map [remap projectile-grep] nil)
+;; (global-set-key (kbd "C-o C-v") 'helm-projectile-grep)
 
-(global-set-key (kbd "C-o C-z") 'projectile-grep)
-(global-set-key (kbd "C-o C-v") 'helm-projectile-grep)
-(global-set-key (kbd "C-o x") 'projectile-grep)
 
 (require-packages 'clojure-mode)
 
@@ -247,17 +259,14 @@
 (add-hook 'clojure-mode-hook
           (lambda ()
             (clj-refactor-mode 1)
-            (yas-minor-mode 1) ; for adding require/use/import
+          ;;  (yas-minor-mode 1) ; for adding require/use/import
             (cljr-add-keybindings-with-prefix "C-o RET")))
-
-
 
 
 (require-packages 'recentf)
 (recentf-mode 1)
-(setq recentf-max-menu-items 25)
-(global-set-key "\C-x\ \C-r" 'recentf-open-files)
-
+;; save the list every five minutes
+(run-at-time nil (* 5 60) 'recentf-save-list)
 
 
 ;; (setq cider-lein-parameters "with-profile +dev repl :headless")
@@ -270,6 +279,8 @@
 ;; (setq cider-test-infer-test-ns (lambda (ns) ns))
 
 
+;; see https://github.com/clojure-emacs/cider/issues/2808
+(setq cider-enhanced-cljs-completion-p nil)
 
 (setq cider-auto-select-error-buffer nil)
 
@@ -490,20 +501,20 @@
 (define-key cider-mode-map (kbd "C-o C-g") 'run-current-ns-tests)
 
 
-(defun juvi-eval-last-sexp-to-kill-ring (&optional custom-fill-column)
-  (interactive "p")
+(defun juvi-eval-last-sexp-to-kill-ring ()
+  (interactive)
   (cider-interactive-eval (cider-last-sexp)
                           (nrepl-make-response-handler (current-buffer)
                                                        (lambda (_buffer value)
-                                                         (kill-new value)                                                         )
+                                                         (message value)
+                                                         (kill-new value))
                                                        (lambda (_buffer out)
                                                          (cider-emit-interactive-eval-output out))
                                                        (lambda (_buffer err)
                                                          (cider-emit-interactive-eval-err-output err))
                                                        '())
                           nil
-                          (cider--nrepl-print-request-map (or custom-fill-column
-                                                              fill-column))))
+                          (cider--nrepl-print-request-map fill-column)))
 
 (define-key cider-mode-map (kbd "C-o C-p") 'juvi-eval-last-sexp-to-kill-ring)
 
@@ -888,3 +899,11 @@
 ;;   ("n" mc/mark-next-like-this "mark-next-like-this"))
 
 ;; (global-unset-key (kbd "C-o C-k C-n"))
+
+;; profiling
+
+(global-set-key (kbd "C-o C-q")
+                (lambda ()
+                  (interactive)
+                  (profiler-report)
+                  (profiler-stop)))
