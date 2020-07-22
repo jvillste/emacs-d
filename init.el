@@ -38,7 +38,7 @@
  '(ediff-window-setup-function (quote ediff-setup-windows-plain))
  '(git-gutter:diff-option "-b")
  '(global-git-gutter-mode t)
- '(global-whitespace-mode t)
+ '(global-whitespace-mode nil)
  '(highlight-symbol-idle-delay 0.1)
  '(ivy-height 30)
  '(ivy-mode t)
@@ -49,7 +49,7 @@
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
    (quote
-    (clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
+    (ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
  '(projectile-enable-caching t)
  '(projectile-mode t nil (projectile))
  '(projectile-use-git-grep nil)
@@ -186,6 +186,14 @@
 (require-packages 'ivy)
 (ivy-mode)
 (setq ivy-use-virtual-buffers t)
+
+(require-packages 'ivy-rich)
+(ivy-rich-mode 1)
+
+(require-packages 'counsel)
+(counsel-mode)
+(global-set-key (kbd "C-x b") 'ivy-switch-buffer)
+(global-set-key (kbd "C-x n") 'counsel-recentf)
 
 (require-packages 'projectile)
 (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
@@ -483,16 +491,6 @@
   (setq cider-lein-parameters "with-profile +dev repl :headless")
   (cider-jack-in nil))
 
-
-
-(defun run-tests ()
-  (interactive)
-  (init-el-cider-load-buffer)
-  (cider-test-run-ns-tests nil))
-
-;; (define-key cider-mode-map (kbd "C-c l t") 'run-tests)
-(define-key cider-mode-map (kbd "C-o C-f") 'run-tests)
-
 (defun run-current-ns-tests ()
   (interactive)
   (init-el-cider-load-buffer)
@@ -583,6 +581,7 @@
   (interactive)
   (find-file "~/.emacs.d/init.el"))
 
+(global-set-key (kbd "C-o C-f") 'open-init)
 
 ;; always split horizontaly
 
@@ -882,6 +881,7 @@
 (global-set-key (kbd "C-o C-k C-f") 'mc/mark-all-like-this-in-defun)
 (global-set-key (kbd "C-o C-k C-s") 'mc/mark-all-symbols-like-this-in-defun)
 (global-set-key (kbd "C-o C-k C-a") 'mc/mark-all-symbols-like-this)
+(global-set-key (kbd "C-o C-k C-m") 'mc/mark-all-like-this)
 (global-set-key (kbd "C-o C-k C-n") 'mc/mark-next-like-this)
 (global-set-key (kbd "C-o C-k C-r") 'mc/mark-all-in-region)
 (global-set-key (kbd "C-o C-k C-c")
@@ -907,3 +907,9 @@
                   (interactive)
                   (profiler-report)
                   (profiler-stop)))
+
+(global-set-key (kbd "C-o C-w")
+                (lambda ()
+                  (interactive)
+		  (customize)))
+
