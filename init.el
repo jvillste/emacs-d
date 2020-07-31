@@ -88,7 +88,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :background "black" :foreground "light gray" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 150 :width normal :foundry "nil" :family "Menlo"))))
+ '(default ((t (:inherit nil :stipple nil :background "black" :foreground "light gray" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 180 :width normal :foundry "nil" :family "Menlo"))))
  '(highlight-symbol-face ((t (:background "forest green" :foreground "gray100"))))
  '(minimap-font-face ((t (:height 20 :family "DejaVu Sans Mono"))))
  '(region ((t (:background "dark green")))))
@@ -256,6 +256,8 @@
 (require-packages 'magit)
 (set-variable 'magit-emacsclient-executable "/usr/local/Cellar/emacs/24.3/bin/emacsclient")
 (global-set-key (kbd "C-x g") 'magit-status)
+(global-set-key (kbd "C-o C-v") 'magit-blame)
+
 
 ;; (add-to-list 'load-path "~/.emacs.d/vendor/clj-refactor.el/")
 ;; (require 'clj-refactor)
@@ -516,6 +518,23 @@
 
 (define-key cider-mode-map (kbd "C-o C-p") 'juvi-eval-last-sexp-to-kill-ring)
 
+(defun juvi-eval-last-sexp-output-to-kill-ring ()
+  (interactive)
+  (kill-new "")
+  (cider-interactive-eval (cider-last-sexp)
+			  (nrepl-make-response-handler (current-buffer)
+							 (lambda (_buffer _value))
+							 (lambda (_buffer output)
+							   (kill-append output nil))
+							 (lambda (_buffer err)
+							   (cider-emit-interactive-eval-err-output err))
+							 '())
+			    nil
+			    (cider--nrepl-print-request-map fill-column))
+  (message "evaluation output is now in the kill ring"))
+
+(define-key cider-mode-map (kbd "C-o C-o") 'juvi-eval-last-sexp-output-to-kill-ring)
+
 (add-to-list 'load-path "~/.emacs.d/vendor/iedit/")
 (require 'iedit)
 ;;(require-packages 'iedit)
@@ -751,7 +770,7 @@
           (set-visited-file-name new-name t t)))))))
 
 ;; mark-sexp
-
+(define-key markdown-mode-map (kbd "C-M-m") nil)
 (global-set-key (kbd "C-M-m") 'mark-sexp)
 
 ;; kill spaces
