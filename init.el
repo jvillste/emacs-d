@@ -50,7 +50,7 @@
  '(package-selected-packages
    (quote
     (ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
- '(projectile-enable-caching t)
+ '(projectile-enable-caching nil)
  '(projectile-mode t nil (projectile))
  '(projectile-use-git-grep nil)
  '(recentf-max-menu-items 25)
@@ -88,7 +88,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :background "black" :foreground "light gray" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 180 :width normal :foundry "nil" :family "Menlo"))))
+ '(default ((t (:inherit nil :stipple nil :background "black" :foreground "light gray" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 160 :width normal :foundry "nil" :family "Menlo"))))
  '(highlight-symbol-face ((t (:background "forest green" :foreground "gray100"))))
  '(minimap-font-face ((t (:height 20 :family "DejaVu Sans Mono"))))
  '(region ((t (:background "dark green")))))
@@ -149,7 +149,10 @@
 
 (define-key cider-mode-map (kbd "C-o C-t C-p") 'cider-test-run-project-tests)
 
-
+(global-unset-key (kbd "M-k"))
+(define-key clojure-mode-map (kbd "M-k M-k") 'cider-jack-in)
+(define-key clojure-mode-map (kbd "M-k M-j") 'cider-jack-in-clj&cljs)
+(define-key clojure-mode-map (kbd "M-k M-q") 'sesman-quit)
 
 
 (require-packages 'hydra)
@@ -183,6 +186,8 @@
 (add-hook 'clojure-mode-hook 'show-paren-mode)
 (add-hook 'emacs-lisp-mode-hook 'show-paren-mode)
 
+(global-set-key (kbd "C-o C-y") 'clojure-mode)
+
 (require-packages 'ivy)
 (ivy-mode)
 (setq ivy-use-virtual-buffers t)
@@ -197,7 +202,8 @@
 
 (require-packages 'projectile)
 (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-(setq projectile-indexing-method 'native)
+;; (setq projectile-indexing-method 'native) ;; this obeys the .projectile file but needs to be manually refreshed
+(setq projectile-indexing-method 'hybrid) ;; this obeys the .projectile file but needs to be manually refreshed
 (setq projectile-completion-system 'ivy)
 (projectile-global-mode)
 (global-set-key (kbd "C-o C-z") 'projectile-grep)
@@ -523,12 +529,12 @@
   (kill-new "")
   (cider-interactive-eval (cider-last-sexp)
 			  (nrepl-make-response-handler (current-buffer)
-							 (lambda (_buffer _value))
-							 (lambda (_buffer output)
-							   (kill-append output nil))
-							 (lambda (_buffer err)
-							   (cider-emit-interactive-eval-err-output err))
-							 '())
+						       (lambda (_buffer _value))
+						       (lambda (_buffer output)
+							 (kill-append output nil))
+						       (lambda (_buffer err)
+							 (cider-emit-interactive-eval-err-output err))
+						       '())
 			    nil
 			    (cider--nrepl-print-request-map fill-column))
   (message "evaluation output is now in the kill ring"))
@@ -932,3 +938,15 @@
                   (interactive)
 		  (customize)))
 
+(global-set-key (kbd "C-o C-a") 'paredit-mode)
+
+
+(defun insert-current-date-time ()
+  (interactive)
+  (when (use-region-p)
+    (delete-region (region-beginning) (region-end)))
+  (insert (format-time-string "%_e %_m %_Y %_H %_M" (current-time))))
+
+(global-set-key (kbd "C-o M-j") (lambda ()
+				  (interactive)
+				  (insert "taoensso.tufte/p :")))
