@@ -38,18 +38,20 @@
  '(ediff-window-setup-function (quote ediff-setup-windows-plain))
  '(git-gutter:diff-option "-b")
  '(global-git-gutter-mode t)
- '(global-whitespace-mode nil)
+ '(global-whitespace-mode t)
  '(highlight-symbol-idle-delay 0.1)
+ '(indent-tabs-mode nil)
  '(ivy-height 30)
  '(ivy-mode t)
  '(ivy-use-virtual-buffers t)
  '(ivy-virtual-abbreviate (quote full))
+ '(js-indent-level 2)
  '(mc/always-run-for-all t)
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
    (quote
-    (ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
+    (rg ag ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
  '(projectile-enable-caching nil)
  '(projectile-mode t nil (projectile))
  '(projectile-use-git-grep nil)
@@ -202,11 +204,10 @@
 
 (require-packages 'projectile)
 (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-;; (setq projectile-indexing-method 'native) ;; this obeys the .projectile file but needs to be manually refreshed
-(setq projectile-indexing-method 'hybrid) ;; this obeys the .projectile file but needs to be manually refreshed
+(setq projectile-indexing-method 'hybrid)
 (setq projectile-completion-system 'ivy)
 (projectile-global-mode)
-(global-set-key (kbd "C-o C-z") 'projectile-grep)
+
 
 ;; (helm-projectile-on)
 ;; (setq helm-projectile-fuzzy-match t)
@@ -275,14 +276,15 @@
 (add-hook 'clojure-mode-hook
           (lambda ()
             (clj-refactor-mode 1)
-          ;;  (yas-minor-mode 1) ; for adding require/use/import
+            ;;  (yas-minor-mode 1) ; for adding require/use/import
             (cljr-add-keybindings-with-prefix "C-o RET")))
 
 
 (require-packages 'recentf)
 (recentf-mode 1)
+
 ;; save the list every five minutes
-(run-at-time nil (* 5 60) 'recentf-save-list)
+;; (run-at-time nil (* 5 60) 'recentf-save-list)
 
 
 ;; (setq cider-lein-parameters "with-profile +dev repl :headless")
@@ -313,8 +315,8 @@
 (define-key cider-mode-map (kbd "C-c C-k") 'init-el-cider-load-buffer)
 (define-key clojure-mode-map (kbd "C-c C-k") 'init-el-cider-load-buffer)
 
-(define-key clojure-mode-map (kbd "C-o C-c") 'comment-region)
-(define-key clojure-mode-map (kbd "C-o C-u") 'uncomment-region)
+(global-set-key (kbd "C-o C-c") 'comment-region)
+(global-set-key (kbd "C-o C-u") 'uncomment-region)
 
 (define-key cider-mode-map (kbd "C-c C-p") 'cider-pprint-eval-last-sexp)
 
@@ -418,8 +420,19 @@
   (init-el-cider-load-buffer)
   (make-eval-marked-sexp))
 
+(defun juvi-eval-marked-sexp-silently ()
+  (interactive)
+  (with-current-buffer make-marked-buffer
+    (cider-interactive-eval make-marked-sexp
+			    (nrepl-make-response-handler make-marked-buffer
+							 (lambda (buffer value))
+							 (lambda (_buffer out))
+							 (lambda (_buffer err))
+							 nil))))
+
 (define-key cider-mode-map (kbd "C-o C-e") 'make-mark-sexp-for-eval)
 (define-key cider-mode-map (kbd "C-o C-i") 'make-save-and-eval-marked-sexp)
+(global-set-key (kbd "C-o M-i") 'juvi-eval-marked-sexp-silently)
 
 (defun juvi-pprint-first ()
   (interactive)
@@ -535,8 +548,8 @@
 						       (lambda (_buffer err)
 							 (cider-emit-interactive-eval-err-output err))
 						       '())
-			    nil
-			    (cider--nrepl-print-request-map fill-column))
+                          nil
+                          (cider--nrepl-print-request-map fill-column))
   (message "evaluation output is now in the kill ring"))
 
 (define-key cider-mode-map (kbd "C-o C-o") 'juvi-eval-last-sexp-output-to-kill-ring)
@@ -550,6 +563,7 @@
 
 (require-packages 'company)
 (add-hook 'cider-repl-mode-hook #'company-mode)
+(add-hook 'cider-mode-hook #'cider-company-enable-fuzzy-completion)
 (add-hook 'clojure-mode-hook #'company-mode)
 (add-hook 'emacs-lisp-mode-hook #'company-mode)
 
@@ -681,6 +695,7 @@
 
 
 ;; org mode
+(require-packages 'org)
 
 (defhydra hydra-org-structure (org-mode-map "M-p")
   "org-structure"
@@ -911,12 +926,20 @@
 (global-set-key (kbd "C-o C-k C-r") 'mc/mark-all-in-region)
 (global-set-key (kbd "C-o C-k C-c")
                 ;;'ace-mc-add-multiple-cursors
-                 'ace-mc-add-single-cursor
+                'ace-mc-add-single-cursor
                 )
 (global-set-key (kbd "C-M-,") 'mc/mark-all-dwim)
 
 (global-unset-key (kbd "M-<down-mouse-1>"))
 (global-set-key (kbd "M-<mouse-1>") 'mc/add-cursor-on-click)
+
+(defun juvi-duplicate ()
+  (interactive)
+  (insert "'")
+  (mc/save-excursion
+   (insert " ")
+   (mc/create-fake-cursor-at-point))
+  (multiple-cursors-mode 1))
 
 ;; (defhydra paredit-mode-map (global-map "C-o C-k")
 ;;   "multiple-cursors"
@@ -941,12 +964,28 @@
 (global-set-key (kbd "C-o C-a") 'paredit-mode)
 
 
-(defun insert-current-date-time ()
+(defun juvi-insert-current-date-time ()
   (interactive)
   (when (use-region-p)
     (delete-region (region-beginning) (region-end)))
-  (insert (format-time-string "%_e %_m %_Y %_H %_M" (current-time))))
+  (insert (format-time-string "%_Y-%_0e-%_0mT%_0H:%_0M:%0S" (current-time))))
+
+(global-set-key (kbd "M-k M-v") 'juvi-insert-current-date-time)
 
 (global-set-key (kbd "C-o M-j") (lambda ()
 				  (interactive)
 				  (insert "taoensso.tufte/p :")))
+
+;; ripgrep
+
+(require-packages 'rg)
+
+(rg-define-search juvi-rg-project
+  "Run ripgrep in current project searching for literal in all files."
+  :dir project
+  :files "all"
+  :format literal)
+
+(global-set-key (kbd "C-o C-z") 'juvi-rg-project)
+
+;; (setq debug-on-error t)
