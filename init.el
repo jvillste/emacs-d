@@ -424,11 +424,12 @@
   (interactive)
   (with-current-buffer make-marked-buffer
     (cider-interactive-eval make-marked-sexp
-			    (nrepl-make-response-handler make-marked-buffer
-							 (lambda (buffer value))
-							 (lambda (_buffer out))
-							 (lambda (_buffer err))
-							 nil))))
+                            (nrepl-make-response-handler make-marked-buffer
+                                                         (lambda (buffer value))
+                                                         (lambda (_buffer out))
+                                                         (lambda (_buffer err))
+                                                         nil)))
+  (message "Ran marked sexp."))
 
 (define-key cider-mode-map (kbd "C-o C-e") 'make-mark-sexp-for-eval)
 (define-key cider-mode-map (kbd "C-o C-i") 'make-save-and-eval-marked-sexp)
@@ -541,13 +542,13 @@
   (interactive)
   (kill-new "")
   (cider-interactive-eval (cider-last-sexp)
-			  (nrepl-make-response-handler (current-buffer)
-						       (lambda (_buffer _value))
-						       (lambda (_buffer output)
-							 (kill-append output nil))
-						       (lambda (_buffer err)
-							 (cider-emit-interactive-eval-err-output err))
-						       '())
+                          (nrepl-make-response-handler (current-buffer)
+                                                       (lambda (_buffer _value))
+                                                       (lambda (_buffer output)
+                                                         (kill-append output nil))
+                                                       (lambda (_buffer err)
+                                                         (cider-emit-interactive-eval-err-output err))
+                                                       '())
                           nil
                           (cider--nrepl-print-request-map fill-column))
   (message "evaluation output is now in the kill ring"))
@@ -933,13 +934,18 @@
 (global-unset-key (kbd "M-<down-mouse-1>"))
 (global-set-key (kbd "M-<mouse-1>") 'mc/add-cursor-on-click)
 
-(defun juvi-duplicate ()
+(defun juvi-double-as-quoted ()
   (interactive)
   (insert "'")
   (mc/save-excursion
    (insert " ")
    (mc/create-fake-cursor-at-point))
   (multiple-cursors-mode 1))
+
+(add-to-list 'mc/cmds-to-run-once 'juvi-double-as-quoted)
+
+(global-set-key (kbd "C-o M-y") 'juvi-double-as-quoted)
+
 
 ;; (defhydra paredit-mode-map (global-map "C-o C-k")
 ;;   "multiple-cursors"
@@ -959,7 +965,7 @@
 (global-set-key (kbd "C-o C-w")
                 (lambda ()
                   (interactive)
-		  (customize)))
+                  (customize)))
 
 (global-set-key (kbd "C-o C-a") 'paredit-mode)
 
@@ -973,8 +979,8 @@
 (global-set-key (kbd "M-k M-v") 'juvi-insert-current-date-time)
 
 (global-set-key (kbd "C-o M-j") (lambda ()
-				  (interactive)
-				  (insert "taoensso.tufte/p :")))
+                                  (interactive)
+                                  (insert "taoensso.tufte/p :")))
 
 ;; ripgrep
 
