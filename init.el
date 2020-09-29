@@ -600,6 +600,15 @@
   (indent-whole-sexp))
 (define-key clojure-mode-map (kbd "C-M-o C-M-n") 'insert-comment-block)
 
+(defun juvi-add-test ()
+  (interactive)
+  (let ((function-name (substring (cider-last-sexp) 0 -1)))
+    (goto-char (second (cider-defun-at-point t)))
+    (insert (concat "\n(deftest test-" function-name "\n  (is (= nil (" function-name " ))))\n"))
+    (backward-char 5)))
+
+(define-key clojure-mode-map (kbd "C-o v") 'juvi-add-test)
+
 (defun yank-quoted-and-unquoted ()
   (interactive)
   (insert "'")
@@ -934,17 +943,16 @@
 (global-unset-key (kbd "M-<down-mouse-1>"))
 (global-set-key (kbd "M-<mouse-1>") 'mc/add-cursor-on-click)
 
-(defun juvi-double-as-quoted ()
+(defun juvi-double-cursor ()
   (interactive)
-  (insert "'")
   (mc/save-excursion
    (insert " ")
    (mc/create-fake-cursor-at-point))
   (multiple-cursors-mode 1))
 
-(add-to-list 'mc/cmds-to-run-once 'juvi-double-as-quoted)
+(add-to-list 'mc/cmds-to-run-once 'juvi-double-cursor)
 
-(global-set-key (kbd "C-o M-y") 'juvi-double-as-quoted)
+(global-set-key (kbd "C-o M-y") 'juvi-double-cursor)
 
 
 ;; (defhydra paredit-mode-map (global-map "C-o C-k")
