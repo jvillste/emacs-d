@@ -51,7 +51,7 @@
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
    (quote
-    (rg ag ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
+    (re-jump rg ag ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
  '(projectile-enable-caching nil)
  '(projectile-mode t nil (projectile))
  '(projectile-use-git-grep nil)
@@ -90,7 +90,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :background "black" :foreground "light gray" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 160 :width normal :foundry "nil" :family "Menlo"))))
+ '(default ((t (:inherit nil :stipple nil :background "black" :foreground "light gray" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 120 :width normal :foundry "nil" :family "Menlo"))))
  '(highlight-symbol-face ((t (:background "forest green" :foreground "gray100"))))
  '(minimap-font-face ((t (:height 20 :family "DejaVu Sans Mono"))))
  '(region ((t (:background "dark green")))))
@@ -258,6 +258,8 @@
   ("p" git-gutter:previous-hunk "previous"))
 
 (global-set-key (kbd "C-o C-j") 'git-gutter:revert-hunk)
+(global-set-key (kbd "C-o g") 'git-gutter:update-all-windows)
+
 
 (setq magit-last-seen-setup-instructions "1.4.0")
 (require-packages 'magit)
@@ -360,7 +362,7 @@
 
 (define-key cider-mode-map (kbd "C-o C-r") 'init-el-refresh)
 
-(defun set-refresh-to-dev ()
+(defun juvi-set-refresh-to-dev ()
   (interactive)
   (setq cider-refresh-before-fn "dev/stop"
         cider-refresh-after-fn "dev/start"))
@@ -504,8 +506,6 @@
 
 (global-set-key (kbd "C-c C-w") 'cider-kill)
 
-(define-key cider-mode-map (kbd "C-c s") 'sesman-restart)
-
 
 (defun force-cider-restart ()
   (interactive)
@@ -526,7 +526,7 @@
   (cider-interactive-eval (cider-last-sexp)
                           (nrepl-make-response-handler (current-buffer)
                                                        (lambda (_buffer value)
-                                                         (message value)
+                                                         (message "result is now in the kill ring")
                                                          (kill-new value))
                                                        (lambda (_buffer out)
                                                          (cider-emit-interactive-eval-output out))
@@ -604,7 +604,7 @@
   (interactive)
   (let ((function-name (substring (cider-last-sexp) 0 -1)))
     (goto-char (second (cider-defun-at-point t)))
-    (insert (concat "\n(deftest test-" function-name "\n  (is (= nil (" function-name " ))))\n"))
+    (insert (concat "\n(deftest test-" function-name "\n  (is (= \n         (" function-name " ))))\n"))
     (backward-char 5)))
 
 (define-key clojure-mode-map (kbd "C-o v") 'juvi-add-test)
@@ -680,8 +680,8 @@
 
 (defhydra other-window (global-map "C-x C-o")
   "other-window"
-  ("C-j" other-window-backwards "other window backwards")
-  ("C-k" other-window "other window"))
+  ("C-k" other-window-backwards "other window backwards")
+  ("C-j" other-window "other window"))
 
 ;; (global-set-key (kbd "C-x C-o") 'other-window-backwards)
 
@@ -812,7 +812,7 @@
 
 (global-set-key (kbd "C-M-k") 'kill-spaces)
 
-(defun just-one-space-in-region (beg end)
+(defun juvi-just-one-space-in-region (beg end)
   "replace all whitespace in the region with single spaces"
   (interactive "r")
   (save-excursion
@@ -822,7 +822,7 @@
       (while (re-search-forward "[ \n]+" nil t)
         (replace-match " ")))))
 
-(global-set-key (kbd "M-K") 'just-one-space-in-region)
+(global-set-key (kbd "M-K") 'juvi-just-one-space-in-region)
 
 ;; avy
 
@@ -830,7 +830,7 @@
 (global-set-key (kbd "M-j") 'avy-goto-char-timer)
 (define-key cider-mode-map (kbd "M-j") 'avy-goto-char-timer)
 (define-key outline-mode-map (kbd "M-j") 'avy-goto-char-timer)
-
+(cider-defun-at-point)
 ;; scala
 
 (require-packages 'scala-mode)
@@ -1003,3 +1003,24 @@
 (global-set-key (kbd "C-o C-z") 'juvi-rg-project)
 
 ;; (setq debug-on-error t)
+
+(defun juvi-set-laptop-font-size ()
+  (interactive)
+  (set-face-attribute 'default nil :height 110))
+
+(global-set-key (kbd "C-o f l") 'juvi-set-laptop-font-size)
+
+(defun juvi-set-desktop-font-size ()
+  (interactive)
+  (set-face-attribute 'default nil :height 180))
+
+(global-set-key (kbd "C-o f d") 'juvi-set-desktop-font-size)
+
+(add-to-list 'load-path "~/.emacs.d/vendor/re-jump.el/")
+(load "re-jump")
+
+(global-set-key (kbd "M-F") 'end-of-buffer)
+(global-set-key (kbd "M-B") 'beginning-of-buffer)
+
+(setq frame-title-format "%b")
+
