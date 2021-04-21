@@ -90,7 +90,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :background "black" :foreground "light gray" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 120 :width normal :foundry "nil" :family "Menlo"))))
+ '(default ((t (:inherit nil :stipple nil :background "black" :foreground "light gray" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 60 :width normal :foundry "nil" :family "Menlo"))))
  '(highlight-symbol-face ((t (:background "forest green" :foreground "gray100"))))
  '(minimap-font-face ((t (:height 20 :family "DejaVu Sans Mono"))))
  '(region ((t (:background "dark green")))))
@@ -1004,17 +1004,16 @@
 
 ;; (setq debug-on-error t)
 
-(defun juvi-set-laptop-font-size ()
-  (interactive)
-  (set-face-attribute 'default nil :height 110))
 
-(global-set-key (kbd "C-o f l") 'juvi-set-laptop-font-size)
+(defun juvi-set-font-size (height)
+  (set-face-attribute 'default nil :height height))
 
-(defun juvi-set-desktop-font-size ()
-  (interactive)
-  (set-face-attribute 'default nil :height 180))
+(defhydra juvi-hydra-font-size (global-map "C-o f")
+  "font-size"
 
-(global-set-key (kbd "C-o f d") 'juvi-set-desktop-font-size)
+  ("l" (juvi-set-font-size 100) "laptop")
+  ("s" (juvi-set-font-size 70) "laptop small")
+  ("d" (juvi-set-font-size 180) "desktop"))
 
 (add-to-list 'load-path "~/.emacs.d/vendor/re-jump.el/")
 (load "re-jump")
@@ -1024,3 +1023,6 @@
 
 (setq frame-title-format "%b")
 
+
+;; show character count on modeline
+;; (add-to-list 'global-mode-string '(" %i"))
