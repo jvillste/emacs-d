@@ -21,21 +21,20 @@
  '(cider-refresh-show-log-buffer nil)
  '(cider-repl-print-length 1000)
  '(cider-save-files-on-cider-refresh t)
- '(cider-test-defining-forms (quote ("deftest" "defspec" "with-test")))
+ '(cider-test-defining-forms '("deftest" "defspec" "with-test"))
  '(cljr-auto-clean-ns nil)
  '(cljr-favor-prefix-notation nil)
  '(cljr-magic-require-namespaces
-   (quote
-    (("io" . "clojure.java.io")
+   '(("io" . "clojure.java.io")
      ("set" . "clojure.set")
      ("string" . "clojure.string")
      ("walk" . "clojure.walk")
-     ("zip" . "clojure.zip"))))
+     ("zip" . "clojure.zip")))
  '(cljr-warn-on-eval nil)
- '(custom-enabled-themes (quote (deeper-blue)))
- '(ediff-merge-split-window-function (quote split-window-horizontally))
- '(ediff-split-window-function (quote split-window-horizontally))
- '(ediff-window-setup-function (quote ediff-setup-windows-plain))
+ '(custom-enabled-themes '(deeper-blue))
+ '(ediff-merge-split-window-function 'split-window-horizontally)
+ '(ediff-split-window-function 'split-window-horizontally)
+ '(ediff-window-setup-function 'ediff-setup-windows-plain)
  '(git-gutter:diff-option "-b")
  '(global-git-gutter-mode t)
  '(global-whitespace-mode t)
@@ -44,23 +43,21 @@
  '(ivy-height 30)
  '(ivy-mode t)
  '(ivy-use-virtual-buffers t)
- '(ivy-virtual-abbreviate (quote full))
+ '(ivy-virtual-abbreviate 'full)
  '(js-indent-level 2)
  '(mc/always-run-for-all t)
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
-   (quote
-    (re-jump rg ag ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy)))
+   '(flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy))
  '(projectile-enable-caching nil)
  '(projectile-mode t nil (projectile))
  '(projectile-use-git-grep nil)
- '(recentf-max-menu-items 25)
- '(recentf-max-saved-items 100)
+ '(recentf-max-menu-items 100)
+ '(recentf-max-saved-items 10000)
  '(recentf-mode t)
  '(safe-local-variable-values
-   (quote
-    ((elisp-lint-indent-specs
+   '((elisp-lint-indent-specs
       (if-let* . 2)
       (when-let* . 1)
       (let* . defun)
@@ -77,20 +74,19 @@
       (with-parsed-tramp-file-name . 2)
       (thread-first . 1)
       (thread-last . 1))
-     (checkdoc-package-keywords-flag))))
+     (checkdoc-package-keywords-flag)))
  '(undo-outer-limit 22000000)
  '(whitespace-action nil)
  '(whitespace-line-column 1000)
  '(whitespace-style
-   (quote
-    (face tabs trailing lines-tail space-before-tab empty space-after-tab tab-mark))))
+   '(face tabs trailing lines-tail space-before-tab empty space-after-tab tab-mark)))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :background "black" :foreground "light gray" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 60 :width normal :foundry "nil" :family "Menlo"))))
+ '(default ((t (:inherit nil :stipple nil :background "black" :foreground "light gray" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 160 :width normal :foundry "nil" :family "Menlo"))))
  '(highlight-symbol-face ((t (:background "forest green" :foreground "gray100"))))
  '(minimap-font-face ((t (:height 20 :family "DejaVu Sans Mono"))))
  '(region ((t (:background "dark green")))))
@@ -680,8 +676,8 @@
 
 (defhydra other-window (global-map "C-x C-o")
   "other-window"
-  ("C-k" other-window-backwards "other window backwards")
-  ("C-j" other-window "other window"))
+  ("C-j" other-window-backwards "other window backwards")
+  ("C-k" other-window "other window"))
 
 ;; (global-set-key (kbd "C-x C-o") 'other-window-backwards)
 
@@ -1011,9 +1007,10 @@
 (defhydra juvi-hydra-font-size (global-map "C-o f")
   "font-size"
 
-  ("l" (juvi-set-font-size 100) "laptop")
-  ("s" (juvi-set-font-size 70) "laptop small")
-  ("d" (juvi-set-font-size 180) "desktop"))
+  ("l" (juvi-set-font-size 120) "laptop")
+  ("s" (juvi-set-font-size 90) "small laptop")
+  ("d" (juvi-set-font-size 180) "desktop")
+  ("f" (juvi-set-font-size 160) "small desktop"))
 
 (add-to-list 'load-path "~/.emacs.d/vendor/re-jump.el/")
 (load "re-jump")
@@ -1026,3 +1023,24 @@
 
 ;; show character count on modeline
 ;; (add-to-list 'global-mode-string '(" %i"))
+
+;; originally from https://stackoverflow.com/a/49525307
+(defun juvi-start-cider-repl-with-profile (profile)
+  (interactive "sEnter profile name: ")
+  (let ((lein-params (concat "with-profile +" profile " repl :headless")))
+    (set-variable 'cider-lein-parameters lein-params)
+    ;;(cider-jack-in-clj (list :jack-in-cmd lein-params))
+    (cider-jack-in-clj '())))
+
+(defun juvi-jack-in-experimentation ()
+  (interactive)
+  (cider-jack-in-clj '(:jack-in-cmd "with-profile +experimentation repl :headless")))
+
+(require-packages 'flycheck-clj-kondo)
+(add-hook 'clojurescript-mode-hook #'flycheck-mode)
+(add-hook 'clojure-mode-hook #'flycheck-mode)
+
+
+;; python
+
+(setq python-shell-interpreter "python3")
