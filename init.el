@@ -57,7 +57,14 @@
  '(recentf-max-saved-items 10000)
  '(recentf-mode t)
  '(safe-local-variable-values
-   '((elisp-lint-indent-specs
+   '((eval progn
+           (setenv "VK_LAYER_PATH" "/Users/jukka/VulkanSDK/1.2.198.0/macOS/share/vulkan/explicit_layer.d")
+           (setenv "VK_ICD_FILENAMES" "/Users/jukka/VulkanSDK/1.2.198.0/macOS/share/vulkan/icd.d/MoltenVK_icd.json")
+           (setenv "VK_LOADER_DEBUG" "all"))
+     (eval progn
+           (setenv "MY_VAR_1" "VALUE 1")
+           (setenv "MY_VAR_2" "VALUE 2"))
+     (elisp-lint-indent-specs
       (if-let* . 2)
       (when-let* . 1)
       (let* . defun)
@@ -392,7 +399,7 @@
   (init-el-cider-load-buffer)
   (cider--pprint-eval-form (concat "(" juvi-marked-ns "/" juvi-marked-function ")")))
 
-(define-key cider-mode-map (kbd "C-M-o C-M-i") 'juvi-eval-marked-function)
+(define-key cider-mode-map (kbd "C-o M-i") 'juvi-eval-marked-function)
 
 (defun juvi-eval-function-at-point ()
   (interactive)
@@ -431,7 +438,22 @@
 
 (define-key cider-mode-map (kbd "C-o C-e") 'make-mark-sexp-for-eval)
 (define-key cider-mode-map (kbd "C-o C-i") 'make-save-and-eval-marked-sexp)
-(global-set-key (kbd "C-o M-i") 'juvi-eval-marked-sexp-silently)
+(define-key cider-mode-map (kbd "C-M-o C-M-i") 'juvi-eval-marked-sexp-silently)
+
+
+(defun juvi-eval-marked-sexp-and-show-stdout ()
+  (interactive)
+  (with-current-buffer make-marked-buffer
+    (cider-interactive-eval make-marked-sexp
+                            (nrepl-make-response-handler (cider-popup-buffer cider-result-buffer nil 'clojure-mode 'ancillary)
+                                                         (lambda (_buffer _value))
+                                                         (lambda (buffer out)
+                                                           (cider-emit-into-popup-buffer buffer out))
+                                                         (lambda (buffer err)
+                                                           (cider-emit-into-popup-buffer buffer err))
+                                                         '()))))
+
+(define-key cider-mode-map (kbd "C-M-o C-M-o") 'juvi-eval-marked-sexp-and-show-stdout)
 
 (defun juvi-pprint-first ()
   (interactive)
@@ -439,10 +461,7 @@
 
 (define-key cider-mode-map (kbd "M-p") 'juvi-pprint-first)
 
-(define-key cider-mode-map (kbd "M-.")
-  (lambda ()
-    (interactive)
-    (cider-find-var 0)))
+(define-key cider-mode-map (kbd "M-.") 'cider-find-var)
 
 (defun juvi-pprint-sample ()
   (interactive)
@@ -519,7 +538,10 @@
 
 (defun juvi-eval-last-sexp-to-kill-ring ()
   (interactive)
-  (cider-interactive-eval (cider-last-sexp)
+  (cider-interactive-eval ;; (concat "(with-out-str (cljs.pprint/pprint "
+                          ;;         (cider-last-sexp)
+                          ;;         "))")
+                          (cider-last-sexp)
                           (nrepl-make-response-handler (current-buffer)
                                                        (lambda (_buffer value)
                                                          (message "result is now in the kill ring")
@@ -533,6 +555,20 @@
                           (cider--nrepl-print-request-map fill-column)))
 
 (define-key cider-mode-map (kbd "C-o C-p") 'juvi-eval-last-sexp-to-kill-ring)
+
+(defun juvi-eval-last-sexp-and-show-stdout ()
+  (interactive)
+  (cider-interactive-eval (cider-last-sexp)
+                          (nrepl-make-response-handler (cider-popup-buffer cider-result-buffer nil 'clojure-mode 'ancillary)
+                                                       (lambda (_buffer _value))
+                                                       (lambda (buffer out)
+                                                         (cider-emit-into-popup-buffer buffer out))
+                                                       (lambda (buffer err)
+                                                         (cider-emit-into-popup-buffer buffer err))
+                                                       '())
+                          nil
+                          (cider--nrepl-print-request-map fill-column)))
+
 
 (defun juvi-eval-last-sexp-output-to-kill-ring ()
   (interactive)
@@ -605,13 +641,13 @@
 
 (define-key clojure-mode-map (kbd "C-o v") 'juvi-add-test)
 
-(defun yank-quoted-and-unquoted ()
+(defun yank-keyword-and-symbol ()
   (interactive)
-  (insert "'")
+  (insert ":")
   (yank)
   (insert " ")
   (yank))
-(define-key clojure-mode-map (kbd "C-M-o C-M-y") 'yank-quoted-and-unquoted)
+(define-key clojure-mode-map (kbd "C-M-o C-M-y") 'yank-keyword-and-symbol)
 
 ;; Delete selection
 (delete-selection-mode 1)
@@ -676,8 +712,8 @@
 
 (defhydra other-window (global-map "C-x C-o")
   "other-window"
-  ("C-j" other-window-backwards "other window backwards")
-  ("C-k" other-window "other window"))
+  ("C-k" other-window-backwards "other window backwards")
+  ("C-j" other-window "other window"))
 
 ;; (global-set-key (kbd "C-x C-o") 'other-window-backwards)
 
@@ -1040,7 +1076,30 @@
 (add-hook 'clojurescript-mode-hook #'flycheck-mode)
 (add-hook 'clojure-mode-hook #'flycheck-mode)
 
+(defun juvi-connect-to-localhost ()
+  (interactive)
+  (cider-connect-clj '(:host "localhost"
+                             :port 7888)))
+
+(define-key cider-mode-map (kbd "C-o c") 'juvi-connect-to-localhost)
+
 
 ;; python
 
 (setq python-shell-interpreter "python3")
+
+
+;; overtone
+
+
+(defun juvi-stop-overtone ()
+  (interactive)
+  (cider-interactive-eval "(overtone.sc.server/stop)"
+                          (nrepl-make-response-handler make-marked-buffer
+                                                       (lambda (buffer value))
+                                                       (lambda (_buffer out))
+                                                       (lambda (_buffer err))
+                                                       nil))
+  (message "stopped overtone"))
+
+(define-key cider-mode-map (kbd "C-M-o C-M-k") 'juvi-stop-overtone)
