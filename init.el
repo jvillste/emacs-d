@@ -82,6 +82,7 @@
       (thread-first . 1)
       (thread-last . 1))
      (checkdoc-package-keywords-flag)))
+ '(show-paren-mode t)
  '(undo-outer-limit 22000000)
  '(whitespace-action nil)
  '(whitespace-line-column 1000)
@@ -93,7 +94,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :background "black" :foreground "light gray" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 160 :width normal :foundry "nil" :family "Menlo"))))
+ '(default ((t (:inherit nil :stipple nil :background "black" :foreground "light gray" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 130 :width normal :foundry "nil" :family "Menlo"))))
  '(highlight-symbol-face ((t (:background "forest green" :foreground "gray100"))))
  '(minimap-font-face ((t (:height 20 :family "DejaVu Sans Mono"))))
  '(region ((t (:background "dark green")))))
@@ -367,11 +368,11 @@
 
 (defun juvi-set-refresh-to-dev ()
   (interactive)
-  (setq cider-refresh-before-fn "dev/stop"
-        cider-refresh-after-fn "dev/start"))
+  (setq cider-ns-refresh-before-fn "dev/stop"
+        cider-ns-refresh-after-fn "dev/start"))
 
-(setq cider-refresh-before-fn "user/stop"
-      cider-refresh-after-fn "user/start")
+(setq cider-ns-refresh-before-fn "user/stop"
+      cider-ns-refresh-after-fn "user/start")
 
 (defun cider-pprint-start ()
   (interactive)
@@ -385,6 +386,16 @@
 
 ;; (define-key cider-mode-map (kbd "C-o C-p") 'cider-pprint-eval-defun-at-point)
 
+(defun juvi-duplicate-quoted ()
+  (interactive)
+  (let  ((sexp (cider-last-sexp)))
+    (backward-sexp)
+    (insert "'")
+    (forward-sexp)
+    (insert " ")
+    (insert sexp)))
+
+(define-key cider-mode-map (kbd "C-o d") 'juvi-duplicate-quoted)
 
 (defun juvi-mark-function-for-eval ()
   (interactive)
@@ -535,6 +546,9 @@
 
 (define-key cider-mode-map (kbd "C-o C-g") 'run-current-ns-tests)
 
+(defun indend-in-kill-ring ()
+  (interactive)
+  (cider-popup-buffer cider-result-buffer nil 'clojure-mode 'ancillary))
 
 (defun juvi-eval-last-sexp-to-kill-ring ()
   (interactive)
@@ -634,7 +648,7 @@
 
 (defun juvi-add-test ()
   (interactive)
-  (let ((function-name (substring (cider-last-sexp) 0 -1)))
+  (let ((function-name (cider-last-sexp)))
     (goto-char (second (cider-defun-at-point t)))
     (insert (concat "\n(deftest test-" function-name "\n  (is (= \n         (" function-name " ))))\n"))
     (backward-char 5)))
@@ -643,7 +657,7 @@
 
 (defun yank-keyword-and-symbol ()
   (interactive)
-  (insert ":")
+  (insert "'")
   (yank)
   (insert " ")
   (yank))
