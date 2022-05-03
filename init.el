@@ -49,7 +49,7 @@
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
-   '(flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy))
+   '(zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy))
  '(projectile-enable-caching nil)
  '(projectile-mode t nil (projectile))
  '(projectile-use-git-grep nil)
@@ -159,7 +159,7 @@
 (define-key clojure-mode-map (kbd "M-k M-k") 'cider-jack-in)
 (define-key clojure-mode-map (kbd "M-k M-j") 'cider-jack-in-clj&cljs)
 (define-key clojure-mode-map (kbd "M-k M-q") 'sesman-quit)
-
+(define-key clojure-mode-map (kbd "C-t") 'transpose-sexps)
 
 (require-packages 'hydra)
 
@@ -385,17 +385,6 @@
 ;; (define-key cider-mode-map (kbd "C-o C-p") 'cider-pprint-start)
 
 ;; (define-key cider-mode-map (kbd "C-o C-p") 'cider-pprint-eval-defun-at-point)
-
-(defun juvi-duplicate-quoted ()
-  (interactive)
-  (let  ((sexp (cider-last-sexp)))
-    (backward-sexp)
-    (insert "'")
-    (forward-sexp)
-    (insert " ")
-    (insert sexp)))
-
-(define-key cider-mode-map (kbd "C-o d") 'juvi-duplicate-quoted)
 
 (defun juvi-mark-function-for-eval ()
   (interactive)
@@ -630,21 +619,22 @@
   (insert (format-time-string "%_e %_m %_Y %_H %_M" (current-time))))
 (define-key clojure-mode-map (kbd "C-c d") 'insert-current-date-time)
 
-(defun insert-debug-prn ()
+(defun juvi-insert-debug-prn ()
   (interactive)
   (save-excursion
     (insert "(prn ) ;; TODO: remove-me\n"))
   (forward-char 5))
-(define-key clojure-mode-map (kbd "C-M-o C-M-p") 'insert-debug-prn)
 
+(define-key clojure-mode-map (kbd "C-M-o C-M-p") 'juvi-insert-debug-prn)
 
-(defun insert-comment-block ()
+(defun juvi-insert-comment-block ()
   (interactive)
   (save-excursion
     (insert "(comment\n  \n) ;; TODO: remove-me\n"))
   (forward-char 11)
   (indent-whole-sexp))
-(define-key clojure-mode-map (kbd "C-M-o C-M-n") 'insert-comment-block)
+
+(define-key clojure-mode-map (kbd "C-M-o C-M-n") 'juvi-insert-comment-block)
 
 (defun juvi-add-test ()
   (interactive)
@@ -655,13 +645,26 @@
 
 (define-key clojure-mode-map (kbd "C-o v") 'juvi-add-test)
 
-(defun yank-keyword-and-symbol ()
+(defun juvi-yank-quoted-and-unquoted ()
   (interactive)
   (insert "'")
   (yank)
   (insert " ")
   (yank))
-(define-key clojure-mode-map (kbd "C-M-o C-M-y") 'yank-keyword-and-symbol)
+
+(define-key clojure-mode-map (kbd "C-M-o C-M-y") 'juvi-yank-quoted-and-unquoted)
+
+(defun juvi-duplicate-quoted ()
+  (interactive)
+  (let  ((sexp (cider-last-sexp)))
+    (backward-sexp)
+    (insert "'")
+    (forward-sexp)
+    (insert " ")
+    (insert sexp)))
+
+(define-key clojure-mode-map (kbd "C-o d") 'juvi-duplicate-quoted)
+
 
 ;; Delete selection
 (delete-selection-mode 1)
@@ -1044,7 +1047,8 @@
   "Run ripgrep in current project searching for literal in all files."
   :dir project
   :files "all"
-  :format literal)
+  :format literal
+  :flags '("--context 1"))
 
 (global-set-key (kbd "C-o C-z") 'juvi-rg-project)
 
@@ -1117,3 +1121,6 @@
   (message "stopped overtone"))
 
 (define-key cider-mode-map (kbd "C-M-o C-M-k") 'juvi-stop-overtone)
+
+
+(require-packages 'zettelkasten)
