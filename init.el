@@ -49,7 +49,7 @@
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
-   '(zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy))
+   '(sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy))
  '(projectile-enable-caching nil)
  '(projectile-mode t nil (projectile))
  '(projectile-use-git-grep nil)
@@ -227,6 +227,8 @@
 
 (require-packages 'paredit)
 (add-hook 'clojure-mode-hook 'paredit-mode)
+(add-hook 'python-mode-hook 'paredit-mode)
+
 (add-hook 'cider-repl-mode-hook 'paredit-mode)
 (add-hook 'emacs-lisp-mode-hook 'paredit-mode)
 
@@ -288,9 +290,11 @@
 
 (require-packages 'recentf)
 (recentf-mode 1)
+(require-packages 'sync-recentf)
+(setq recentf-auto-cleanup 60) ;; this is triggers sync-recentf once in a minute
 
-;; save the list every five minutes
-;; (run-at-time nil (* 5 60) 'recentf-save-list)
+;; save the list every fifteen minutes
+(run-at-time nil (* 15 60) 'recentf-save-list)
 
 
 ;; (setq cider-lein-parameters "with-profile +dev repl :headless")
@@ -542,20 +546,20 @@
 (defun juvi-eval-last-sexp-to-kill-ring ()
   (interactive)
   (cider-interactive-eval ;; (concat "(with-out-str (cljs.pprint/pprint "
-                          ;;         (cider-last-sexp)
-                          ;;         "))")
-                          (cider-last-sexp)
-                          (nrepl-make-response-handler (current-buffer)
-                                                       (lambda (_buffer value)
-                                                         (message "result is now in the kill ring")
-                                                         (kill-new value))
-                                                       (lambda (_buffer out)
-                                                         (cider-emit-interactive-eval-output out))
-                                                       (lambda (_buffer err)
-                                                         (cider-emit-interactive-eval-err-output err))
-                                                       '())
-                          nil
-                          (cider--nrepl-print-request-map fill-column)))
+   ;;         (cider-last-sexp)
+   ;;         "))")
+   (cider-last-sexp)
+   (nrepl-make-response-handler (current-buffer)
+                                (lambda (_buffer value)
+                                  (message "result is now in the kill ring")
+                                  (kill-new value))
+                                (lambda (_buffer out)
+                                  (cider-emit-interactive-eval-output out))
+                                (lambda (_buffer err)
+                                  (cider-emit-interactive-eval-err-output err))
+                                '())
+   nil
+   (cider--nrepl-print-request-map fill-column)))
 
 (define-key cider-mode-map (kbd "C-o C-p") 'juvi-eval-last-sexp-to-kill-ring)
 
@@ -653,6 +657,18 @@
   (yank))
 
 (define-key clojure-mode-map (kbd "C-M-o C-M-y") 'juvi-yank-quoted-and-unquoted)
+
+(defun juvi-define-last-sexp ()
+  (interactive)
+  (let  ((sexp (cider-last-sexp)))
+    (backward-sexp)
+    (insert "(def ")
+    (forward-sexp)
+    (insert " ")
+    (insert sexp)
+    (insert ")")))
+
+(define-key clojure-mode-map (kbd "C-M-o C-M-u") 'juvi-define-last-sexp)
 
 (defun juvi-duplicate-quoted ()
   (interactive)
@@ -1039,6 +1055,10 @@
                                   (interactive)
                                   (insert "taoensso.tufte/p :")))
 
+(global-set-key (kbd "C-o M-k") (lambda ()
+                                  (interactive)
+                                  (insert "logga.core/write ")))
+
 ;; ripgrep
 
 (require-packages 'rg)
@@ -1071,6 +1091,7 @@
 
 (global-set-key (kbd "M-F") 'end-of-buffer)
 (global-set-key (kbd "M-B") 'beginning-of-buffer)
+(global-set-key (kbd "C-o M-f") 'fill-paragraph)
 
 (setq frame-title-format "%b")
 
@@ -1093,6 +1114,7 @@
 (require-packages 'flycheck-clj-kondo)
 (add-hook 'clojurescript-mode-hook #'flycheck-mode)
 (add-hook 'clojure-mode-hook #'flycheck-mode)
+(add-hook 'python-mode-hook #'flycheck-mode)
 
 (defun juvi-connect-to-localhost ()
   (interactive)
@@ -1105,6 +1127,9 @@
 ;; python
 
 (setq python-shell-interpreter "python3")
+
+;; (require-packages 'elpy)
+;; (elpy-enable)
 
 
 ;; overtone
@@ -1124,3 +1149,5 @@
 
 
 (require-packages 'zettelkasten)
+
+(require-packages 'yasnippet)
