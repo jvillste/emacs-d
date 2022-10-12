@@ -35,6 +35,9 @@
  '(ediff-merge-split-window-function 'split-window-horizontally)
  '(ediff-split-window-function 'split-window-horizontally)
  '(ediff-window-setup-function 'ediff-setup-windows-plain)
+ '(elpy-shell-display-buffer-after-send t)
+ '(elpy-shell-echo-input nil)
+ '(elpy-shell-starting-directory 'current-directory)
  '(git-gutter:diff-option "-b")
  '(global-git-gutter-mode t)
  '(global-whitespace-mode t)
@@ -49,7 +52,7 @@
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
-   '(sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy))
+   '(helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy))
  '(projectile-enable-caching nil)
  '(projectile-mode t nil (projectile))
  '(projectile-use-git-grep nil)
@@ -227,7 +230,6 @@
 
 (require-packages 'paredit)
 (add-hook 'clojure-mode-hook 'paredit-mode)
-(add-hook 'python-mode-hook 'paredit-mode)
 
 (add-hook 'cider-repl-mode-hook 'paredit-mode)
 (add-hook 'emacs-lisp-mode-hook 'paredit-mode)
@@ -720,6 +722,8 @@
 
 (define-key clojure-mode-map (kbd "C-c n") 'indent-whole-sexp)
 
+(define-key clojure-mode-map (kbd "M-q") 'lisp-fill-paragraph)
+
 (auto-revert-mode 1)
 
 
@@ -1128,9 +1132,85 @@
 
 (setq python-shell-interpreter "python3")
 
-;; (require-packages 'elpy)
-;; (elpy-enable)
+(require-packages 'elpy)
+(elpy-enable)
 
+(setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+(add-hook 'elpy-mode-hook 'flycheck-mode)
+;; (add-hook 'elpy-mode-hook (lambda () (elpy-shell-toggle-dedicated-shell 1)))
+(setq elpy-shell-use-project-root nil)
+
+(defun juvi-restart-python ()
+  (interactive)
+  (if (python-shell-get-process)
+      (elpy-shell-kill))
+  (let ((process (elpy-shell-get-or-create-process)))
+    (pyvenv-activate "/Users/jukka/nitor-src/dna/monokkeli/monokkeli-backend/src/lambda_functions/venv39")
+    (python-shell-send-file "/Users/jukka/nitor-src/dna/monokkeli/monokkeli-backend/src/set_static_environment.py"
+                            process)
+    ;; (python-shell-send-file "/Users/jukka/nitor-src/dna/monokkeli/monokkeli-backend/temp/set_aws_keys.py"
+    ;;                         process)
+    ))
+
+(define-key elpy-mode-map (kbd "C-c s") 'juvi-restart-python)
+(define-key elpy-mode-map (kbd "C-c C-p") 'elpy-shell-send-statement)
+
+(defun juvi-run-python-unittests ()
+  (interactive)
+  (save-buffer)
+  (juvi-restart-python)
+  (elpy-shell-send-buffer)
+  (python-shell-send-string "unittest.main()"))
+
+(define-key elpy-mode-map (kbd "C-o C-t C-t") 'juvi-run-python-unittests)
+
+(defun juvi-mark-python-region-for-eval ()
+  (interactive)
+  (setq juvi-marked-python-code (buffer-substring (region-beginning) (region-end)))
+  (message "marked python code for eval"))
+
+(define-key elpy-mode-map (kbd "C-M-o C-M-e") 'juvi-mark-python-region-for-eval)
+
+(defun juvi-send-marked-python-code ()
+  (interactive)
+  (python-shell-send-string juvi-marked-python-code))
+
+(define-key elpy-mode-map (kbd "C-M-o C-M-o") 'juvi-send-marked-python-code)
+
+(setq python-shell-completion-native-enable nil)
+
+(defun juvi-comment-line (n)
+  "Based on comment-line.
+
+Comment or uncomment current line and leave point after it.
+With positive prefix, apply to N lines including current one.
+With negative prefix, apply to -N lines above.  Also, further
+consecutive invocations of this command will inherit the negative
+argument.
+
+If region is active, comment lines in active region instead.
+Unlike `comment-dwim', this always comments whole lines."
+  (interactive "p")
+  (if (use-region-p)
+      (comment-or-uncomment-region
+       (save-excursion
+         (goto-char (region-beginning))
+         (line-beginning-position))
+       (save-excursion
+         (goto-char (region-end))
+         (line-end-position)))
+    (when (and (eq last-command 'comment-line-backward)
+               (natnump n))
+      (setq n (- n)))
+    (let ((range
+           (list (line-beginning-position)
+                 (goto-char (line-end-position n)))))
+      (comment-or-uncomment-region
+       (apply #'min range)
+       (apply #'max range)))
+    (unless (natnump n) (setq this-command 'comment-line-backward))))
+
+(define-key elpy-mode-map (kbd "C-o C-g") 'juvi-comment-line)
 
 ;; overtone
 
@@ -1151,3 +1231,13 @@
 (require-packages 'zettelkasten)
 
 (require-packages 'yasnippet)
+
+(defun juvi-set-java-17 ()
+  (interactive)
+  (setenv "JENV_VERSION" "17"))
+
+
+;; c
+
+(add-hook 'c-mode-hook 'irony-mode)
+(add-hook 'irony-mode-hook #'irony-eldoc)
