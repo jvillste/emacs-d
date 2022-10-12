@@ -1,4 +1,4 @@
-(load-file "~/.emacs.d/local.el")
+
 
 (package-initialize)
 
@@ -1144,13 +1144,10 @@
   (interactive)
   (if (python-shell-get-process)
       (elpy-shell-kill))
+  (pyvenv-activate "venv")
   (let ((process (elpy-shell-get-or-create-process)))
-    (pyvenv-activate "/Users/jukka/nitor-src/dna/monokkeli/monokkeli-backend/src/lambda_functions/venv39")
-    (python-shell-send-file "/Users/jukka/nitor-src/dna/monokkeli/monokkeli-backend/src/set_static_environment.py"
-                            process)
-    ;; (python-shell-send-file "/Users/jukka/nitor-src/dna/monokkeli/monokkeli-backend/temp/set_aws_keys.py"
-    ;;                         process)
-    ))
+    (python-shell-send-file "initialize_repl.py"
+                            process)))
 
 (define-key elpy-mode-map (kbd "C-c s") 'juvi-restart-python)
 (define-key elpy-mode-map (kbd "C-c C-p") 'elpy-shell-send-statement)
