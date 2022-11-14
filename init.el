@@ -1,5 +1,3 @@
-
-
 (package-initialize)
 
 (custom-set-variables
@@ -48,11 +46,12 @@
  '(ivy-use-virtual-buffers t)
  '(ivy-virtual-abbreviate 'full)
  '(js-indent-level 2)
+ '(lsp-keymap-prefix "M-l")
  '(mc/always-run-for-all t)
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
-   '(helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile git-gutter ggtags exec-path-from-shell edn company avy))
+   '(change-case quelpa python helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile ggtags exec-path-from-shell edn company avy))
  '(projectile-enable-caching nil)
  '(projectile-mode t nil (projectile))
  '(projectile-use-git-grep nil)
@@ -225,6 +224,38 @@
 
 
 (require-packages 'clojure-mode)
+
+;; clojure-lsp
+
+;; orignally from https://gist.github.com/borkdude/61d1532c57f9efdfd336a9ab6f468353
+;; also see https://youtu.be/WMnVv63ezFQ
+;; and https://emacs-lsp.github.io/lsp-mode/tutorials/clojure-guide/
+;; and https://clojure-lsp.github.io/clojure-lsp/clients/#emacs
+
+(require-packages 'lsp-mode)
+
+;; (add-hook 'clojure-mode-hook 'lsp)
+;; (add-hook 'clojurescript-mode-hook 'lsp)
+;; (add-hook 'clojurec-mode-hook 'lsp)
+
+(setq ;; lsp-keymap-prefix "M-l" ;; this is set through customize
+      lsp-lens-enable nil
+      gc-cons-threshold (* 100 1024 1024)
+      read-process-output-max (* 1024 1024)
+      treemacs-space-between-root-nodes nil
+      lsp-headerline-breadcrumb-enable nil
+      company-idle-delay 0.2
+      company-minimum-prefix-length 1
+      ;; lsp-lens-enable t
+      lsp-file-watch-threshold 10000
+      lsp-signature-auto-activate nil
+      lsp-clojure-custom-server-command '("/opt/homebrew/Cellar/clojure-lsp-native/2022.11.03-00.14.57/bin/clojure-lsp")
+      ;; clj-kondo is used directly
+      lsp-diagnostics-provider :none
+      lsp-enable-indentation nil ;; uncomment to use cider indentation instead of lsp
+      ;; lsp-enable-completion-at-point nil ;; uncomment to use cider completion instead of lsp
+)
+
 
 ;; paredit
 
@@ -628,7 +659,7 @@
 (defun juvi-insert-debug-prn ()
   (interactive)
   (save-excursion
-    (insert "(prn ) ;; TODO: remove-me\n"))
+    (insert "(prn ) ;; TODO: remove me\n"))
   (forward-char 5))
 
 (define-key clojure-mode-map (kbd "C-M-o C-M-p") 'juvi-insert-debug-prn)
@@ -636,7 +667,7 @@
 (defun juvi-insert-comment-block ()
   (interactive)
   (save-excursion
-    (insert "(comment\n  \n) ;; TODO: remove-me\n"))
+    (insert "(comment\n  \n) ;; TODO: remove me\n"))
   (forward-char 11)
   (indent-whole-sexp))
 
@@ -668,7 +699,7 @@
     (forward-sexp)
     (insert " ")
     (insert sexp)
-    (insert ")")))
+    (insert ") ;; TODO: remove me")))
 
 (define-key clojure-mode-map (kbd "C-M-o C-M-u") 'juvi-define-last-sexp)
 
@@ -948,7 +979,7 @@
 
 ;; c/++
 
-(require-packages 'ggtags)
+;; (require-packages 'ggtags)
 
 ;; whitespace
 
@@ -1140,16 +1171,29 @@
 ;; (add-hook 'elpy-mode-hook (lambda () (elpy-shell-toggle-dedicated-shell 1)))
 (setq elpy-shell-use-project-root nil)
 
+(defun juvi-initialize-python-repl ()
+  (interactive)
+  (python-shell-send-file "initializeRepl.py"))
+
 (defun juvi-restart-python ()
   (interactive)
   (if (python-shell-get-process)
       (elpy-shell-kill))
   (pyvenv-activate "venv")
-  (let ((process (elpy-shell-get-or-create-process)))
-    (python-shell-send-file "initialize_repl.py"
-                            process)))
+  (run-python)
+;;   (python-shell-send-string "print('moi')")
+;;   (python-shell-send-string "
+;; with open('initializeRepl.py','r') as file:
+;;     contents = file.read()
+;;     __PYTHON_EL_eval(contents, 'initializeRepl.py')
+;; ")
+;; (call-interactively #'juvi-initialize-python-repl)
+;;;  (call-interactively #'python-shell-send-file "initializeRepl.py")
+;;   (python-shell-send-file "initializeRepl.py")
+  )
 
 (define-key elpy-mode-map (kbd "C-c s") 'juvi-restart-python)
+(define-key elpy-mode-map (kbd "C-c C-s") 'juvi-initialize-python-repl)
 (define-key elpy-mode-map (kbd "C-c C-p") 'elpy-shell-send-statement)
 
 (defun juvi-run-python-unittests ()
@@ -1161,12 +1205,25 @@
 
 (define-key elpy-mode-map (kbd "C-o C-t C-t") 'juvi-run-python-unittests)
 
+(defun juvi-insert-debug-python-print ()
+  (interactive)
+  (insert "print(f'")
+  (yank)
+  (insert ": {")
+  (yank)
+  (insert "}') # TODO: remove-me\n"))
+
+(define-key elpy-mode-map (kbd "C-M-o C-M-p") 'juvi-insert-debug-python-print)
+
+
 (defun juvi-mark-python-region-for-eval ()
   (interactive)
   (setq juvi-marked-python-code (buffer-substring (region-beginning) (region-end)))
   (message "marked python code for eval"))
 
 (define-key elpy-mode-map (kbd "C-M-o C-M-e") 'juvi-mark-python-region-for-eval)
+
+(define-key elpy-mode-map (kbd "C-c C-k") 'python-shell-send-buffer)
 
 (defun juvi-send-marked-python-code ()
   (interactive)
@@ -1238,3 +1295,8 @@ Unlike `comment-dwim', this always comments whole lines."
 
 (add-hook 'c-mode-hook 'irony-mode)
 (add-hook 'irony-mode-hook #'irony-eldoc)
+
+
+(require 'quelpa)
+
+(quelpa '(change-case :fetcher git :url "git@gist.github.com:e8a10244aac6308de1323d1f6685658b.git"))
