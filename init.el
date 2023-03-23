@@ -51,8 +51,10 @@
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
-   '(change-case quelpa python helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile ggtags exec-path-from-shell edn company avy))
+   '(terraform-mode change-case quelpa python helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile ggtags exec-path-from-shell edn company avy))
  '(projectile-enable-caching nil)
+ '(projectile-globally-ignored-directories
+   '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "target"))
  '(projectile-mode t nil (projectile))
  '(projectile-use-git-grep nil)
  '(recentf-max-menu-items 100)
@@ -363,8 +365,6 @@
 
 (define-key cider-mode-map (kbd "C-c C-p") 'cider-pprint-eval-last-sexp)
 
-
-
 (defun remove-and-load-cider-buffer ()
   (interactive)
   (save-buffer)
@@ -459,7 +459,7 @@
 
 (defun make-save-and-eval-marked-sexp ()
   (interactive)
-  (init-el-cider-load-buffer)
+  ;; (init-el-cider-load-buffer)
   (make-eval-marked-sexp))
 
 (defun juvi-eval-marked-sexp-silently ()
@@ -1156,6 +1156,19 @@
   (cider-connect-clj '(:host "localhost"
                              :port 7888)))
 
+;; use this when developing build program with deps.edn and tools.build
+(defun juvi-use-build-clj-alias ()
+  (interactive)
+  (setq cider-clojure-cli-global-options "-A:build"))
+
+(defun juvi-use-dev-clj-alias ()
+  (interactive)
+  (setq cider-clojure-cli-global-options "-A:dev"))
+
+(defun juvi-clear-clj-options ()
+  (interactive)
+  (setq cider-clojure-cli-global-options ""))
+
 (define-key cider-mode-map (kbd "C-o c") 'juvi-connect-to-localhost)
 
 
@@ -1192,16 +1205,27 @@
 ;;   (python-shell-send-file "initializeRepl.py")
   )
 
+;; This does not work
+(defun juvi-restart-and-evaluate-python-buffer ()
+  (interactive)
+  (juvi-restart-python)
+  (juvi-initialize-python-repl)
+  (elpy-shell-send-buffer))
+
 (define-key elpy-mode-map (kbd "C-c s") 'juvi-restart-python)
 (define-key elpy-mode-map (kbd "C-c C-s") 'juvi-initialize-python-repl)
 (define-key elpy-mode-map (kbd "C-c C-p") 'elpy-shell-send-statement)
 
+;; (defun juvi-run-python-unittests ()
+;;   (interactive)
+;;   (save-buffer)
+;;   (juvi-restart-python)
+;;   (elpy-shell-send-buffer)
+;;   (python-shell-send-string "unittest.main()"))
+
 (defun juvi-run-python-unittests ()
   (interactive)
-  (save-buffer)
-  (juvi-restart-python)
-  (elpy-shell-send-buffer)
-  (python-shell-send-string "unittest.main()"))
+  (python-shell-send-string "unittest.main(exit=False)"))
 
 (define-key elpy-mode-map (kbd "C-o C-t C-t") 'juvi-run-python-unittests)
 
@@ -1300,3 +1324,30 @@ Unlike `comment-dwim', this always comments whole lines."
 (require 'quelpa)
 
 (quelpa '(change-case :fetcher git :url "git@gist.github.com:e8a10244aac6308de1323d1f6685658b.git"))
+
+;; emacs
+
+;; originally from https://stackoverflow.com/a/2417617
+(defun juvi-put-file-on-clipboard (include-path)
+  (let ((filename (if (equal major-mode 'dired-mode)
+                      default-directory
+                    (if include-path
+                        (buffer-file-name)
+                      (file-name-nondirectory (buffer-file-name))))))
+    (when filename
+      (with-temp-buffer
+        (insert filename)
+        (clipboard-kill-region (point-min) (point-max)))
+      (message filename))))
+
+(defun juvi-put-file-path-on-clipboard ()
+  "Put the current file name on the clipboard"
+  (interactive)
+  (juvi-put-file-on-clipboard t))
+
+(defun juvi-put-file-name-on-clipboard ()
+  "Put the current file path on the clipboard"
+  (interactive)
+  (juvi-put-file-on-clipboard nil))
+
+(setq-default frame-title-format '("%b"))
