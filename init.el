@@ -408,8 +408,13 @@
   (setq cider-ns-refresh-before-fn "dev/stop"
         cider-ns-refresh-after-fn "dev/start"))
 
-(setq cider-ns-refresh-before-fn "user/stop"
-      cider-ns-refresh-after-fn "user/start")
+(defun juvi-set-refresh-to-user ()
+  (interactive)
+  (setq cider-ns-refresh-before-fn "dev/stop"
+        cider-ns-refresh-after-fn "dev/start"))
+
+(setq cider-ns-refresh-before-fn "dev/stop"
+      cider-ns-refresh-after-fn "dev/start")
 
 (defun cider-pprint-start ()
   (interactive)
@@ -672,6 +677,13 @@
   (indent-whole-sexp))
 
 (define-key clojure-mode-map (kbd "C-M-o C-M-n") 'juvi-insert-comment-block)
+
+(defun juvi-insert-break-point ()
+  (interactive)
+  (insert "#break ")
+  (indent-whole-sexp))
+
+(define-key clojure-mode-map (kbd "C-o b") 'juvi-insert-break-point)
 
 (defun juvi-add-test ()
   (interactive)
@@ -1082,9 +1094,18 @@
   (interactive)
   (when (use-region-p)
     (delete-region (region-beginning) (region-end)))
-  (insert (format-time-string "%_Y-%_0e-%_0mT%_0H:%_0M:%0S" (current-time))))
+  (insert (format-time-string "%_Y-%_0m-%_0eT%_0H:%_0M:%0S" (current-time))))
 
 (global-set-key (kbd "M-k M-v") 'juvi-insert-current-date-time)
+
+
+(defun juvi-insert-current-date ()
+  (interactive)
+  (when (use-region-p)
+    (delete-region (region-beginning) (region-end)))
+  (insert (format-time-string "%-d.%-m." (current-time))))
+
+(global-set-key (kbd "C-o C-d") 'juvi-insert-current-date)
 
 (global-set-key (kbd "C-o M-j") (lambda ()
                                   (interactive)
