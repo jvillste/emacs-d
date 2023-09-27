@@ -79,7 +79,7 @@
  '(success ((((class color) (min-colors 89)) (:foreground "SeaGreen2"))))
  '(warning ((((class color) (min-colors 89)) (:foreground "Yellow"))))
  '(highlight-symbol-face ((t (:background "forest green" :foreground "gray100"))))
- '(default ((t (:background "#000000" :foreground "gray50"))))
+ '(default ((t (:background "#000000" :foreground "gray60"))))
  '(widget-field ((t (:extend t :background "#282828"))))
  '(clojure-keyword-face ((t (:inherit font-lock-constant-face)))))
 
