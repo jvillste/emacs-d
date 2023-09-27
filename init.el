@@ -29,7 +29,9 @@
      ("walk" . "clojure.walk")
      ("zip" . "clojure.zip")))
  '(cljr-warn-on-eval nil)
- '(custom-enabled-themes '(deeper-blue))
+ '(custom-enabled-themes '(juvi-deeper-blue))
+ '(custom-safe-themes
+   '("4e6439567a7d852cb5e4b916ec5f8d2567ac1b8f51bbe92bc75e1c47564fed54" "ff5e537e366db140285c24ca399abfe116379abfb83ce42fdd0844ace47d9d63" "d7ddab1ce8e1eac362036a647955790d897db221a8f18757415af4bcf934a76d" "c0579966a5f9f1d9f7d499f4869278073b913bcc12a98f4dce9b7590939d34fe" "f9a3cd3ecf80347e2716daf7f8f929adecd3efcafe660ae7785172d11b17fa49" "df3a0d74d0294a7a4fbb566975ab1659e8f75e2c020067c2a3becf0a5e4b1d84" "78459fbbfc2c176ca5c481e429598e2f1b644e5f2d610679d379d75ef3c0dc9a" "faeec12e44d84a02a578d16460e7b00d491fca28b109d6fc9301e6aa45145492" "6fac5cd7353e2ab050b80923147c4846afac198c6c757c9eaa5736a5d1e52218" "2d44815daa6caa2341cf1abae1713315e17b3eca394cbccb8ed5929022f30538" "48455a96d7234093c0b5a156f0dc9b8ceb6c8a99e32beca521395ff973828ad5" "24c251a53f48fc529805aa4d567d212a4837eba475ce22992e448b210f51867e" "7205b1e53c3255ee0da478ca2c51e4ddf30a71a659802e0dbfae8a83d8662703" "ec0a8caf37e3df9c0911ee8e83068dde5808270687751de995c17609150bf342" "f366d4bc6d14dcac2963d45df51956b2409a15b770ec2f6d730e73ce0ca5c8a7" default))
  '(ediff-merge-split-window-function 'split-window-horizontally)
  '(ediff-split-window-function 'split-window-horizontally)
  '(ediff-window-setup-function 'ediff-setup-windows-plain)
@@ -51,7 +53,7 @@
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
-   '(terraform-mode change-case quelpa python helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile ggtags exec-path-from-shell edn company avy))
+   '(zenburn-theme terraform-mode change-case quelpa python helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile ggtags exec-path-from-shell edn company avy))
  '(projectile-enable-caching nil)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "target"))
@@ -93,15 +95,15 @@
  '(whitespace-style
    '(face tabs trailing lines-tail space-before-tab empty space-after-tab tab-mark)))
 
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :background "black" :foreground "light gray" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 130 :width normal :foundry "nil" :family "Menlo"))))
- '(highlight-symbol-face ((t (:background "forest green" :foreground "gray100"))))
- '(minimap-font-face ((t (:height 20 :family "DejaVu Sans Mono"))))
- '(region ((t (:background "dark green")))))
+;; (custom-set-faces
+;;  ;; custom-set-faces was added by Custom.
+;;  ;; If you edit it by hand, you could mess it up, so be careful.
+;;  ;; Your init file should contain only one such instance.
+;;  ;; If there is more than one, they won't work right.
+;;  '(default ((t (:inherit nil :stipple nil :background "black" :foreground "light gray" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 130 :width normal :foundry "nil" :family "Menlo"))))
+;;  '(highlight-symbol-face ((t (:background "forest green" :foreground "gray100"))))
+;;  '(minimap-font-face ((t (:height 20 :family "DejaVu Sans Mono"))))
+;;  '(region ((t (:background "dark green")))))
 
 (require 'package)
 
@@ -630,6 +632,13 @@
                           (cider--nrepl-print-request-map fill-column))
   (message "evaluation output is now in the kill ring"))
 
+
+(defun juvi-last-sexp-indended-to-kill-ring ()
+  (interactive)
+  (message (cider-last-sexp)))
+
+(global-set-key (kbd "C-M-p") 'juvi-last-sexp-indended-to-kill-ring)
+
 (define-key cider-mode-map (kbd "C-o C-o") 'juvi-eval-last-sexp-output-to-kill-ring)
 
 (add-to-list 'load-path "~/.emacs.d/vendor/iedit/")
@@ -911,6 +920,8 @@
          (t
           (rename-file filename new-name t)
           (set-visited-file-name new-name t t)))))))
+
+(global-set-key (kbd "M-o M-r") 'rename-file-and-buffer)
 
 ;; mark-sexp
 (define-key markdown-mode-map (kbd "C-M-m") nil)
@@ -1372,3 +1383,9 @@ Unlike `comment-dwim', this always comments whole lines."
   (juvi-put-file-on-clipboard nil))
 
 (setq-default frame-title-format '("%b"))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(highlight-symbol-face ((t (:background "dark cyan")))))
