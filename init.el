@@ -31,7 +31,7 @@
  '(cljr-warn-on-eval nil)
  '(custom-enabled-themes '(juvi-deeper-blue))
  '(custom-safe-themes
-   '("e1c652f78f723bee2c626d6b11444b9e064ab6fe941306ee72a7a1ff8c2762dc" "4e6439567a7d852cb5e4b916ec5f8d2567ac1b8f51bbe92bc75e1c47564fed54" "ff5e537e366db140285c24ca399abfe116379abfb83ce42fdd0844ace47d9d63" "d7ddab1ce8e1eac362036a647955790d897db221a8f18757415af4bcf934a76d" "c0579966a5f9f1d9f7d499f4869278073b913bcc12a98f4dce9b7590939d34fe" "f9a3cd3ecf80347e2716daf7f8f929adecd3efcafe660ae7785172d11b17fa49" "df3a0d74d0294a7a4fbb566975ab1659e8f75e2c020067c2a3becf0a5e4b1d84" "78459fbbfc2c176ca5c481e429598e2f1b644e5f2d610679d379d75ef3c0dc9a" "faeec12e44d84a02a578d16460e7b00d491fca28b109d6fc9301e6aa45145492" "6fac5cd7353e2ab050b80923147c4846afac198c6c757c9eaa5736a5d1e52218" "2d44815daa6caa2341cf1abae1713315e17b3eca394cbccb8ed5929022f30538" "48455a96d7234093c0b5a156f0dc9b8ceb6c8a99e32beca521395ff973828ad5" "24c251a53f48fc529805aa4d567d212a4837eba475ce22992e448b210f51867e" "7205b1e53c3255ee0da478ca2c51e4ddf30a71a659802e0dbfae8a83d8662703" "ec0a8caf37e3df9c0911ee8e83068dde5808270687751de995c17609150bf342" "f366d4bc6d14dcac2963d45df51956b2409a15b770ec2f6d730e73ce0ca5c8a7" default))
+   '("5252c9e5f25ccb15ba0e2c6890770534499f430c202588d6adb82739de5a2f15" "64510b8379398428665d62469a65f1f26a143f50bdfd75aa08ab82c58666a16a" "b32cf217327b6b6b2c4fc7e917fb04626a1a081c164059c58f81447639085c6f" "1ff292adb82d413c3b540f1936df0a6ec953f1e9b53a0e1b1331c626b288a80f" "e1c652f78f723bee2c626d6b11444b9e064ab6fe941306ee72a7a1ff8c2762dc" "4e6439567a7d852cb5e4b916ec5f8d2567ac1b8f51bbe92bc75e1c47564fed54" "ff5e537e366db140285c24ca399abfe116379abfb83ce42fdd0844ace47d9d63" "d7ddab1ce8e1eac362036a647955790d897db221a8f18757415af4bcf934a76d" "c0579966a5f9f1d9f7d499f4869278073b913bcc12a98f4dce9b7590939d34fe" "f9a3cd3ecf80347e2716daf7f8f929adecd3efcafe660ae7785172d11b17fa49" "df3a0d74d0294a7a4fbb566975ab1659e8f75e2c020067c2a3becf0a5e4b1d84" "78459fbbfc2c176ca5c481e429598e2f1b644e5f2d610679d379d75ef3c0dc9a" "faeec12e44d84a02a578d16460e7b00d491fca28b109d6fc9301e6aa45145492" "6fac5cd7353e2ab050b80923147c4846afac198c6c757c9eaa5736a5d1e52218" "2d44815daa6caa2341cf1abae1713315e17b3eca394cbccb8ed5929022f30538" "48455a96d7234093c0b5a156f0dc9b8ceb6c8a99e32beca521395ff973828ad5" "24c251a53f48fc529805aa4d567d212a4837eba475ce22992e448b210f51867e" "7205b1e53c3255ee0da478ca2c51e4ddf30a71a659802e0dbfae8a83d8662703" "ec0a8caf37e3df9c0911ee8e83068dde5808270687751de995c17609150bf342" "f366d4bc6d14dcac2963d45df51956b2409a15b770ec2f6d730e73ce0ca5c8a7" default))
  '(ediff-merge-split-window-function 'split-window-horizontally)
  '(ediff-split-window-function 'split-window-horizontally)
  '(ediff-window-setup-function 'ediff-setup-windows-plain)
@@ -176,6 +176,12 @@
           (lambda ()
             (visual-line-mode)))
 
+(defhydra juvi-move-markdown-list-item (markdown-mode-map "C-c l")
+  "move list item"
+  ("p" markdown-move-list-item-up "list item up")
+  ("n" markdown-move-list-item-down "list item down")
+  ("b" markdown-promote-list-item "promote list item")
+  ("f" markdown-demote-list-item "demote list item"))
 
 ;; (require-packages 'helm)
 ;; (require-packages 'wgrep-helm)
@@ -243,22 +249,22 @@
 ;; (add-hook 'clojurec-mode-hook 'lsp)
 
 (setq ;; lsp-keymap-prefix "M-l" ;; this is set through customize
-      lsp-lens-enable nil
-      gc-cons-threshold (* 100 1024 1024)
-      read-process-output-max (* 1024 1024)
-      treemacs-space-between-root-nodes nil
-      lsp-headerline-breadcrumb-enable nil
-      company-idle-delay 0.2
-      company-minimum-prefix-length 1
-      ;; lsp-lens-enable t
-      lsp-file-watch-threshold 10000
-      lsp-signature-auto-activate nil
-      lsp-clojure-custom-server-command '("/opt/homebrew/Cellar/clojure-lsp-native/2022.11.03-00.14.57/bin/clojure-lsp")
-      ;; clj-kondo is used directly
-      lsp-diagnostics-provider :none
-      lsp-enable-indentation nil ;; uncomment to use cider indentation instead of lsp
-      ;; lsp-enable-completion-at-point nil ;; uncomment to use cider completion instead of lsp
-)
+ lsp-lens-enable nil
+ gc-cons-threshold (* 100 1024 1024)
+ read-process-output-max (* 1024 1024)
+ treemacs-space-between-root-nodes nil
+ lsp-headerline-breadcrumb-enable nil
+ company-idle-delay 0.2
+ company-minimum-prefix-length 1
+ ;; lsp-lens-enable t
+ lsp-file-watch-threshold 10000
+ lsp-signature-auto-activate nil
+ lsp-clojure-custom-server-command '("/opt/homebrew/Cellar/clojure-lsp-native/2022.11.03-00.14.57/bin/clojure-lsp")
+ ;; clj-kondo is used directly
+ lsp-diagnostics-provider :none
+ lsp-enable-indentation nil ;; uncomment to use cider indentation instead of lsp
+ ;; lsp-enable-completion-at-point nil ;; uncomment to use cider completion instead of lsp
+ )
 
 
 ;; paredit
@@ -412,8 +418,8 @@
 
 (defun juvi-set-refresh-to-user ()
   (interactive)
-  (setq cider-ns-refresh-before-fn "dev/stop"
-        cider-ns-refresh-after-fn "dev/start"))
+  (setq cider-ns-refresh-before-fn "userstop"
+        cider-ns-refresh-after-fn "user/start"))
 
 (setq cider-ns-refresh-before-fn "dev/stop"
       cider-ns-refresh-after-fn "dev/start")
@@ -724,6 +730,21 @@
 
 (define-key clojure-mode-map (kbd "C-M-o C-M-u") 'juvi-define-last-sexp)
 
+(defun juvi-define-vars-for-symbols-in-a-vector-in-the-kill-ring ()
+  (interactive)
+  (dolist (symbol (split-string (substring (first kill-ring)
+                                           1
+                                           -1)
+                                "\s+"))
+    (insert "(def " symbol " " symbol ") ;; TODO: remove me\n"))
+
+  (save-excursion
+    (beginning-of-defun)
+    (indent-sexp)))
+
+(define-key clojure-mode-map (kbd "S-C-M-o S-C-M-u") 'juvi-define-vars-for-symbols-in-a-vector-in-the-kill-ring)
+
+
 (defun juvi-duplicate-quoted ()
   (interactive)
   (let  ((sexp (cider-last-sexp)))
@@ -929,11 +950,18 @@
 
 ;; kill spaces
 
-(defun kill-spaces ()
+(defun kill-spaces-except-one ()
   (interactive)
   (just-one-space -1))
 
-(global-set-key (kbd "C-M-k") 'kill-spaces)
+(global-set-key (kbd "C-M-k") 'kill-spaces-except-one)
+
+(defun kill-all-spaces ()
+  (interactive)
+  (just-one-space -1)
+  (delete-backward-char 1))
+
+(global-set-key (kbd "C-S-M-k") 'kill-all-spaces)
 
 (defun juvi-just-one-space-in-region (beg end)
   "replace all whitespace in the region with single spaces"
@@ -1226,15 +1254,15 @@
       (elpy-shell-kill))
   (pyvenv-activate "venv")
   (run-python)
-;;   (python-shell-send-string "print('moi')")
-;;   (python-shell-send-string "
-;; with open('initializeRepl.py','r') as file:
-;;     contents = file.read()
-;;     __PYTHON_EL_eval(contents, 'initializeRepl.py')
-;; ")
-;; (call-interactively #'juvi-initialize-python-repl)
+  ;;   (python-shell-send-string "print('moi')")
+  ;;   (python-shell-send-string "
+  ;; with open('initializeRepl.py','r') as file:
+  ;;     contents = file.read()
+  ;;     __PYTHON_EL_eval(contents, 'initializeRepl.py')
+  ;; ")
+  ;; (call-interactively #'juvi-initialize-python-repl)
 ;;;  (call-interactively #'python-shell-send-file "initializeRepl.py")
-;;   (python-shell-send-file "initializeRepl.py")
+  ;;   (python-shell-send-file "initializeRepl.py")
   )
 
 ;; This does not work
@@ -1389,3 +1417,25 @@ Unlike `comment-dwim', this always comments whole lines."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(highlight-symbol-face ((t (:background "dark cyan")))))
+
+(defun juvi-format-region-to-clipboard (mode)
+  (let ((formatted-buffer (get-buffer-create "formatted-region"))
+        (code-to-be-formatted (buffer-substring (mark) (point))))
+    (set-buffer formatted-buffer)
+    (funcall mode)
+    (erase-buffer)
+    (insert code-to-be-formatted)
+    (indent-region (point-min) (point-max) nil)
+    (clipboard-kill-ring-save (point-min) (point-max))))
+
+(defun juvi-format-clojure-region-to-clipboard ()
+  (interactive)
+  (juvi-format-region-to-clipboard 'clojure-mode))
+
+(define-key cider-mode-map (kbd "C-M-w") 'juvi-format-clojure-region-to-clipboard)
+
+(defun juvi-format-python-region-to-clipboard ()
+  (interactive)
+  (juvi-format-region-to-clipboard 'python-mode))
+
+(define-key python-mode-map (kbd "C-M-w") 'juvi-format-python-region-to-clipboard)
