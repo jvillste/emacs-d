@@ -53,7 +53,7 @@
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
-   '(zenburn-theme terraform-mode change-case quelpa python helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile ggtags exec-path-from-shell edn company avy))
+   '(typescript-mode wgsl-mode zenburn-theme terraform-mode change-case quelpa python helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile ggtags exec-path-from-shell edn company avy))
  '(projectile-enable-caching nil)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "target"))
@@ -148,7 +148,7 @@
 
 ;;(require 'cider-macroexpansion)
 
-
+(setq cider-dynamic-indentation nil)
 
 (define-key cider-mode-map (kbd "C-c C-i") 'cider-pprint-eval-last-sexp-to-comment)
 
@@ -291,6 +291,7 @@
 
 ;; (add-hook 'web-mode-hook 'my-paredit-nonlisp)
 
+(define-key paredit-mode-map (kbd "M-d") 'paredit-backward-delete)
 
 ;; Copy PATH from the environment to emacs
 (require-packages 'exec-path-from-shell)
@@ -513,10 +514,10 @@
 
 (define-key cider-mode-map (kbd "M-.") 'cider-find-var)
 
-(defun juvi-pprint-sample ()
-  (interactive)
-  (cider--pprint-eval-form (concat "@dev/sample-atom")))
-(define-key cider-mode-map (kbd "C-o C-d") 'juvi-pprint-sample)
+;; (defun juvi-pprint-sample ()
+;;   (interactive)
+;;   (cider--pprint-eval-form (concat "@dev/sample-atom")))
+;; (define-key cider-mode-map (kbd "C-o C-d") 'juvi-pprint-sample)
 
 (defun initel-eval-last-sexp ()
   (interactive)
@@ -588,6 +589,47 @@
 (defun indend-in-kill-ring ()
   (interactive)
   (cider-popup-buffer cider-result-buffer nil 'clojure-mode 'ancillary))
+
+(defun juvi-indent-whole-sexp ()
+  (interactive)
+  (save-excursion
+    (beginning-of-defun)
+    (indent-sexp)))
+
+(define-key clojure-mode-map (kbd "C-c n") 'juvi-indent-whole-sexp)
+
+(defun juvi-require-sc-api ()
+  (interactive)
+  (cider-interactive-eval "(require 'sc.api)"))
+
+(define-key cider-mode-map (kbd "C-q C-q") 'juvi-require-sc-api)
+
+(defun juvi-define-local-variables-of-most-recent-execution-point ()
+  (interactive)
+  (cider-interactive-eval "
+(let [ep-id (apply max (keys (:execution-points @sc.impl.db/db)))]
+    (doseq [local-name (:sc.cs/local-names (sc.impl/resolve-code-site ep-id))]
+      (println \"defining \" local-name)
+      (intern *ns* local-name (sc.impl/ep-binding ep-id local-name))))"))
+
+(define-key cider-mode-map (kbd "C-q C-w") 'juvi-define-local-variables-of-most-recent-execution-point)
+
+(defun juvi-add-spy ()
+  (interactive)
+  (insert "(sc.api/spy )")
+  (backward-char)
+  (paredit-forward-slurp-sexp)
+  (juvi-indent-whole-sexp))
+
+(define-key cider-mode-map (kbd "C-q C-r") 'juvi-add-spy)
+
+(defun juvi-remove-spy ()
+  (interactive)
+  (paredit-forward-barf-sexp)
+  (backward-kill-sexp)
+  (juvi-indent-whole-sexp))
+
+(define-key cider-mode-map (kbd "C-q C-e") 'juvi-remove-spy)
 
 (defun juvi-eval-last-sexp-to-kill-ring ()
   (interactive)
@@ -669,6 +711,13 @@
   ("n" highlight-symbol-next "next")
   ("p" highlight-symbol-prev "previous"))
 
+(defun indent-buffer ()
+  (interactive)
+  (save-excursion
+    (indent-region (point-min) (point-max) nil)))
+
+(global-set-key (kbd "C-c b") 'indent-buffer)
+
 (defun insert-current-date-time ()
   (interactive)
   (when (use-region-p)
@@ -689,14 +738,14 @@
   (save-excursion
     (insert "(comment\n  \n) ;; TODO: remove me\n"))
   (forward-char 11)
-  (indent-whole-sexp))
+  (juvi-indent-whole-sexp))
 
 (define-key clojure-mode-map (kbd "C-M-o C-M-n") 'juvi-insert-comment-block)
 
 (defun juvi-insert-break-point ()
   (interactive)
   (insert "#break ")
-  (indent-whole-sexp))
+  (juvi-indent-whole-sexp))
 
 (define-key clojure-mode-map (kbd "C-o b") 'juvi-insert-break-point)
 
@@ -738,9 +787,7 @@
                                 "\s+"))
     (insert "(def " symbol " " symbol ") ;; TODO: remove me\n"))
 
-  (save-excursion
-    (beginning-of-defun)
-    (indent-sexp)))
+  (juvi-indent-whole-sexp))
 
 (define-key clojure-mode-map (kbd "S-C-M-o S-C-M-u") 'juvi-define-vars-for-symbols-in-a-vector-in-the-kill-ring)
 
@@ -780,20 +827,6 @@
 ;; hide tool bar
 (tool-bar-mode -1)
 
-(defun indent-buffer ()
-  (interactive)
-  (save-excursion
-    (indent-region (point-min) (point-max) nil)))
-(global-set-key (kbd "C-c b") 'indent-buffer)
-
-
-(defun indent-whole-sexp ()
-  (interactive)
-  (save-excursion
-    (beginning-of-defun)
-    (indent-sexp)))
-
-(define-key clojure-mode-map (kbd "C-c n") 'indent-whole-sexp)
 
 (define-key clojure-mode-map (kbd "M-q") 'lisp-fill-paragraph)
 
@@ -1350,6 +1383,9 @@ Unlike `comment-dwim', this always comments whole lines."
 
 (define-key elpy-mode-map (kbd "C-o C-g") 'juvi-comment-line)
 
+
+(define-key elpy-mode-map (kbd "C-x C-e") 'python-shell-send-statement)
+
 ;; overtone
 
 
@@ -1439,3 +1475,6 @@ Unlike `comment-dwim', this always comments whole lines."
   (juvi-format-region-to-clipboard 'python-mode))
 
 (define-key python-mode-map (kbd "C-M-w") 'juvi-format-python-region-to-clipboard)
+
+
+(global-set-key (kbd "C-x C-l") 'balance-windows)
