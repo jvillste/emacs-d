@@ -53,11 +53,13 @@
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
-   '(typescript-mode wgsl-mode zenburn-theme terraform-mode change-case quelpa python helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile ggtags exec-path-from-shell edn company avy))
+   '(yaml-mode typescript-mode wgsl-mode zenburn-theme terraform-mode change-case quelpa python helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile ggtags exec-path-from-shell edn company avy))
  '(projectile-enable-caching nil)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "target"))
  '(projectile-mode t nil (projectile))
+ '(projectile-project-root-files-bottom-up
+   '(".projectile" "build.sh" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs"))
  '(projectile-use-git-grep nil)
  '(recentf-max-menu-items 100)
  '(recentf-max-saved-items 10000)
@@ -408,7 +410,8 @@
 (defun init-el-refresh ()
   (interactive)
   (save-buffer)
-  (cider-ns-refresh))
+  (cider-ns-refresh 'refresh-all ;;'clear
+                    ))
 
 (define-key cider-mode-map (kbd "C-o C-r") 'init-el-refresh)
 
@@ -424,6 +427,11 @@
 
 (setq cider-ns-refresh-before-fn "dev/stop"
       cider-ns-refresh-after-fn "dev/start")
+
+(defun juvi-unset-refresh ()
+  (interactive)
+  (setq cider-ns-refresh-before-fn nil
+        cider-ns-refresh-after-fn nil))
 
 (defun cider-pprint-start ()
   (interactive)
@@ -630,6 +638,20 @@
   (juvi-indent-whole-sexp))
 
 (define-key cider-mode-map (kbd "C-q C-e") 'juvi-remove-spy)
+
+(defun juvi-define-def-locals ()
+  (interactive)
+  (cider-interactive-eval "(defmacro def-locals []
+  `(do ~@(for [local-variable (map symbol (map name (keys &env)))]
+           `(def ~local-variable ~local-variable))))"))
+
+(define-key cider-mode-map (kbd "C-q C-d") 'juvi-define-def-locals)
+
+(defun juvi-insert-def-locals ()
+  (interactive)
+  (insert "(def-locals)"))
+
+(define-key cider-mode-map (kbd "C-q C-f") 'juvi-insert-def-locals)
 
 (defun juvi-eval-last-sexp-to-kill-ring ()
   (interactive)
@@ -1194,11 +1216,23 @@
 (rg-define-search juvi-rg-project
   "Run ripgrep in current project searching for literal in all files."
   :dir project
-  :files "all"
+  :files "everything"
   :format literal
   :flags '("--context 1"))
 
 (global-set-key (kbd "C-o C-z") 'juvi-rg-project)
+
+(rg-define-search juvi-rg-parent-project
+  "Run ripgrep in current projects parent project searching for literal in all files."
+  :dir (file-name-concat (projectile-project-root) "../")
+  :files "everything"
+  :format literal
+  :flags '("--context 1"))
+
+(global-set-key (kbd "C-o M-z") 'juvi-rg-parent-project)
+
+(global-set-key (kbd "C-c M-s") #'rg-menu)
+(define-key cider-mode-map (kbd "C-c M-s") #'rg-menu)
 
 ;; (setq debug-on-error t)
 
@@ -1478,3 +1512,5 @@ Unlike `comment-dwim', this always comments whole lines."
 
 
 (global-set-key (kbd "C-x C-l") 'balance-windows)
+
+(global-hl-line-mode)
