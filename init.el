@@ -641,7 +641,7 @@
 
 (defun juvi-define-def-locals ()
   (interactive)
-  (cider-interactive-eval "(defmacro def-locals []
+  (insert "(defmacro def-locals [] ;; TODO: remove me
   `(do ~@(for [local-variable (map symbol (map name (keys &env)))]
            `(def ~local-variable ~local-variable))))"))
 
@@ -649,7 +649,12 @@
 
 (defun juvi-insert-def-locals ()
   (interactive)
-  (insert "(def-locals)"))
+
+  (cider-interactive-eval "(defmacro def-locals []
+                            `(do ~@(for [local-variable (map symbol (map name (keys &env)))]
+                                     `(def ~local-variable ~local-variable))))")
+
+  (insert "(def-locals) ;; TODO: remove me"))
 
 (define-key cider-mode-map (kbd "C-q C-f") 'juvi-insert-def-locals)
 
