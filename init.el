@@ -14,10 +14,17 @@
  '(beacon-color "Emacs")
  '(beacon-mode t)
  '(beacon-size 140)
+ '(cider-auto-select-error-buffer nil)
+ '(cider-dynamic-indentation nil)
+ '(cider-enhanced-cljs-completion-p nil)
+ '(cider-interactive-eval-output-destination 'repl-buffer)
+ '(cider-ns-refresh-after-fn "dev/start")
+ '(cider-ns-refresh-before-fn "dev/stop")
  '(cider-ns-refresh-show-log-buffer nil)
  '(cider-output-std-streams-to-popup t)
  '(cider-refresh-show-log-buffer nil)
  '(cider-repl-print-length 1000)
+ '(cider-save-file-on-load t)
  '(cider-save-files-on-cider-refresh t)
  '(cider-test-defining-forms '("deftest" "defspec" "with-test"))
  '(cljr-auto-clean-ns nil)
@@ -48,12 +55,11 @@
  '(ivy-use-virtual-buffers t)
  '(ivy-virtual-abbreviate 'full)
  '(js-indent-level 2)
- '(lsp-keymap-prefix "M-l")
  '(mc/always-run-for-all t)
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
-   '(yaml-mode typescript-mode wgsl-mode zenburn-theme terraform-mode change-case quelpa python helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel clj-refactor ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion clojure-mode epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile ggtags exec-path-from-shell edn company avy))
+   '(yaml-mode typescript-mode wgsl-mode zenburn-theme terraform-mode change-case quelpa python helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile ggtags exec-path-from-shell edn company avy))
  '(projectile-enable-caching nil)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "target"))
@@ -141,7 +147,7 @@
 
 
 ;; cider is loaded as a git submodule to get a stable version
-(add-to-list 'load-path "~/.emacs.d/vendor/cider/")
+;; (add-to-list 'load-path "~/.emacs.d/vendor/cider/")
 (require-packages 'parseedn 'cider)
 ;; (require 'cider)
 ;; (require 'cider-ns)
@@ -244,29 +250,29 @@
 ;; and https://emacs-lsp.github.io/lsp-mode/tutorials/clojure-guide/
 ;; and https://clojure-lsp.github.io/clojure-lsp/clients/#emacs
 
-(require-packages 'lsp-mode)
+;; (require-packages 'lsp-mode)
 
 ;; (add-hook 'clojure-mode-hook 'lsp)
 ;; (add-hook 'clojurescript-mode-hook 'lsp)
 ;; (add-hook 'clojurec-mode-hook 'lsp)
 
-(setq ;; lsp-keymap-prefix "M-l" ;; this is set through customize
- lsp-lens-enable nil
- gc-cons-threshold (* 100 1024 1024)
- read-process-output-max (* 1024 1024)
- treemacs-space-between-root-nodes nil
- lsp-headerline-breadcrumb-enable nil
- company-idle-delay 0.2
- company-minimum-prefix-length 1
- ;; lsp-lens-enable t
- lsp-file-watch-threshold 10000
- lsp-signature-auto-activate nil
- lsp-clojure-custom-server-command '("/opt/homebrew/Cellar/clojure-lsp-native/2022.11.03-00.14.57/bin/clojure-lsp")
- ;; clj-kondo is used directly
- lsp-diagnostics-provider :none
- lsp-enable-indentation nil ;; uncomment to use cider indentation instead of lsp
- ;; lsp-enable-completion-at-point nil ;; uncomment to use cider completion instead of lsp
- )
+;; (setq ;; lsp-keymap-prefix "M-l" ;; this is set through customize
+;;  lsp-lens-enable nil
+;;  gc-cons-threshold (* 100 1024 1024)
+;;  read-process-output-max (* 1024 1024)
+;;  treemacs-space-between-root-nodes nil
+;;  lsp-headerline-breadcrumb-enable nil
+;;  company-idle-delay 0.2
+;;  company-minimum-prefix-length 1
+;;  ;; lsp-lens-enable t
+;;  lsp-file-watch-threshold 10000
+;;  lsp-signature-auto-activate nil
+;;  lsp-clojure-custom-server-command '("/opt/homebrew/Cellar/clojure-lsp-native/2022.11.03-00.14.57/bin/clojure-lsp")
+;;  ;; clj-kondo is used directly
+;;  lsp-diagnostics-provider :none
+;;  lsp-enable-indentation nil ;; uncomment to use cider indentation instead of lsp
+;;  ;; lsp-enable-completion-at-point nil ;; uncomment to use cider completion instead of lsp
+;;  )
 
 
 ;; paredit
@@ -324,14 +330,14 @@
 ;; (require 'clj-refactor)
 
 (add-to-list 'package-pinned-packages '(clj-refactor . "melpa-stable") t)
-(require-packages 'clj-refactor)
+;; (require-packages 'clj-refactor)
 
 
-(add-hook 'clojure-mode-hook
-          (lambda ()
-            (clj-refactor-mode 1)
-            ;;  (yas-minor-mode 1) ; for adding require/use/import
-            (cljr-add-keybindings-with-prefix "C-o RET")))
+;; (add-hook 'clojure-mode-hook
+;;           (lambda ()
+;;             (clj-refactor-mode 1)
+;;             ;;  (yas-minor-mode 1) ; for adding require/use/import
+;;             (cljr-add-keybindings-with-prefix "C-o RET")))
 
 
 (require-packages 'recentf)
@@ -362,19 +368,17 @@
 
 (define-key cider-mode-map (kbd "C-c s") 'sesman-restart)
 
-(defun init-el-cider-load-buffer ()
-  (interactive)
-  (save-buffer)
-  ;;  (cider-interactive-eval (concat "(let [ns '" (cider-current-ns) "] (doseq [alias (keys (ns-aliases ns))] (ns-unalias ns alias)))"))
-  (cider-load-buffer))
+;; (defun init-el-cider-load-buffer ()
+;;   (interactive)
+;;   (save-buffer)
+;;   ;;  (cider-interactive-eval (concat "(let [ns '" (cider-current-ns) "] (doseq [alias (keys (ns-aliases ns))] (ns-unalias ns alias)))"))
+;;   (cider-load-buffer))
 
-(define-key cider-mode-map (kbd "C-c C-k") 'init-el-cider-load-buffer)
-(define-key clojure-mode-map (kbd "C-c C-k") 'init-el-cider-load-buffer)
+(define-key cider-mode-map (kbd "C-c C-k") 'cider-load-buffer)
+(define-key clojure-mode-map (kbd "C-c C-k") 'cider-load-buffer)
 
 (global-set-key (kbd "C-o C-c") 'comment-region)
 (global-set-key (kbd "C-o C-u") 'uncomment-region)
-
-(define-key cider-mode-map (kbd "C-c C-p") 'cider-pprint-eval-last-sexp)
 
 (defun remove-and-load-cider-buffer ()
   (interactive)
@@ -410,7 +414,7 @@
 (defun init-el-refresh ()
   (interactive)
   (save-buffer)
-  (cider-ns-refresh 'refresh-all ;;'clear
+  (cider-ns-refresh ;; 'refresh-all ;;'clear
                     ))
 
 (define-key cider-mode-map (kbd "C-o C-r") 'init-el-refresh)
@@ -441,9 +445,25 @@
                     (cider-current-ns))))
     (message "using start-ns '%s'" start-ns)
     (cider--pprint-eval-form (concat "(" start-ns "/start)"))))
-;; (define-key cider-mode-map (kbd "C-o C-p") 'cider-pprint-start)
 
-;; (define-key cider-mode-map (kbd "C-o C-p") 'cider-pprint-eval-defun-at-point)
+(defun juvi-pprint-eval-to-result-buffer (form)
+  (cider-interactive-eval form
+                          (nrepl-make-response-handler (cider-popup-buffer cider-result-buffer nil 'clojure-mode 'ancillary)
+                                                       (lambda (buffer value)
+                                                         (cider-emit-into-popup-buffer buffer value))
+                                                       (lambda (buffer out)
+                                                         (cider-emit-into-popup-buffer buffer out))
+                                                       (lambda (buffer err)
+                                                         (cider-emit-into-popup-buffer buffer err))
+                                                       '())
+                          nil
+                          (cider--nrepl-print-request-map fill-column)))
+
+(defun juvi-pprint-eval-last-sexp-to-result-buffer ()
+  (interactive)
+  (juvi-pprint-eval-to-result-buffer (cider-last-sexp)))
+
+(define-key cider-mode-map (kbd "C-c C-p") 'juvi-pprint-eval-last-sexp-to-result-buffer)
 
 (defun juvi-mark-function-for-eval ()
   (interactive)
@@ -456,63 +476,81 @@
 (defun juvi-eval-marked-function ()
   (interactive)
   (init-el-cider-load-buffer)
-  (cider--pprint-eval-form (concat "(" juvi-marked-ns "/" juvi-marked-function ")")))
+  (juvi-pprint-eval-to-result-buffer (concat "(" juvi-marked-ns "/" juvi-marked-function ")")))
 
-(define-key cider-mode-map (kbd "C-o M-i") 'juvi-eval-marked-function)
+(define-key cider-mode-map (kbd "C-M-o C-M-i") 'juvi-eval-marked-function)
 
 (defun juvi-eval-function-at-point ()
   (interactive)
-  (cider--pprint-eval-form (concat "(" (cider-current-ns) "/" (cider-last-sexp) ")")))
+  (juvi-pprint-eval-to-result-buffer (concat "(" (cider-current-ns) "/" (cider-last-sexp) ")")))
 
-(define-key cider-mode-map (kbd "M-o M-i") 'juvi-eval-function-at-point)
+(define-key cider-mode-map (kbd "M-O M-I") 'juvi-eval-function-at-point)
 
-(defun make-mark-sexp-for-eval ()
+(defun juvi-mark-sexp-for-eval ()
   (interactive)
-  (setq make-marked-buffer (current-buffer))
-  (setq make-marked-sexp (cider-last-sexp)))
+  (setq juvi-marked-buffer (current-buffer))
+  (setq juvi-marked-sexp (cider-last-sexp)))
 
-(defun make-eval-marked-sexp ()
+(define-key cider-mode-map (kbd "C-o C-e") 'juvi-mark-sexp-for-eval)
+
+(defun juvi-eval-marked-sexp ()
   (interactive)
-  (if (and make-marked-buffer make-marked-sexp)
-      (with-current-buffer make-marked-buffer
+  (if (and juvi-marked-buffer juvi-marked-sexp)
+      (with-current-buffer juvi-marked-buffer
         (save-excursion
-          (cider--pprint-eval-form make-marked-sexp)))
-    (message "First mark sexp with `make-mark-sexp-for-eval`" 'font-lock-warning-face)))
+          (juvi-pprint-eval-to-result-buffer juvi-marked-sexp)))
+    (message "First mark sexp with `juvi-mark-sexp-for-eval`" 'font-lock-warning-face)))
 
-(defun make-save-and-eval-marked-sexp ()
-  (interactive)
-  ;; (init-el-cider-load-buffer)
-  (make-eval-marked-sexp))
+(define-key cider-mode-map (kbd "C-o C-i") 'juvi-eval-marked-sexp)
 
 (defun juvi-eval-marked-sexp-silently ()
   (interactive)
-  (with-current-buffer make-marked-buffer
-    (cider-interactive-eval make-marked-sexp
-                            (nrepl-make-response-handler make-marked-buffer
+  (with-current-buffer juvi-marked-buffer
+    (cider-interactive-eval juvi-marked-sexp
+                            (nrepl-make-response-handler juvi-marked-buffer
                                                          (lambda (buffer value))
                                                          (lambda (_buffer out))
                                                          (lambda (_buffer err))
                                                          nil)))
   (message "Ran marked sexp."))
 
-(define-key cider-mode-map (kbd "C-o C-e") 'make-mark-sexp-for-eval)
-(define-key cider-mode-map (kbd "C-o C-i") 'make-save-and-eval-marked-sexp)
-(define-key cider-mode-map (kbd "C-M-o C-M-i") 'juvi-eval-marked-sexp-silently)
+(define-key cider-mode-map (kbd "M-o M-i") 'juvi-eval-marked-sexp-silently)
 
-
-(defun juvi-eval-marked-sexp-and-show-stdout ()
+(defun juvi-eval-last-sexp-to-kill-ring ()
   (interactive)
-  (with-current-buffer make-marked-buffer
-    (cider-interactive-eval make-marked-sexp
-                            (nrepl-make-response-handler (cider-popup-buffer cider-result-buffer nil 'clojure-mode 'ancillary)
-                                                         (lambda (_buffer _value))
-                                                         (lambda (buffer out)
-                                                           (cider-emit-into-popup-buffer buffer out))
-                                                         (lambda (buffer err)
-                                                           (cider-emit-into-popup-buffer buffer err))
-                                                         '()))))
+  (cider-interactive-eval
+   (cider-last-sexp)
+   (nrepl-make-response-handler (current-buffer)
+                                (lambda (_buffer value)
+                                  (message "result is now in the kill ring")
+                                  (kill-new value))
+                                (lambda (_buffer out)
+                                  (cider-emit-interactive-eval-output out))
+                                (lambda (_buffer err)
+                                  (cider-emit-interactive-eval-err-output err))
+                                '())
+   nil
+   (cider--nrepl-print-request-map fill-column)))
 
-(define-key cider-mode-map (kbd "C-M-o C-M-o") 'juvi-eval-marked-sexp-and-show-stdout)
+(define-key cider-mode-map (kbd "C-o C-p") 'juvi-eval-last-sexp-to-kill-ring)
+
+(defun juvi-eval-last-sexp-output-to-kill-ring ()
+  (interactive)
+  (kill-new "")
+  (cider-interactive-eval (cider-last-sexp)
+                          (nrepl-make-response-handler (current-buffer)
+                                                       (lambda (_buffer _value))
+                                                       (lambda (_buffer output)
+                                                         (kill-append output nil))
+                                                       (lambda (_buffer err)
+                                                         (cider-emit-interactive-eval-err-output err))
+                                                       '())
+                          nil
+                          (cider--nrepl-print-request-map fill-column))
+  (message "evaluation output is now in the kill ring"))
+
+(define-key cider-mode-map (kbd "C-M-o C-M-p") 'juvi-eval-last-sexp-output-to-kill-ring)
+
 
 (defun juvi-pprint-first ()
   (interactive)
@@ -657,64 +695,6 @@
   (insert "(def-locals) ;; TODO: remove me"))
 
 (define-key cider-mode-map (kbd "C-q C-f") 'juvi-insert-def-locals)
-
-(defun juvi-eval-last-sexp-to-kill-ring ()
-  (interactive)
-  (cider-interactive-eval ;; (concat "(with-out-str (cljs.pprint/pprint "
-   ;;         (cider-last-sexp)
-   ;;         "))")
-   (cider-last-sexp)
-   (nrepl-make-response-handler (current-buffer)
-                                (lambda (_buffer value)
-                                  (message "result is now in the kill ring")
-                                  (kill-new value))
-                                (lambda (_buffer out)
-                                  (cider-emit-interactive-eval-output out))
-                                (lambda (_buffer err)
-                                  (cider-emit-interactive-eval-err-output err))
-                                '())
-   nil
-   (cider--nrepl-print-request-map fill-column)))
-
-(define-key cider-mode-map (kbd "C-o C-p") 'juvi-eval-last-sexp-to-kill-ring)
-
-(defun juvi-eval-last-sexp-and-show-stdout ()
-  (interactive)
-  (cider-interactive-eval (cider-last-sexp)
-                          (nrepl-make-response-handler (cider-popup-buffer cider-result-buffer nil 'clojure-mode 'ancillary)
-                                                       (lambda (_buffer _value))
-                                                       (lambda (buffer out)
-                                                         (cider-emit-into-popup-buffer buffer out))
-                                                       (lambda (buffer err)
-                                                         (cider-emit-into-popup-buffer buffer err))
-                                                       '())
-                          nil
-                          (cider--nrepl-print-request-map fill-column)))
-
-
-(defun juvi-eval-last-sexp-output-to-kill-ring ()
-  (interactive)
-  (kill-new "")
-  (cider-interactive-eval (cider-last-sexp)
-                          (nrepl-make-response-handler (current-buffer)
-                                                       (lambda (_buffer _value))
-                                                       (lambda (_buffer output)
-                                                         (kill-append output nil))
-                                                       (lambda (_buffer err)
-                                                         (cider-emit-interactive-eval-err-output err))
-                                                       '())
-                          nil
-                          (cider--nrepl-print-request-map fill-column))
-  (message "evaluation output is now in the kill ring"))
-
-
-(defun juvi-last-sexp-indended-to-kill-ring ()
-  (interactive)
-  (message (cider-last-sexp)))
-
-(global-set-key (kbd "C-M-p") 'juvi-last-sexp-indended-to-kill-ring)
-
-(define-key cider-mode-map (kbd "C-o C-o") 'juvi-eval-last-sexp-output-to-kill-ring)
 
 (add-to-list 'load-path "~/.emacs.d/vendor/iedit/")
 (require 'iedit)
@@ -1308,8 +1288,14 @@
 
 (setq python-shell-interpreter "python3")
 
-(require-packages 'elpy)
-(elpy-enable)
+
+(use-package elpy
+  :ensure t
+  :init
+  (elpy-enable))
+
+;; (elpy-enable)
+;; (require-packages 'elpy)
 
 (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
 (add-hook 'elpy-mode-hook 'flycheck-mode)
@@ -1431,7 +1417,7 @@ Unlike `comment-dwim', this always comments whole lines."
 (defun juvi-stop-overtone ()
   (interactive)
   (cider-interactive-eval "(overtone.sc.server/stop)"
-                          (nrepl-make-response-handler make-marked-buffer
+                          (nrepl-make-response-handler juvi-marked-buffer
                                                        (lambda (buffer value))
                                                        (lambda (_buffer out))
                                                        (lambda (_buffer err))
