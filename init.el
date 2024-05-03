@@ -18,8 +18,8 @@
  '(cider-dynamic-indentation nil)
  '(cider-enhanced-cljs-completion-p nil)
  '(cider-interactive-eval-output-destination 'repl-buffer)
- '(cider-ns-refresh-after-fn "dev/start")
- '(cider-ns-refresh-before-fn "dev/stop")
+ '(cider-ns-refresh-after-fn "dev/start" t)
+ '(cider-ns-refresh-before-fn "dev/stop" t)
  '(cider-ns-refresh-show-log-buffer nil)
  '(cider-output-std-streams-to-popup t)
  '(cider-refresh-show-log-buffer nil)
@@ -59,7 +59,7 @@
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
-   '(yaml-mode typescript-mode wgsl-mode zenburn-theme terraform-mode change-case quelpa python helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile ggtags exec-path-from-shell edn company avy))
+   '(lsp-ui lsp-mode clj-refactor yaml-mode typescript-mode wgsl-mode zenburn-theme terraform-mode change-case quelpa python helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile ggtags exec-path-from-shell edn company avy))
  '(projectile-enable-caching nil)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "target"))
@@ -332,12 +332,11 @@
 (add-to-list 'package-pinned-packages '(clj-refactor . "melpa-stable") t)
 ;; (require-packages 'clj-refactor)
 
-
-;; (add-hook 'clojure-mode-hook
-;;           (lambda ()
-;;             (clj-refactor-mode 1)
-;;             ;;  (yas-minor-mode 1) ; for adding require/use/import
-;;             (cljr-add-keybindings-with-prefix "C-o RET")))
+(add-hook 'clojure-mode-hook
+          (lambda ()
+            (clj-refactor-mode 1)
+            ;;  (yas-minor-mode 1) ; for adding require/use/import
+            (cljr-add-keybindings-with-prefix "C-o RET")))
 
 
 (require-packages 'recentf)
@@ -367,12 +366,6 @@
 (add-hook 'cider-mode-hook 'eldoc-mode)
 
 (define-key cider-mode-map (kbd "C-c s") 'sesman-restart)
-
-;; (defun init-el-cider-load-buffer ()
-;;   (interactive)
-;;   (save-buffer)
-;;   ;;  (cider-interactive-eval (concat "(let [ns '" (cider-current-ns) "] (doseq [alias (keys (ns-aliases ns))] (ns-unalias ns alias)))"))
-;;   (cider-load-buffer))
 
 (define-key cider-mode-map (kbd "C-c C-k") 'cider-load-buffer)
 (define-key clojure-mode-map (kbd "C-c C-k") 'cider-load-buffer)
@@ -415,7 +408,7 @@
   (interactive)
   (save-buffer)
   (cider-ns-refresh ;; 'refresh-all ;;'clear
-                    ))
+   ))
 
 (define-key cider-mode-map (kbd "C-o C-r") 'init-el-refresh)
 
@@ -439,7 +432,7 @@
 
 (defun cider-pprint-start ()
   (interactive)
-  (init-el-cider-load-buffer)
+  (cider-load-buffer)
   (let ((start-ns (if start-ns
                       start-ns
                     (cider-current-ns))))
@@ -475,7 +468,7 @@
 
 (defun juvi-eval-marked-function ()
   (interactive)
-  (init-el-cider-load-buffer)
+  (cider-load-buffer)
   (juvi-pprint-eval-to-result-buffer (concat "(" juvi-marked-ns "/" juvi-marked-function ")")))
 
 (define-key cider-mode-map (kbd "C-M-o C-M-i") 'juvi-eval-marked-function)
@@ -484,7 +477,7 @@
   (interactive)
   (juvi-pprint-eval-to-result-buffer (concat "(" (cider-current-ns) "/" (cider-last-sexp) ")")))
 
-(define-key cider-mode-map (kbd "M-O M-I") 'juvi-eval-function-at-point)
+(define-key cider-mode-map (kbd "M-S-o M-S-i") 'juvi-eval-function-at-point)
 
 (defun juvi-mark-sexp-for-eval ()
   (interactive)
@@ -549,8 +542,13 @@
                           (cider--nrepl-print-request-map fill-column))
   (message "evaluation output is now in the kill ring"))
 
-(define-key cider-mode-map (kbd "C-M-o C-M-p") 'juvi-eval-last-sexp-output-to-kill-ring)
+(define-key cider-mode-map (kbd "C-S-o C-S-p") 'juvi-eval-last-sexp-output-to-kill-ring)
 
+
+(defun juvi-copy-fully-qualified-name ()
+  (interactive)
+  (message (concat (cider-current-ns) "/" (cider-last-sexp)))
+  (kill-new (concat (cider-current-ns) "/" (cider-last-sexp))))
 
 (defun juvi-pprint-first ()
   (interactive)
@@ -559,6 +557,73 @@
 (define-key cider-mode-map (kbd "M-p") 'juvi-pprint-first)
 
 (define-key cider-mode-map (kbd "M-.") 'cider-find-var)
+
+(defun juvi-execute-tests (include-selectors exclude-selectors)
+  "based on cider-test-execute"
+  (cider-test-clear-highlights)
+  (cider-map-repls :clj-strict
+    (lambda (conn)
+      (message "Running tests including: %s and excluding %s" include-selectors exclude-selectors)
+      (setq cider-test--current-repl conn)
+      (let* ((request '("op" "test-all"
+                        "load?" "true"
+                        "fail-fast" "false")))
+        (when (and (listp include-selectors) include-selectors)
+          (setq request (append request `("include" ,include-selectors))))
+        (when (and (listp exclude-selectors) exclude-selectors)
+          (setq request (append request `("exclude" ,exclude-selectors))))
+        (cider-nrepl-send-request
+         request
+         (lambda (response)
+           (nrepl-dbind-response response (summary results status out err elapsed-time ns-elapsed-time var-elapsed-time)
+             (cond ((member "namespace-not-found" status)
+                    (unless silent
+                      (message "No test namespace: %s" (cider-propertize ns 'ns))))
+                   (out (cider-emit-interactive-eval-output out))
+                   (err (cider-emit-interactive-eval-err-output err))
+                   (results
+                    (nrepl-dbind-response summary (error fail)
+                      (setq cider-test-last-summary summary)
+                      (setq cider-test-last-results results)
+                      (cider-test-highlight-problems results)
+                      (cider-test-echo-summary summary results elapsed-time)
+                      (if (or (not (zerop (+ error fail)))
+                              cider-test-show-report-on-success)
+                          (let ((b (cider-popup-buffer
+                                    cider-test-report-buffer
+                                    cider-auto-select-test-report-buffer)))
+                            (with-current-buffer b
+                              ;; Change the default-directory so that it doesn't affect `sesman--linked-sessions` logic:
+                              (setq-local default-directory
+                                          (with-current-buffer "*Messages*" default-directory)))
+                            (cider-test-render-report
+                             b
+                             summary
+                             results
+                             elapsed-time
+                             ns-elapsed-time
+                             var-elapsed-time))
+                        (when (get-buffer cider-test-report-buffer)
+                          (with-current-buffer cider-test-report-buffer
+                            (let ((inhibit-read-only t))
+                              (erase-buffer)))
+                          (cider-test-render-report
+                           cider-test-report-buffer
+                           summary
+                           results
+                           elapsed-time
+                           ns-elapsed-time))))))))
+         conn)))))
+
+(defun juvi-execute-all-but-integration-tests ()
+  (interactive)
+  (juvi-execute-tests nil '("integration-test")))
+
+(define-key cider-mode-map (kbd "C-o C-t C-o") 'juvi-execute-all-but-integration-tests)
+
+(defun juvi-execute-integration-tests ()
+  (interactive)
+  (juvi-execute-tests '("integration-test") nil))
 
 ;; (defun juvi-pprint-sample ()
 ;;   (interactive)
@@ -627,7 +692,7 @@
 
 (defun run-current-ns-tests ()
   (interactive)
-  (init-el-cider-load-buffer)
+  (cider-load-buffer)
   (cider-test-run-ns-tests t))
 
 (define-key cider-mode-map (kbd "C-o C-g") 'run-current-ns-tests)
@@ -677,24 +742,42 @@
 
 (define-key cider-mode-map (kbd "C-q C-e") 'juvi-remove-spy)
 
-(defun juvi-define-def-locals ()
+(defun juvi-def-locals-definition ()
   (interactive)
-  (insert "(defmacro def-locals [] ;; TODO: remove me
+  (insert "(defmacro def-locals [& value] ;; TODO: remove me
   `(do ~@(for [local-variable (map symbol (map name (keys &env)))]
-           `(def ~local-variable ~local-variable))))"))
+           `(def ~local-variable ~local-variable))
+       ~value))"))
 
-(define-key cider-mode-map (kbd "C-q C-d") 'juvi-define-def-locals)
+(define-key cider-mode-map (kbd "C-q C-d") 'juvi-def-locals-definition)
+
+(defun define-def-locals ()
+  (cider-interactive-eval "(defmacro def-locals [& value]
+                            `(do ~@(for [local-variable (map symbol (map name (keys &env)))]
+                                     `(def ~local-variable ~local-variable))
+                                 ~value))"))
 
 (defun juvi-insert-def-locals ()
   (interactive)
-
-  (cider-interactive-eval "(defmacro def-locals []
-                            `(do ~@(for [local-variable (map symbol (map name (keys &env)))]
-                                     `(def ~local-variable ~local-variable))))")
-
+  (define-def-locals)
   (insert "(def-locals) ;; TODO: remove me"))
 
 (define-key cider-mode-map (kbd "C-q C-f") 'juvi-insert-def-locals)
+
+(defun juvi-insert-identity ()
+  (interactive)
+  (insert "identity #_"))
+
+(define-key cider-mode-map (kbd "C-q C-i") 'juvi-insert-def-locals)
+
+(defun juvi-wrap-with-def-locals ()
+  (interactive)
+  (define-def-locals)
+  (insert "(def-locals )")
+  (backward-char 1)
+  (paredit-forward-slurp-sexp))
+
+(define-key cider-mode-map (kbd "C-S-q C-S-f") 'juvi-wrap-with-def-locals)
 
 (add-to-list 'load-path "~/.emacs.d/vendor/iedit/")
 (require 'iedit)
@@ -810,6 +893,12 @@
 
 (define-key clojure-mode-map (kbd "C-o d") 'juvi-duplicate-quoted)
 
+(defun insert-defun-name ()
+  (interactive)
+  ;; TODO: parse def and defun name from the sexp and insert that
+  (insert (cider-defun-at-point)))
+
+(define-key clojure-mode-map (kbd "C-o n") 'insert-defun-name)
 
 ;; Delete selection
 (delete-selection-mode 1)
@@ -1182,7 +1271,7 @@
   (interactive)
   (when (use-region-p)
     (delete-region (region-beginning) (region-end)))
-  (insert (format-time-string "%-d.%-m." (current-time))))
+  (insert (format-time-string "%-d.%-m.%_Y" (current-time))))
 
 (global-set-key (kbd "C-o C-d") 'juvi-insert-current-date)
 
@@ -1411,6 +1500,7 @@ Unlike `comment-dwim', this always comments whole lines."
 
 (define-key elpy-mode-map (kbd "C-x C-e") 'python-shell-send-statement)
 
+
 ;; overtone
 
 
@@ -1504,4 +1594,24 @@ Unlike `comment-dwim', this always comments whole lines."
 
 (global-set-key (kbd "C-x C-l") 'balance-windows)
 
-(global-hl-line-mode)
+;; (global-hl-line-mode)
+
+;; lsp
+
+(require-packages 'lsp-mode)
+(require-packages 'lsp-ui)
+
+;; odin
+
+(add-to-list 'load-path "~/.emacs.d/vendor/odin-mode/")
+(require 'odin-mode)
+
+;; With odin-mode (https://github.com/mattt-b/odin-mode) and lsp-mode already added to your init.el of course!.
+(setq-default lsp-auto-guess-root t) ;; if you work with Projectile/project.el this will help find the ols.json file.
+(defvar lsp-language-id-configuration '((odin-mode . "odin")))
+(lsp-register-client
+ (make-lsp-client :new-connection (lsp-stdio-connection "/Users/jukka/src-others/ols/ols")
+                  :major-modes '(odin-mode)
+                  :server-id 'ols
+                  :multi-root t)) ;; This is just so lsp-mode sends the "workspaceFolders" param to the server.
+(add-hook 'odin-mode-hook #'lsp)
