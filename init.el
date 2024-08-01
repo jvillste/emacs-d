@@ -18,8 +18,8 @@
  '(cider-dynamic-indentation nil)
  '(cider-enhanced-cljs-completion-p nil)
  '(cider-interactive-eval-output-destination 'repl-buffer)
- '(cider-ns-refresh-after-fn "dev/start" t)
- '(cider-ns-refresh-before-fn "dev/stop" t)
+ '(cider-ns-refresh-after-fn "dev/start")
+ '(cider-ns-refresh-before-fn "dev/stop")
  '(cider-ns-refresh-show-log-buffer nil)
  '(cider-output-std-streams-to-popup t)
  '(cider-refresh-show-log-buffer nil)
@@ -36,6 +36,7 @@
      ("walk" . "clojure.walk")
      ("zip" . "clojure.zip")))
  '(cljr-warn-on-eval nil)
+ '(clojure-thread-all-but-last t)
  '(custom-enabled-themes '(juvi-deeper-blue))
  '(custom-safe-themes
    '("5252c9e5f25ccb15ba0e2c6890770534499f430c202588d6adb82739de5a2f15" "64510b8379398428665d62469a65f1f26a143f50bdfd75aa08ab82c58666a16a" "b32cf217327b6b6b2c4fc7e917fb04626a1a081c164059c58f81447639085c6f" "1ff292adb82d413c3b540f1936df0a6ec953f1e9b53a0e1b1331c626b288a80f" "e1c652f78f723bee2c626d6b11444b9e064ab6fe941306ee72a7a1ff8c2762dc" "4e6439567a7d852cb5e4b916ec5f8d2567ac1b8f51bbe92bc75e1c47564fed54" "ff5e537e366db140285c24ca399abfe116379abfb83ce42fdd0844ace47d9d63" "d7ddab1ce8e1eac362036a647955790d897db221a8f18757415af4bcf934a76d" "c0579966a5f9f1d9f7d499f4869278073b913bcc12a98f4dce9b7590939d34fe" "f9a3cd3ecf80347e2716daf7f8f929adecd3efcafe660ae7785172d11b17fa49" "df3a0d74d0294a7a4fbb566975ab1659e8f75e2c020067c2a3becf0a5e4b1d84" "78459fbbfc2c176ca5c481e429598e2f1b644e5f2d610679d379d75ef3c0dc9a" "faeec12e44d84a02a578d16460e7b00d491fca28b109d6fc9301e6aa45145492" "6fac5cd7353e2ab050b80923147c4846afac198c6c757c9eaa5736a5d1e52218" "2d44815daa6caa2341cf1abae1713315e17b3eca394cbccb8ed5929022f30538" "48455a96d7234093c0b5a156f0dc9b8ceb6c8a99e32beca521395ff973828ad5" "24c251a53f48fc529805aa4d567d212a4837eba475ce22992e448b210f51867e" "7205b1e53c3255ee0da478ca2c51e4ddf30a71a659802e0dbfae8a83d8662703" "ec0a8caf37e3df9c0911ee8e83068dde5808270687751de995c17609150bf342" "f366d4bc6d14dcac2963d45df51956b2409a15b770ec2f6d730e73ce0ca5c8a7" default))
@@ -59,7 +60,7 @@
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
-   '(lsp-ui lsp-mode clj-refactor yaml-mode typescript-mode wgsl-mode zenburn-theme terraform-mode change-case quelpa python helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile ggtags exec-path-from-shell edn company avy))
+   '(python-pytest gnu-elpa-keyring-update pytest xml-format lsp-ui lsp-mode clj-refactor yaml-mode typescript-mode wgsl-mode zenburn-theme terraform-mode change-case quelpa python helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile ggtags exec-path-from-shell edn company avy))
  '(projectile-enable-caching nil)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "target"))
@@ -67,6 +68,7 @@
  '(projectile-project-root-files-bottom-up
    '(".projectile" "build.sh" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs"))
  '(projectile-use-git-grep nil)
+ '(python-pytest-executable "python -m pytest ")
  '(recentf-max-menu-items 100)
  '(recentf-max-saved-items 10000)
  '(recentf-mode t)
@@ -145,6 +147,7 @@
 
 (global-unset-key (kbd "C-o"))
 
+(global-set-key (kbd "M-z") 'undo)
 
 ;; cider is loaded as a git submodule to get a stable version
 ;; (add-to-list 'load-path "~/.emacs.d/vendor/cider/")
@@ -313,7 +316,8 @@
 (defhydra hydra-gitgutter-hunk (global-map "C-o C-h")
   "hunk"
   ("n" git-gutter:next-hunk "next")
-  ("p" git-gutter:previous-hunk "previous"))
+  ("p" git-gutter:previous-hunk "previous")
+  ("k" git-gutter:revert-hunk "revert"))
 
 (global-set-key (kbd "C-o C-j") 'git-gutter:revert-hunk)
 (global-set-key (kbd "C-o g") 'git-gutter:update-all-windows)
@@ -625,6 +629,8 @@
   (interactive)
   (juvi-execute-tests '("integration-test") nil))
 
+(define-key cider-mode-map (kbd "C-o C-t C-i") 'juvi-execute-integration-tests)
+
 ;; (defun juvi-pprint-sample ()
 ;;   (interactive)
 ;;   (cider--pprint-eval-form (concat "@dev/sample-atom")))
@@ -823,6 +829,14 @@
 
 (define-key clojure-mode-map (kbd "C-M-o C-M-p") 'juvi-insert-debug-prn)
 
+(defun juvi-insert-debug-emit ()
+  (interactive)
+  (save-excursion
+    (insert "(log/serialized-prn ) ;; TODO: remove me\n"))
+  (forward-char 20))
+
+(define-key clojure-mode-map (kbd "C-M-O C-M-O") 'juvi-insert-debug-emit)
+
 (defun juvi-insert-comment-block ()
   (interactive)
   (save-excursion
@@ -951,8 +965,8 @@
 
 (defhydra other-window (global-map "C-x C-o")
   "other-window"
-  ("C-k" other-window-backwards "other window backwards")
-  ("C-j" other-window "other window"))
+  ("p" other-window-backwards "other window backwards")
+  ("n" other-window "other window"))
 
 ;; (global-set-key (kbd "C-x C-o") 'other-window-backwards)
 
@@ -1377,6 +1391,7 @@
 
 (setq python-shell-interpreter "python3")
 
+(require-packages 'python-pytest)
 
 (use-package elpy
   :ensure t
@@ -1421,7 +1436,16 @@
 
 (define-key elpy-mode-map (kbd "C-c s") 'juvi-restart-python)
 (define-key elpy-mode-map (kbd "C-c C-s") 'juvi-initialize-python-repl)
-(define-key elpy-mode-map (kbd "C-c C-p") 'elpy-shell-send-statement)
+
+(defun juvi-send-python-statement ()
+  (interactive)
+  (if (use-region-p)
+      (python-shell-send-region (region-beginning)
+                                (region-end))
+    (python-shell-send-statement)))
+
+(define-key elpy-mode-map (kbd "C-c C-c") 'juvi-send-python-statement)
+(define-key elpy-mode-map (kbd "C-c c") 'elpy-shell-send-defun)
 
 ;; (defun juvi-run-python-unittests ()
 ;;   (interactive)
@@ -1432,7 +1456,9 @@
 
 (defun juvi-run-python-unittests ()
   (interactive)
-  (python-shell-send-string "unittest.main(exit=False)"))
+  ;; (python-shell-send-string "unittest.main(exit=False)")
+  (save-buffer)
+  (python-pytest-file (buffer-file-name)))
 
 (define-key elpy-mode-map (kbd "C-o C-t C-t") 'juvi-run-python-unittests)
 
@@ -1501,6 +1527,115 @@ Unlike `comment-dwim', this always comments whole lines."
 (define-key elpy-mode-map (kbd "C-x C-e") 'python-shell-send-statement)
 
 
+(defun juvi-python-shell-buffer-substring (start end &optional nomain no-cookie)
+  "Same as python-shell-buffer-substring except does not add \"if True:\" prefix.
+
+Send buffer substring from START to END formatted for shell.
+This is a wrapper over `buffer-substring' that takes care of
+different transformations for the code sent to be evaluated in
+the python shell:
+  1. When optional argument NOMAIN is non-nil everything under an
+     \"if __name__ == \\='__main__\\='\" block will be removed.
+  2. When a subregion of the buffer is sent, it takes care of
+     appending extra empty lines so tracebacks are correct.
+  3. When the region sent is a substring of the current buffer, a
+     coding cookie is added.
+  4. Wraps indented regions under an \"if True:\" block so the
+     interpreter evaluates them correctly."
+  (let* ((start (save-excursion
+                  ;; If we're at the start of the expression, and
+                  ;; there's just blank space ahead of it, then expand
+                  ;; the region to include the start of the line.
+                  ;; This makes things work better with the rest of
+                  ;; the data we're sending over.
+                  (goto-char start)
+                  (if (string-blank-p
+                       (buffer-substring (line-beginning-position) start))
+                      (line-beginning-position)
+                    start)))
+         (substring (buffer-substring-no-properties start end))
+         (starts-at-point-min-p (save-restriction
+                                  (widen)
+                                  (= (point-min) start)))
+         (encoding (python-info-encoding))
+         (toplevel-p (zerop (save-excursion
+                              (goto-char start)
+                              (python-util-forward-comment 1)
+                              (current-indentation))))
+         (fillstr (and (not no-cookie)
+                       (not starts-at-point-min-p)
+                       (concat
+                        (format "# -*- coding: %s -*-\n" encoding)
+                        (make-string
+                         ;; Subtract 2 because of the coding cookie.
+                         (- (line-number-at-pos start) 2) ?\n)))))
+    (with-temp-buffer
+      (python-mode)
+      (when fillstr
+        (insert fillstr))
+      (insert substring)
+      (goto-char (point-min))
+      ;; (when (not toplevel-p)
+      ;;   (insert "if True:")
+      ;;   (delete-region (point) (line-end-position)))
+      (when nomain
+        (let* ((if-name-main-start-end
+                (and nomain
+                     (save-excursion
+                       (when (python-nav-if-name-main)
+                         (cons (point)
+                               (progn (python-nav-forward-sexp-safe)
+                                      ;; Include ending newline
+                                      (forward-line 1)
+                                      (point)))))))
+               ;; Oh destructuring bind, how I miss you.
+               (if-name-main-start (car if-name-main-start-end))
+               (if-name-main-end (cdr if-name-main-start-end))
+               (fillstr (make-string
+                         (- (line-number-at-pos if-name-main-end)
+                            (line-number-at-pos if-name-main-start)) ?\n)))
+          (when if-name-main-start-end
+            (goto-char if-name-main-start)
+            (delete-region if-name-main-start if-name-main-end)
+            (insert fillstr))))
+      ;; Ensure there's only one coding cookie in the generated string.
+      (goto-char (point-min))
+      (when (looking-at-p (python-rx coding-cookie))
+        (forward-line 1)
+        (when (looking-at-p (python-rx coding-cookie))
+          (delete-region
+           (line-beginning-position) (line-end-position))))
+      (buffer-substring-no-properties (point-min) (point-max)))))
+
+(defun juvi-python-shell-send-region (start end &optional send-main msg no-cookie)
+  "The same as python-shell-send-region except calls juvi-python-shell-buffer-substring
+and elpy-shell-switch-to-shell.
+
+Send the region delimited by START and END to inferior Python process.
+When optional argument SEND-MAIN is non-nil, allow execution of
+code inside blocks delimited by \"if __name__== \\='__main__\\=':\".
+When called interactively SEND-MAIN defaults to nil, unless it's
+called with prefix argument.  When optional argument MSG is
+non-nil, forces display of a user-friendly message if there's no
+process running; defaults to t when called interactively."
+  (interactive
+   (list (region-beginning) (region-end) current-prefix-arg t))
+  (let* ((string (juvi-python-shell-buffer-substring start end (not send-main)
+                                                     no-cookie))
+         (process (python-shell-get-process-or-error msg))
+         (original-string (buffer-substring-no-properties start end))
+         (_ (string-match "\\`\n*\\(.*\\)" original-string)))
+    (message "Sent: %s..." (match-string 1 original-string))
+    ;; Recalculate positions to avoid landing on the wrong line if
+    ;; lines have been removed/added.
+    (with-current-buffer (process-buffer process)
+      (compilation-forget-errors))
+    (python-shell-send-string string process)
+    (deactivate-mark)
+    (elpy-shell-switch-to-shell)))
+
+(define-key elpy-mode-map (kbd "C-c C-p") 'juvi-python-shell-send-region)
+
 ;; overtone
 
 
@@ -1567,7 +1702,8 @@ Unlike `comment-dwim', this always comments whole lines."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(highlight-symbol-face ((t (:background "dark cyan")))))
+ '(highlight-symbol-face ((t (:background "dark cyan"))))
+ '(magit-hash ((t (:foreground "grey60")))))
 
 (defun juvi-format-region-to-clipboard (mode)
   (let ((formatted-buffer (get-buffer-create "formatted-region"))
@@ -1615,3 +1751,7 @@ Unlike `comment-dwim', this always comments whole lines."
                   :server-id 'ols
                   :multi-root t)) ;; This is just so lsp-mode sends the "workspaceFolders" param to the server.
 (add-hook 'odin-mode-hook #'lsp)
+
+;; xml
+
+(require-packages 'xml-format)
