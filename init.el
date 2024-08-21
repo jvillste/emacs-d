@@ -443,6 +443,21 @@
     (message "using start-ns '%s'" start-ns)
     (cider--pprint-eval-form (concat "(" start-ns "/start)"))))
 
+(defun juvi-show-result-buffer-cursor ()
+  (interactive)
+  (with-current-buffer cider-result-buffer
+    (setq cursor-type 'box)))
+
+(defun juvi-hide-result-buffer-cursor ()
+  (interactive)
+  (with-current-buffer cider-result-buffer
+    (setq cursor-type nil)))
+
+(defun juvi-copy-result-buffer ()
+  (interactive)
+  (with-current-buffer cider-result-buffer
+    (copy-region-as-kill (buffer-end -1) (buffer-end 1))))
+
 (defun juvi-pprint-eval-to-result-buffer (form)
   (cider-interactive-eval form
                           (nrepl-make-response-handler (cider-popup-buffer cider-result-buffer nil 'clojure-mode 'ancillary)
@@ -454,7 +469,8 @@
                                                          (cider-emit-into-popup-buffer buffer err))
                                                        '())
                           nil
-                          (cider--nrepl-print-request-map fill-column)))
+                          (cider--nrepl-print-request-map fill-column))
+  (juvi-hide-result-buffer-cursor))
 
 (defun juvi-pprint-eval-last-sexp-to-result-buffer ()
   (interactive)
@@ -1695,6 +1711,17 @@ process running; defaults to t when called interactively."
   "Put the current file path on the clipboard"
   (interactive)
   (juvi-put-file-on-clipboard nil))
+
+(transient-define-prefix transient-prefix-juvi ()
+  "juvi"
+  [("p" "put-file-path-on-clipboard" juvi-put-file-path-on-clipboard)
+   ("n" "put-file-name-on-clipboard" juvi-put-file-name-on-clipboard)
+   ("s" "show-result-buffer-cursor" juvi-show-result-buffer-cursor)
+   ("r" "copy-result-buffer" juvi-copy-result-buffer)
+   ("t" "execute-all-but-integration-tests" juvi-execute-all-but-integration-tests)
+   ("i" "execute-integration-tests" juvi-execute-integration-tests)])
+
+(global-set-key (kbd "C-M-j") 'transient-prefix-juvi)
 
 (setq-default frame-title-format '("%b"))
 (custom-set-faces
