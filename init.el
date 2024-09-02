@@ -1215,6 +1215,26 @@
 
 ;; wgrep
 
+(defun juvi-indent-buffers-that-wgrep-changed ()
+  "Originally from Macroz."
+  (interactive)
+  (let ((count 0))
+    (dolist (b (buffer-list))
+      (with-current-buffer b
+        (let ((ovs (wgrep-file-overlays)))
+          (when (and ovs (buffer-modified-p))
+            (indent-buffer)
+            (setq count (1+ count))))))
+    (message "%d buffers have been indented." count)))
+
+(defun juvi-wgrep-finish-edit ()
+  (interactive)
+  (wgrep-finish-edit)
+  (juvi-indent-buffers-that-wgrep-changed)
+  (save-some-buffers t))
+
+(define-key wgrep-mode-map (kbd "C-x C-s") 'juvi-wgrep-finish-edit)
+
 (require-packages 'wgrep)
 
 ;; easyPG https://www.emacswiki.org/emacs/EasyPG
