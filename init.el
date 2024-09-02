@@ -1215,6 +1215,8 @@
 
 ;; wgrep
 
+(require-packages 'wgrep)
+
 (defun juvi-indent-buffers-that-wgrep-changed ()
   "Originally from Macroz."
   (interactive)
@@ -1234,8 +1236,6 @@
   (save-some-buffers t))
 
 (define-key wgrep-mode-map (kbd "C-x C-s") 'juvi-wgrep-finish-edit)
-
-(require-packages 'wgrep)
 
 ;; easyPG https://www.emacswiki.org/emacs/EasyPG
 
