@@ -37,7 +37,7 @@
  '(flymake-warning ((((class color) (min-colors 89)) (:background nil :underline "magenta3"))))
  '(font-lock-builtin-face ((((class color) (min-colors 89)) (:foreground "LightCoral"))))
  '(font-lock-comment-delimiter-face ((((class color) (min-colors 89)) (:foreground "gray50"))))
- '(font-lock-comment-face ((((class color) (min-colors 89)) (:foreground "gray50"))))
+ '(font-lock-comment-face ((((class color) (min-colors 89)) (:foreground "gray60"))))
  '(font-lock-constant-face ((((class color) (min-colors 89)) (:foreground "DarkOliveGreen3"))))
  '(font-lock-doc-face ((((class color) (min-colors 89)) (:foreground "moccasin"))))
  '(font-lock-function-name-face ((((class color) (min-colors 89)) (:foreground "goldenrod"))))
