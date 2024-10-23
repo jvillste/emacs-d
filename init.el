@@ -18,8 +18,8 @@
  '(cider-dynamic-indentation nil)
  '(cider-enhanced-cljs-completion-p nil)
  '(cider-interactive-eval-output-destination 'repl-buffer)
- '(cider-ns-refresh-after-fn "dev/start")
- '(cider-ns-refresh-before-fn "dev/stop")
+ '(cider-ns-refresh-after-fn "dev/start" t)
+ '(cider-ns-refresh-before-fn "dev/stop" t)
  '(cider-ns-refresh-show-log-buffer nil)
  '(cider-output-std-streams-to-popup t)
  '(cider-refresh-show-log-buffer nil)
@@ -39,7 +39,7 @@
  '(clojure-thread-all-but-last t)
  '(custom-enabled-themes '(juvi-deeper-blue))
  '(custom-safe-themes
-   '("5252c9e5f25ccb15ba0e2c6890770534499f430c202588d6adb82739de5a2f15" "64510b8379398428665d62469a65f1f26a143f50bdfd75aa08ab82c58666a16a" "b32cf217327b6b6b2c4fc7e917fb04626a1a081c164059c58f81447639085c6f" "1ff292adb82d413c3b540f1936df0a6ec953f1e9b53a0e1b1331c626b288a80f" "e1c652f78f723bee2c626d6b11444b9e064ab6fe941306ee72a7a1ff8c2762dc" "4e6439567a7d852cb5e4b916ec5f8d2567ac1b8f51bbe92bc75e1c47564fed54" "ff5e537e366db140285c24ca399abfe116379abfb83ce42fdd0844ace47d9d63" "d7ddab1ce8e1eac362036a647955790d897db221a8f18757415af4bcf934a76d" "c0579966a5f9f1d9f7d499f4869278073b913bcc12a98f4dce9b7590939d34fe" "f9a3cd3ecf80347e2716daf7f8f929adecd3efcafe660ae7785172d11b17fa49" "df3a0d74d0294a7a4fbb566975ab1659e8f75e2c020067c2a3becf0a5e4b1d84" "78459fbbfc2c176ca5c481e429598e2f1b644e5f2d610679d379d75ef3c0dc9a" "faeec12e44d84a02a578d16460e7b00d491fca28b109d6fc9301e6aa45145492" "6fac5cd7353e2ab050b80923147c4846afac198c6c757c9eaa5736a5d1e52218" "2d44815daa6caa2341cf1abae1713315e17b3eca394cbccb8ed5929022f30538" "48455a96d7234093c0b5a156f0dc9b8ceb6c8a99e32beca521395ff973828ad5" "24c251a53f48fc529805aa4d567d212a4837eba475ce22992e448b210f51867e" "7205b1e53c3255ee0da478ca2c51e4ddf30a71a659802e0dbfae8a83d8662703" "ec0a8caf37e3df9c0911ee8e83068dde5808270687751de995c17609150bf342" "f366d4bc6d14dcac2963d45df51956b2409a15b770ec2f6d730e73ce0ca5c8a7" default))
+   '("8a3c4b0e97c2007655aa56e4201cfb592b75d01804b6968fb2b5e4e93d9818ee" "a60c1317f8a048ff232de128974f1e0219e99a8f4032069eef1a96d62c9e16da" "5252c9e5f25ccb15ba0e2c6890770534499f430c202588d6adb82739de5a2f15" "64510b8379398428665d62469a65f1f26a143f50bdfd75aa08ab82c58666a16a" "b32cf217327b6b6b2c4fc7e917fb04626a1a081c164059c58f81447639085c6f" "1ff292adb82d413c3b540f1936df0a6ec953f1e9b53a0e1b1331c626b288a80f" "e1c652f78f723bee2c626d6b11444b9e064ab6fe941306ee72a7a1ff8c2762dc" "4e6439567a7d852cb5e4b916ec5f8d2567ac1b8f51bbe92bc75e1c47564fed54" "ff5e537e366db140285c24ca399abfe116379abfb83ce42fdd0844ace47d9d63" "d7ddab1ce8e1eac362036a647955790d897db221a8f18757415af4bcf934a76d" "c0579966a5f9f1d9f7d499f4869278073b913bcc12a98f4dce9b7590939d34fe" "f9a3cd3ecf80347e2716daf7f8f929adecd3efcafe660ae7785172d11b17fa49" "df3a0d74d0294a7a4fbb566975ab1659e8f75e2c020067c2a3becf0a5e4b1d84" "78459fbbfc2c176ca5c481e429598e2f1b644e5f2d610679d379d75ef3c0dc9a" "faeec12e44d84a02a578d16460e7b00d491fca28b109d6fc9301e6aa45145492" "6fac5cd7353e2ab050b80923147c4846afac198c6c757c9eaa5736a5d1e52218" "2d44815daa6caa2341cf1abae1713315e17b3eca394cbccb8ed5929022f30538" "48455a96d7234093c0b5a156f0dc9b8ceb6c8a99e32beca521395ff973828ad5" "24c251a53f48fc529805aa4d567d212a4837eba475ce22992e448b210f51867e" "7205b1e53c3255ee0da478ca2c51e4ddf30a71a659802e0dbfae8a83d8662703" "ec0a8caf37e3df9c0911ee8e83068dde5808270687751de995c17609150bf342" "f366d4bc6d14dcac2963d45df51956b2409a15b770ec2f6d730e73ce0ca5c8a7" default))
  '(ediff-merge-split-window-function 'split-window-horizontally)
  '(ediff-split-window-function 'split-window-horizontally)
  '(ediff-window-setup-function 'ediff-setup-windows-plain)
@@ -462,15 +462,18 @@
   (cider-interactive-eval form
                           (nrepl-make-response-handler (cider-popup-buffer cider-result-buffer nil 'clojure-mode 'ancillary)
                                                        (lambda (buffer value)
-                                                         (cider-emit-into-popup-buffer buffer value))
+                                                         (cider-emit-into-popup-buffer buffer value)
+                                                         (with-current-buffer cider-result-buffer
+                                                           (beginning-of-buffer)
+                                                           (set-window-point (get-buffer-window cider-result-buffer)
+                                                                             (point-at-eol))))
                                                        (lambda (buffer out)
                                                          (cider-emit-into-popup-buffer buffer out))
                                                        (lambda (buffer err)
                                                          (cider-emit-into-popup-buffer buffer err))
                                                        '())
                           nil
-                          (cider--nrepl-print-request-map fill-column))
-  (juvi-hide-result-buffer-cursor))
+                          (cider--nrepl-print-request-map fill-column)))
 
 (defun juvi-pprint-eval-last-sexp-to-result-buffer ()
   (interactive)
@@ -1249,6 +1252,10 @@
 (put 'downcase-region 'disabled nil)
 (put 'upcase-region 'disabled nil)
 
+
+(global-set-key (kbd "M-l") 'downcase-dwim)
+(global-set-key (kbd "M-u") 'upcase-dwim)
+
 ;; haskell
 (require-packages 'intero)
 (add-hook 'haskell-mode-hook 'intero-mode)
@@ -1354,6 +1361,16 @@
   :flags '("--context 1"))
 
 (global-set-key (kbd "C-o M-z") 'juvi-rg-parent-project)
+
+(rg-define-search juvi-rg-everything
+  "Run ripgrep in current project searching for literal in all files."
+  :dir (projectile-project-root)
+  :files "everything"
+  :format literal
+  :flags '("--context 1"))
+
+(global-set-key (kbd "C-o M-z") 'juvi-rg-parent-project)
+
 
 (global-set-key (kbd "C-c M-s") #'rg-menu)
 (define-key cider-mode-map (kbd "C-c M-s") #'rg-menu)
@@ -1732,14 +1749,7 @@ process running; defaults to t when called interactively."
   (interactive)
   (juvi-put-file-on-clipboard nil))
 
-(transient-define-prefix transient-prefix-juvi ()
-  "juvi"
-  [("p" "put-file-path-on-clipboard" juvi-put-file-path-on-clipboard)
-   ("n" "put-file-name-on-clipboard" juvi-put-file-name-on-clipboard)
-   ("s" "show-result-buffer-cursor" juvi-show-result-buffer-cursor)
-   ("r" "copy-result-buffer" juvi-copy-result-buffer)
-   ("t" "execute-all-but-integration-tests" juvi-execute-all-but-integration-tests)
-   ("i" "execute-integration-tests" juvi-execute-integration-tests)])
+
 
 (global-set-key (kbd "C-M-j") 'transient-prefix-juvi)
 
@@ -1772,7 +1782,20 @@ process running; defaults to t when called interactively."
   (interactive)
   (juvi-format-region-to-clipboard 'python-mode))
 
+
+(transient-define-prefix transient-prefix-juvi ()
+  "juvi"
+  [("p" "put-file-path-on-clipboard" juvi-put-file-path-on-clipboard)
+   ("n" "put-file-name-on-clipboard" juvi-put-file-name-on-clipboard)
+   ("h" "hide-result-buffer-cursor" juvi-hide-result-buffer-cursor)
+   ("r" "copy-result-buffer" juvi-copy-result-buffer)
+   ("t" "execute-all-but-integration-tests" juvi-execute-all-but-integration-tests)
+   ("i" "execute-integration-tests" juvi-execute-integration-tests)
+   ("f" "format-clojure-region-to-clipboard" juvi-format-clojure-region-to-clipboard)])
+
 (define-key python-mode-map (kbd "C-M-w") 'juvi-format-python-region-to-clipboard)
+
+
 
 
 (global-set-key (kbd "C-x C-l") 'balance-windows)
