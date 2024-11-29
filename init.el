@@ -329,6 +329,10 @@
 (global-set-key (kbd "C-x g") 'magit-status)
 (global-set-key (kbd "C-o C-v") 'magit-blame)
 
+(defun juvi-git-commit-setup-handler ()
+  (insert (magit-get-current-branch)))
+
+(add-hook 'git-commit-setup-hook 'juvi-git-commit-setup-handler)
 
 ;; (add-to-list 'load-path "~/.emacs.d/vendor/clj-refactor.el/")
 ;; (require 'clj-refactor)
@@ -856,6 +860,26 @@
 
 (define-key clojure-mode-map (kbd "C-M-O C-M-O") 'juvi-insert-debug-emit)
 
+(defun juvi-insert-now ()
+  (interactive)
+  (save-excursion
+    (insert ";; NOW TODO: remove me"))
+  (juvi-indent-whole-sexp))
+
+(defun juvi-search-now-forward ()
+  (interactive)
+  (search-forward "NOW"))
+
+(defun juvi-search-now-backward ()
+  (interactive)
+  (search-backward "NOW"))
+
+(defhydra hydra-now (global-map "C-o n")
+  "now"
+  ("i" juvi-insert-now "insert-now")
+  ("n" juvi-search-now-forward "search-now-forward")
+  ("p" juvi-search-now-backward "search-now-backward"))
+
 (defun juvi-insert-comment-block ()
   (interactive)
   (save-excursion
@@ -931,7 +955,7 @@
   ;; TODO: parse def and defun name from the sexp and insert that
   (insert (cider-defun-at-point)))
 
-(define-key clojure-mode-map (kbd "C-o n") 'insert-defun-name)
+;; (define-key clojure-mode-map (kbd "C-o n") 'insert-defun-name)
 
 ;; Delete selection
 (delete-selection-mode 1)
@@ -1791,7 +1815,8 @@ process running; defaults to t when called interactively."
    ("r" "copy-result-buffer" juvi-copy-result-buffer)
    ("t" "execute-all-but-integration-tests" juvi-execute-all-but-integration-tests)
    ("i" "execute-integration-tests" juvi-execute-integration-tests)
-   ("f" "format-clojure-region-to-clipboard" juvi-format-clojure-region-to-clipboard)])
+   ("f" "format-clojure-region-to-clipboard" juvi-format-clojure-region-to-clipboard)
+   ("o" "insert-now" juvi-insert-now)])
 
 (define-key python-mode-map (kbd "C-M-w") 'juvi-format-python-region-to-clipboard)
 
