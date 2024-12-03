@@ -329,10 +329,15 @@
 (global-set-key (kbd "C-x g") 'magit-status)
 (global-set-key (kbd "C-o C-v") 'magit-blame)
 
+(defun juvi-jira-id (string)
+  (when (string-match "\\`[[:alpha:]]\\{3\\}-[[:digit:]]\\{1,\\}" string)
+     (match-string 0 string)))
+
 (defun juvi-git-commit-setup-handler ()
   (when (and (looking-at-p "$") ;; the message is empty i.e. we are not amending a commit
-             (not (= "master" (magit-get-current-branch))))
-    (insert (magit-get-current-branch))))
+             (juvi-jira-id (magit-get-current-branch)))
+    (insert (juvi-jira-id (magit-get-current-branch)))
+    (insert " ")))
 
 (add-hook 'git-commit-setup-hook 'juvi-git-commit-setup-handler)
 
