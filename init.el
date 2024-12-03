@@ -330,7 +330,9 @@
 (global-set-key (kbd "C-o C-v") 'magit-blame)
 
 (defun juvi-git-commit-setup-handler ()
-  (insert (magit-get-current-branch)))
+  (when (and (looking-at-p "$") ;; the message is empty i.e. we are not amending a commit
+             (not (= "master" (magit-get-current-branch))))
+    (insert (magit-get-current-branch))))
 
 (add-hook 'git-commit-setup-hook 'juvi-git-commit-setup-handler)
 
