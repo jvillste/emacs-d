@@ -60,7 +60,7 @@
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
-   '(python-pytest gnu-elpa-keyring-update pytest xml-format lsp-ui lsp-mode clj-refactor yaml-mode typescript-mode wgsl-mode zenburn-theme terraform-mode change-case quelpa python helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile ggtags exec-path-from-shell edn company avy))
+   '(flycheck python-mode python-pytest gnu-elpa-keyring-update pytest xml-format lsp-ui lsp-mode clj-refactor yaml-mode typescript-mode wgsl-mode zenburn-theme terraform-mode change-case quelpa python helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile ggtags exec-path-from-shell edn company avy))
  '(projectile-enable-caching nil)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "target"))
@@ -1758,12 +1758,14 @@ process running; defaults to t when called interactively."
 ;; emacs
 
 ;; originally from https://stackoverflow.com/a/2417617
-(defun juvi-put-file-on-clipboard (include-path)
+(defun juvi-put-file-on-clipboard (include-path include-extension)
   (let ((filename (if (equal major-mode 'dired-mode)
                       default-directory
                     (if include-path
                         (buffer-file-name)
-                      (file-name-nondirectory (buffer-file-name))))))
+                      (if include-extension
+                          (file-name-nondirectory (buffer-file-name))
+                        (file-name-sans-extension (file-name-nondirectory (buffer-file-name))))))))
     (when filename
       (with-temp-buffer
         (insert filename)
@@ -1773,14 +1775,17 @@ process running; defaults to t when called interactively."
 (defun juvi-put-file-path-on-clipboard ()
   "Put the current file name on the clipboard"
   (interactive)
-  (juvi-put-file-on-clipboard t))
+  (juvi-put-file-on-clipboard t t))
 
 (defun juvi-put-file-name-on-clipboard ()
   "Put the current file path on the clipboard"
   (interactive)
-  (juvi-put-file-on-clipboard nil))
+  (juvi-put-file-on-clipboard nil t))
 
-
+(defun juvi-put-file-name-without-extension-on-clipboard ()
+  "Put the current file path on the clipboard"
+  (interactive)
+  (juvi-put-file-on-clipboard nil nil))
 
 (global-set-key (kbd "C-M-j") 'transient-prefix-juvi)
 
@@ -1818,6 +1823,7 @@ process running; defaults to t when called interactively."
   "juvi"
   [("p" "put-file-path-on-clipboard" juvi-put-file-path-on-clipboard)
    ("n" "put-file-name-on-clipboard" juvi-put-file-name-on-clipboard)
+   ("m" "put-file-name-without-extension-on-clipboard" juvi-put-file-name-without-extension-on-clipboard)
    ("h" "hide-result-buffer-cursor" juvi-hide-result-buffer-cursor)
    ("r" "copy-result-buffer" juvi-copy-result-buffer)
    ("t" "execute-all-but-integration-tests" juvi-execute-all-but-integration-tests)
