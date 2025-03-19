@@ -1887,7 +1887,7 @@ process running; defaults to t when called interactively."
    ("o" "insert-now" juvi-insert-now)
    ("k" "kill-other-buffers" kill-other-buffers)
    ("s" "split-sexps-to-lines" juvi-split-sexps-to-lines)
-   ("S" "split-sexps-to-lines" juvi-just-one-space-in-region)])
+   ("S" "just-one-space-in-region" juvi-just-one-space-in-region)])
 
 (define-key python-mode-map (kbd "C-M-w") 'juvi-format-python-region-to-clipboard)
 
