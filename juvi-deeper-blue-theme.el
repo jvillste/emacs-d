@@ -79,6 +79,7 @@
  '(success ((((class color) (min-colors 89)) (:foreground "SeaGreen2"))))
  '(warning ((((class color) (min-colors 89)) (:foreground "Yellow"))))
  '(highlight-symbol-face ((t (:background "forest green" :foreground "gray100"))))
+ '(symbol-overlay-default-face ((t (:background "forest green" :foreground "gray100"))))
  '(default ((((class color) (min-colors 89)) (:background "#000000" :foreground "gray80")))))
 
 (provide-theme 'juvi-deeper-blue)
