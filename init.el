@@ -18,8 +18,9 @@
  '(cider-dynamic-indentation nil)
  '(cider-enhanced-cljs-completion-p nil)
  '(cider-interactive-eval-output-destination 'repl-buffer)
- '(cider-ns-refresh-after-fn "dev/start" t)
- '(cider-ns-refresh-before-fn "dev/stop" t)
+ '(cider-jack-in-default 'lein)
+ '(cider-ns-refresh-after-fn "dev/start")
+ '(cider-ns-refresh-before-fn "dev/stop")
  '(cider-ns-refresh-show-log-buffer nil)
  '(cider-output-std-streams-to-popup t)
  '(cider-refresh-show-log-buffer nil)
@@ -27,6 +28,7 @@
  '(cider-save-file-on-load t)
  '(cider-save-files-on-cider-refresh t)
  '(cider-test-defining-forms '("deftest" "defspec" "with-test"))
+ '(cider-test-fail-fast nil)
  '(cljr-auto-clean-ns nil)
  '(cljr-favor-prefix-notation nil)
  '(cljr-magic-require-namespaces
@@ -39,7 +41,7 @@
  '(clojure-thread-all-but-last t)
  '(custom-enabled-themes '(juvi-deeper-blue))
  '(custom-safe-themes
-   '("8a3c4b0e97c2007655aa56e4201cfb592b75d01804b6968fb2b5e4e93d9818ee" "a60c1317f8a048ff232de128974f1e0219e99a8f4032069eef1a96d62c9e16da" "5252c9e5f25ccb15ba0e2c6890770534499f430c202588d6adb82739de5a2f15" "64510b8379398428665d62469a65f1f26a143f50bdfd75aa08ab82c58666a16a" "b32cf217327b6b6b2c4fc7e917fb04626a1a081c164059c58f81447639085c6f" "1ff292adb82d413c3b540f1936df0a6ec953f1e9b53a0e1b1331c626b288a80f" "e1c652f78f723bee2c626d6b11444b9e064ab6fe941306ee72a7a1ff8c2762dc" "4e6439567a7d852cb5e4b916ec5f8d2567ac1b8f51bbe92bc75e1c47564fed54" "ff5e537e366db140285c24ca399abfe116379abfb83ce42fdd0844ace47d9d63" "d7ddab1ce8e1eac362036a647955790d897db221a8f18757415af4bcf934a76d" "c0579966a5f9f1d9f7d499f4869278073b913bcc12a98f4dce9b7590939d34fe" "f9a3cd3ecf80347e2716daf7f8f929adecd3efcafe660ae7785172d11b17fa49" "df3a0d74d0294a7a4fbb566975ab1659e8f75e2c020067c2a3becf0a5e4b1d84" "78459fbbfc2c176ca5c481e429598e2f1b644e5f2d610679d379d75ef3c0dc9a" "faeec12e44d84a02a578d16460e7b00d491fca28b109d6fc9301e6aa45145492" "6fac5cd7353e2ab050b80923147c4846afac198c6c757c9eaa5736a5d1e52218" "2d44815daa6caa2341cf1abae1713315e17b3eca394cbccb8ed5929022f30538" "48455a96d7234093c0b5a156f0dc9b8ceb6c8a99e32beca521395ff973828ad5" "24c251a53f48fc529805aa4d567d212a4837eba475ce22992e448b210f51867e" "7205b1e53c3255ee0da478ca2c51e4ddf30a71a659802e0dbfae8a83d8662703" "ec0a8caf37e3df9c0911ee8e83068dde5808270687751de995c17609150bf342" "f366d4bc6d14dcac2963d45df51956b2409a15b770ec2f6d730e73ce0ca5c8a7" default))
+   '("46be98fa0dc7d07ab63f765ca9f01cadc0e73febf080d39802cf4dc356ded626" "8a3c4b0e97c2007655aa56e4201cfb592b75d01804b6968fb2b5e4e93d9818ee" "a60c1317f8a048ff232de128974f1e0219e99a8f4032069eef1a96d62c9e16da" "5252c9e5f25ccb15ba0e2c6890770534499f430c202588d6adb82739de5a2f15" "64510b8379398428665d62469a65f1f26a143f50bdfd75aa08ab82c58666a16a" "b32cf217327b6b6b2c4fc7e917fb04626a1a081c164059c58f81447639085c6f" "1ff292adb82d413c3b540f1936df0a6ec953f1e9b53a0e1b1331c626b288a80f" "e1c652f78f723bee2c626d6b11444b9e064ab6fe941306ee72a7a1ff8c2762dc" "4e6439567a7d852cb5e4b916ec5f8d2567ac1b8f51bbe92bc75e1c47564fed54" "ff5e537e366db140285c24ca399abfe116379abfb83ce42fdd0844ace47d9d63" "d7ddab1ce8e1eac362036a647955790d897db221a8f18757415af4bcf934a76d" "c0579966a5f9f1d9f7d499f4869278073b913bcc12a98f4dce9b7590939d34fe" "f9a3cd3ecf80347e2716daf7f8f929adecd3efcafe660ae7785172d11b17fa49" "df3a0d74d0294a7a4fbb566975ab1659e8f75e2c020067c2a3becf0a5e4b1d84" "78459fbbfc2c176ca5c481e429598e2f1b644e5f2d610679d379d75ef3c0dc9a" "faeec12e44d84a02a578d16460e7b00d491fca28b109d6fc9301e6aa45145492" "6fac5cd7353e2ab050b80923147c4846afac198c6c757c9eaa5736a5d1e52218" "2d44815daa6caa2341cf1abae1713315e17b3eca394cbccb8ed5929022f30538" "48455a96d7234093c0b5a156f0dc9b8ceb6c8a99e32beca521395ff973828ad5" "24c251a53f48fc529805aa4d567d212a4837eba475ce22992e448b210f51867e" "7205b1e53c3255ee0da478ca2c51e4ddf30a71a659802e0dbfae8a83d8662703" "ec0a8caf37e3df9c0911ee8e83068dde5808270687751de995c17609150bf342" "f366d4bc6d14dcac2963d45df51956b2409a15b770ec2f6d730e73ce0ca5c8a7" default))
  '(ediff-merge-split-window-function 'split-window-horizontally)
  '(ediff-split-window-function 'split-window-horizontally)
  '(ediff-window-setup-function 'ediff-setup-windows-plain)
@@ -60,7 +62,7 @@
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
-   '(flycheck python-mode python-pytest gnu-elpa-keyring-update pytest xml-format lsp-ui lsp-mode clj-refactor yaml-mode typescript-mode wgsl-mode zenburn-theme terraform-mode change-case quelpa python helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile ggtags exec-path-from-shell edn company avy))
+   '(gptel symbol-overlay flycheck python-mode python-pytest gnu-elpa-keyring-update pytest xml-format lsp-ui lsp-mode yaml-mode typescript-mode wgsl-mode zenburn-theme terraform-mode change-case quelpa python helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile ggtags exec-path-from-shell edn company avy))
  '(projectile-enable-caching nil)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "target"))
@@ -99,6 +101,7 @@
       (thread-last . 1))
      (checkdoc-package-keywords-flag)))
  '(show-paren-mode t)
+ '(symbol-overlay-idle-time 0.2)
  '(undo-outer-limit 22000000)
  '(whitespace-action nil)
  '(whitespace-line-column 1000)
@@ -149,8 +152,6 @@
 
 (global-set-key (kbd "M-z") 'undo)
 
-;; cider is loaded as a git submodule to get a stable version
-;; (add-to-list 'load-path "~/.emacs.d/vendor/cider/")
 (require-packages 'parseedn 'cider)
 ;; (require 'cider)
 ;; (require 'cider-ns)
@@ -323,9 +324,9 @@
 (global-set-key (kbd "C-o g") 'git-gutter:update-all-windows)
 
 
-(setq magit-last-seen-setup-instructions "1.4.0")
+;; (setq magit-last-seen-setup-instructions "1.4.0")
 (require-packages 'magit)
-(set-variable 'magit-emacsclient-executable "/usr/local/Cellar/emacs/24.3/bin/emacsclient")
+;; (set-variable 'magit-emacsclient-executable "/usr/local/Cellar/emacs/24.3/bin/emacsclient")
 (global-set-key (kbd "C-x g") 'magit-status)
 (global-set-key (kbd "C-o C-v") 'magit-blame)
 
@@ -344,8 +345,8 @@
 ;; (add-to-list 'load-path "~/.emacs.d/vendor/clj-refactor.el/")
 ;; (require 'clj-refactor)
 
-(add-to-list 'package-pinned-packages '(clj-refactor . "melpa-stable") t)
-;; (require-packages 'clj-refactor)
+;; (add-to-list 'package-pinned-packages '(clj-refactor . "melpa-stable") t)
+(require-packages 'clj-refactor)
 
 (add-hook 'clojure-mode-hook
           (lambda ()
@@ -830,12 +831,39 @@
 
 (define-key clojure-mode-map (kbd "C-<tab>") 'company-complete)
 
-(require-packages 'highlight-symbol)
-(global-set-key (kbd "C-c h") 'highlight-symbol-mode)
-(defhydra hydra-highlight-symbol (global-map "C-c j")
-  "highlight-symbol"
+;; (require-packages 'highlight-symbol)
+;; (global-set-key (kbd "C-c h") 'highlight-symbol-mode)
+;; (defhydra hydra-highlight-symbol (global-map "C-c j")
+;;   "highlight-symbol"
+;;   ("n" highlight-symbol-next "next")
+;;   ("p" highlight-symbol-prev "previous"))
+
+(require-packages 'symbol-overlay)
+;; originally from https://github.com/wolray/symbol-overlay/issues/59
+;; (transient-define-prefix symbol-overlay-transient ()
+;;   "Symbol Overlay transient"
+;;   ["Symbol Overlay"
+;;    ["Overlays"
+;;     ("." "Add/Remove at point" symbol-overlay-put)
+;;     ("k" "Remove All" symbol-overlay-remove-all)
+;;     ]
+;;    ["Move to Symbol"
+;;     ("n" "Next" symbol-overlay-jump-next)
+;;     ("p" "Previous" symbol-overlay-jump-prev)
+;;     ]
+;;    ["Other"
+;;     ("h" "Highlight symbol-at-point" symbol-overlay-mode)
+;;     ]
+;;    ]
+;;   )
+;; (global-set-key (kbd "C-c j") 'symbol-overlay-transient)
+
+(defhydra hydra-symbol-overlay (global-map "C-c j")
+  "symbol-overlay"
   ("n" highlight-symbol-next "next")
   ("p" highlight-symbol-prev "previous"))
+
+(global-set-key (kbd "C-c h") 'symbol-overlay-mode)
 
 (defun indent-buffer ()
   (interactive)
@@ -870,16 +898,16 @@
 (defun juvi-insert-now ()
   (interactive)
   (save-excursion
-    (insert ";; NOW TODO: remove me"))
+    (insert ";; hot-right-now TODO: remove me"))
   (juvi-indent-whole-sexp))
 
 (defun juvi-search-now-forward ()
   (interactive)
-  (search-forward "NOW"))
+  (search-forward "hot-right-now"))
 
 (defun juvi-search-now-backward ()
   (interactive)
-  (search-backward "NOW"))
+  (search-backward "hot-right-now"))
 
 (defhydra hydra-now (global-map "C-o n")
   "now"
@@ -1165,8 +1193,6 @@
       (goto-char (point-min))
       (while (re-search-forward "[ \n]+" nil t)
         (replace-match " ")))))
-
-(global-set-key (kbd "M-K") 'juvi-just-one-space-in-region)
 
 ;; avy
 
@@ -1481,8 +1507,8 @@
   :ensure t
   :init
   (elpy-enable))
-
-;; (elpy-enable)
+;; (elpy-disable)
+(elpy-enable)
 ;; (require-packages 'elpy)
 
 (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
@@ -1818,6 +1844,35 @@ process running; defaults to t when called interactively."
   (interactive)
   (juvi-format-region-to-clipboard 'python-mode))
 
+;; https://stackoverflow.com/a/3417473
+(defun kill-other-buffers ()
+  "Kill all other buffers."
+  (interactive)
+  (mapc 'kill-buffer
+        (delq (current-buffer)
+              (remove-if-not 'buffer-file-name (buffer-list)))))
+
+(defun juvi-split-sexps-to-lines ()
+  "Split the selected region into separate lines for each top-level S-expression."
+  (interactive)
+  (let* ((start (region-beginning))          ; Start of the selected region
+         (end (region-end))                  ; End of the selected region
+         (region-text (buffer-substring-no-properties start end)) ; Copy region text
+         (temp-buffer (generate-new-buffer " *temp*"))) ; Create a temporary buffer
+    ;; Work in the temporary buffer
+    (with-current-buffer temp-buffer
+      (insert region-text)                   ; Insert the region text
+      (goto-char (point-min))                ; Move to the start
+      (while (not (eobp))                    ; Loop until end of buffer
+        (forward-sexp 1)                     ; Move past the next sexp
+        (unless (eobp)                       ; If not at the end
+          (insert "\n"))))                   ; Insert a newline
+    ;; Replace the original region with the modified content
+    (delete-region start end)                ; Remove the original region
+    (insert (with-current-buffer temp-buffer ; Insert the edited text
+              (buffer-string)))
+    (kill-buffer temp-buffer))               ; Clean up the temporary buffer
+  )
 
 (transient-define-prefix transient-prefix-juvi ()
   "juvi"
@@ -1829,7 +1884,10 @@ process running; defaults to t when called interactively."
    ("t" "execute-all-but-integration-tests" juvi-execute-all-but-integration-tests)
    ("i" "execute-integration-tests" juvi-execute-integration-tests)
    ("f" "format-clojure-region-to-clipboard" juvi-format-clojure-region-to-clipboard)
-   ("o" "insert-now" juvi-insert-now)])
+   ("o" "insert-now" juvi-insert-now)
+   ("k" "kill-other-buffers" kill-other-buffers)
+   ("s" "split-sexps-to-lines" juvi-split-sexps-to-lines)
+   ("S" "split-sexps-to-lines" juvi-just-one-space-in-region)])
 
 (define-key python-mode-map (kbd "C-M-w") 'juvi-format-python-region-to-clipboard)
 
@@ -1863,3 +1921,26 @@ process running; defaults to t when called interactively."
 ;; xml
 
 (require-packages 'xml-format)
+
+;; smerge
+
+(global-set-key (kbd "C-M-j") 'transient-prefix-juvi)
+
+;; gptel
+
+(require-packages 'gptel)
+
+(setq gptel-backend
+      (gptel-make-ollama "Ollama"
+                         :host "localhost:11434"
+                         :models '("qwen2.5-coder-7b-instruct-q4_k_m")
+                         :stream t))
+(setq gptel-model "qwen2.5-coder-7b-instruct-q4_k_m")
+
+;; macros
+
+(defhydra hydra-keyboard-macro (global-map "C-o m")
+  "keyboard macro"
+
+  ("s" (kmacro-start-macro nil) "start")
+  ("e" (kmacro-end-or-call-macro nil) "end or call"))
