@@ -39,6 +39,7 @@
      ("zip" . "clojure.zip")))
  '(cljr-warn-on-eval nil)
  '(clojure-thread-all-but-last t)
+ '(clojure-toplevel-inside-comment-form t)
  '(custom-enabled-themes '(juvi-deeper-blue))
  '(custom-safe-themes
    '("46be98fa0dc7d07ab63f765ca9f01cadc0e73febf080d39802cf4dc356ded626" "8a3c4b0e97c2007655aa56e4201cfb592b75d01804b6968fb2b5e4e93d9818ee" "a60c1317f8a048ff232de128974f1e0219e99a8f4032069eef1a96d62c9e16da" "5252c9e5f25ccb15ba0e2c6890770534499f430c202588d6adb82739de5a2f15" "64510b8379398428665d62469a65f1f26a143f50bdfd75aa08ab82c58666a16a" "b32cf217327b6b6b2c4fc7e917fb04626a1a081c164059c58f81447639085c6f" "1ff292adb82d413c3b540f1936df0a6ec953f1e9b53a0e1b1331c626b288a80f" "e1c652f78f723bee2c626d6b11444b9e064ab6fe941306ee72a7a1ff8c2762dc" "4e6439567a7d852cb5e4b916ec5f8d2567ac1b8f51bbe92bc75e1c47564fed54" "ff5e537e366db140285c24ca399abfe116379abfb83ce42fdd0844ace47d9d63" "d7ddab1ce8e1eac362036a647955790d897db221a8f18757415af4bcf934a76d" "c0579966a5f9f1d9f7d499f4869278073b913bcc12a98f4dce9b7590939d34fe" "f9a3cd3ecf80347e2716daf7f8f929adecd3efcafe660ae7785172d11b17fa49" "df3a0d74d0294a7a4fbb566975ab1659e8f75e2c020067c2a3becf0a5e4b1d84" "78459fbbfc2c176ca5c481e429598e2f1b644e5f2d610679d379d75ef3c0dc9a" "faeec12e44d84a02a578d16460e7b00d491fca28b109d6fc9301e6aa45145492" "6fac5cd7353e2ab050b80923147c4846afac198c6c757c9eaa5736a5d1e52218" "2d44815daa6caa2341cf1abae1713315e17b3eca394cbccb8ed5929022f30538" "48455a96d7234093c0b5a156f0dc9b8ceb6c8a99e32beca521395ff973828ad5" "24c251a53f48fc529805aa4d567d212a4837eba475ce22992e448b210f51867e" "7205b1e53c3255ee0da478ca2c51e4ddf30a71a659802e0dbfae8a83d8662703" "ec0a8caf37e3df9c0911ee8e83068dde5808270687751de995c17609150bf342" "f366d4bc6d14dcac2963d45df51956b2409a15b770ec2f6d730e73ce0ca5c8a7" default))
@@ -492,6 +493,12 @@
   (juvi-pprint-eval-to-result-buffer (cider-last-sexp)))
 
 (define-key cider-mode-map (kbd "C-c C-p") 'juvi-pprint-eval-last-sexp-to-result-buffer)
+
+(defun juvi-pprint-eval-defun-at-point-to-result-buffer ()
+  (interactive)
+  (juvi-pprint-eval-to-result-buffer (cider-defun-at-point)))
+
+(define-key cider-mode-map (kbd "C-c C-o") 'juvi-pprint-eval-defun-at-point-to-result-buffer)
 
 (defun juvi-mark-function-for-eval ()
   (interactive)
@@ -1494,8 +1501,6 @@
   (interactive)
   (setq cider-clojure-cli-global-options ""))
 
-(define-key cider-mode-map (kbd "C-o c") 'juvi-connect-to-localhost)
-
 
 ;; python
 
@@ -1874,6 +1879,12 @@ process running; defaults to t when called interactively."
     (kill-buffer temp-buffer))               ; Clean up the temporary buffer
   )
 
+(defalias 'juvi-remove-sexp-prefix
+   (kmacro "M-<return> C-w C-p C-e C-M-k C-f SPC C-y C-M-b C-M-b # _ C-c b"))
+
+(defalias 'juvi-restore-sexp-prefix
+   (kmacro "<backspace> <backspace> C-M-f <return> C-p C-e C-b C-c l f <backspace>"))
+
 (transient-define-prefix transient-prefix-juvi ()
   "juvi"
   [("p" "put-file-path-on-clipboard" juvi-put-file-path-on-clipboard)
@@ -1887,7 +1898,9 @@ process running; defaults to t when called interactively."
    ("o" "insert-now" juvi-insert-now)
    ("k" "kill-other-buffers" kill-other-buffers)
    ("s" "split-sexps-to-lines" juvi-split-sexps-to-lines)
-   ("S" "just-one-space-in-region" juvi-just-one-space-in-region)])
+   ("S" "just-one-space-in-region" juvi-just-one-space-in-region)
+   ("e" "remove-sexp-prefix" juvi-remove-sexp-prefix)
+   ("x" "restore-sexp-prefix" juvi-restore-sexp-prefix)])
 
 (define-key python-mode-map (kbd "C-M-w") 'juvi-format-python-region-to-clipboard)
 
@@ -1944,3 +1957,92 @@ process running; defaults to t when called interactively."
 
   ("s" (kmacro-start-macro nil) "start")
   ("e" (kmacro-end-or-call-macro nil) "end or call"))
+
+
+;; comment-or-uncomment-sexp from https://endlessparentheses.com/a-comment-or-uncomment-sexp-command.html?source=rss
+
+(defun uncomment-sexp (&optional n)
+  "Uncomment a sexp around point."
+  (interactive "P")
+  (let* ((initial-point (point-marker))
+         (inhibit-field-text-motion t)
+         (p)
+         (end (save-excursion
+                (when (elt (syntax-ppss) 4)
+                  (re-search-backward comment-start-skip
+                                      (line-beginning-position)
+                                      t))
+                (setq p (point-marker))
+                (comment-forward (point-max))
+                (point-marker)))
+         (beg (save-excursion
+                (forward-line 0)
+                (while (and (not (bobp))
+                            (= end (save-excursion
+                                     (comment-forward (point-max))
+                                     (point))))
+                  (forward-line -1))
+                (goto-char (line-end-position))
+                (re-search-backward comment-start-skip
+                                    (line-beginning-position)
+                                    t)
+                (ignore-errors
+                  (while (looking-at-p comment-start-skip)
+                    (forward-char -1)))
+                (point-marker))))
+    (unless (= beg end)
+      (uncomment-region beg end)
+      (goto-char p)
+      ;; Indentify the "top-level" sexp inside the comment.
+      (while (and (ignore-errors (backward-up-list) t)
+                  (>= (point) beg))
+        (skip-chars-backward (rx (syntax expression-prefix)))
+        (setq p (point-marker)))
+      ;; Re-comment everything before it.
+      (ignore-errors
+        (comment-region beg p))
+      ;; And everything after it.
+      (goto-char p)
+      (forward-sexp (or n 1))
+      (skip-chars-forward "\r\n[:blank:]")
+      (if (< (point) end)
+          (ignore-errors
+            (comment-region (point) end))
+        ;; If this is a closing delimiter, pull it up.
+        (goto-char end)
+        (skip-chars-forward "\r\n[:blank:]")
+        (when (eq 5 (car (syntax-after (point))))
+          (delete-indentation))))
+    ;; Without a prefix, it's more useful to leave point where
+    ;; it was.
+    (unless n
+      (goto-char initial-point))))
+
+(defun comment-sexp--raw ()
+  "Comment the sexp at point or ahead of point."
+  (pcase (or (bounds-of-thing-at-point 'sexp)
+             (save-excursion
+               (skip-chars-forward "\r\n[:blank:]")
+               (bounds-of-thing-at-point 'sexp)))
+    (`(,l . ,r)
+     (goto-char r)
+     (skip-chars-forward "\r\n[:blank:]")
+     (save-excursion
+       (comment-region l r))
+     (skip-chars-forward "\r\n[:blank:]"))))
+
+(defun comment-or-uncomment-sexp (&optional n)
+  "Comment the sexp at point and move past it.
+If already inside (or before) a comment, uncomment instead.
+With a prefix argument N, (un)comment that many sexps."
+  (interactive "P")
+  (if (or (elt (syntax-ppss) 4)
+          (< (save-excursion
+               (skip-chars-forward "\r\n[:blank:]")
+               (point))
+             (save-excursion
+               (comment-forward 1)
+               (point))))
+      (uncomment-sexp n)
+    (dotimes (_ (or n 1))
+      (comment-sexp--raw))))
