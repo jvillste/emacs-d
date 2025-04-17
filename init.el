@@ -19,8 +19,8 @@
  '(cider-enhanced-cljs-completion-p nil)
  '(cider-interactive-eval-output-destination 'repl-buffer)
  '(cider-jack-in-default 'lein)
- '(cider-ns-refresh-after-fn "dev/start")
- '(cider-ns-refresh-before-fn "dev/stop")
+ '(cider-ns-refresh-after-fn "dev/start" t)
+ '(cider-ns-refresh-before-fn "dev/stop" t)
  '(cider-ns-refresh-show-log-buffer nil)
  '(cider-output-std-streams-to-popup t)
  '(cider-refresh-show-log-buffer nil)
@@ -59,11 +59,14 @@
  '(ivy-use-virtual-buffers t)
  '(ivy-virtual-abbreviate 'full)
  '(js-indent-level 2)
+ '(lsp-enable-symbol-highlighting nil)
+ '(lsp-keymap-prefix "C-o RET")
+ '(lsp-lens-enable nil)
  '(mc/always-run-for-all t)
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
-   '(gptel symbol-overlay flycheck python-mode python-pytest gnu-elpa-keyring-update pytest xml-format lsp-ui lsp-mode yaml-mode typescript-mode wgsl-mode zenburn-theme terraform-mode change-case quelpa python helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile ggtags exec-path-from-shell edn company avy))
+   '(which-key gptel symbol-overlay flycheck python-mode python-pytest gnu-elpa-keyring-update pytest xml-format lsp-ui lsp-mode yaml-mode typescript-mode wgsl-mode zenburn-theme terraform-mode change-case quelpa python helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile ggtags exec-path-from-shell edn company avy))
  '(projectile-enable-caching nil)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "target"))
@@ -165,6 +168,8 @@
 
 (define-key cider-mode-map (kbd "C-c C-i") 'cider-pprint-eval-last-sexp-to-comment)
 
+(define-key cider-mode-map (kbd "M-.") 'lsp-find-definition)
+
 (define-key cider-mode-map (kbd "C-o C-t C-t") (lambda ()
                                                  (interactive)
                                                  (cider-eval-defun-at-point)
@@ -254,14 +259,19 @@
 ;; also see https://youtu.be/WMnVv63ezFQ
 ;; and https://emacs-lsp.github.io/lsp-mode/tutorials/clojure-guide/
 ;; and https://clojure-lsp.github.io/clojure-lsp/clients/#emacs
+(require-packages 'which-key)
+(which-key-mode)
 
-;; (require-packages 'lsp-mode)
+(require-packages 'lsp-mode)
 
-;; (add-hook 'clojure-mode-hook 'lsp)
-;; (add-hook 'clojurescript-mode-hook 'lsp)
-;; (add-hook 'clojurec-mode-hook 'lsp)
 
-;; (setq ;; lsp-keymap-prefix "M-l" ;; this is set through customize
+(add-hook 'clojure-mode-hook 'lsp)
+(add-hook 'clojurescript-mode-hook 'lsp)
+(add-hook 'clojurec-mode-hook 'lsp)
+
+(setq lsp-enable-indentation nil)
+
+;; (setq lsp-keymap-prefix "M-l"
 ;;  lsp-lens-enable nil
 ;;  gc-cons-threshold (* 100 1024 1024)
 ;;  read-process-output-max (* 1024 1024)
@@ -294,6 +304,9 @@
   ("d" paredit-forward-barf-sexp "forward barf")
   ("a" paredit-backward-slurp-sexp "backward slurp")
   ("s" paredit-backward-barf-sexp "backward barf"))
+
+(unbind-key "C-j" paredit-mode-map)
+(global-unset-key (kbd "C-j")) ;; this was electric-newline-and-maybe-indent
 
 ;; (defun my-paredit-nonlisp ()
 ;;   "Turn on paredit mode for non-lisps."
@@ -347,13 +360,13 @@
 ;; (require 'clj-refactor)
 
 ;; (add-to-list 'package-pinned-packages '(clj-refactor . "melpa-stable") t)
-(require-packages 'clj-refactor)
+;; (require-packages 'clj-refactor)
 
-(add-hook 'clojure-mode-hook
-          (lambda ()
-            (clj-refactor-mode 1)
-            ;;  (yas-minor-mode 1) ; for adding require/use/import
-            (cljr-add-keybindings-with-prefix "C-o RET")))
+;; (add-hook 'clojure-mode-hook
+;;           (lambda ()
+;;             (clj-refactor-mode 1)
+;;             ;;  (yas-minor-mode 1) ; for adding require/use/import
+;;             (cljr-add-keybindings-with-prefix "C-o RET")))
 
 
 (require-packages 'recentf)
@@ -551,13 +564,11 @@
 
 (define-key cider-mode-map (kbd "M-o M-i") 'juvi-eval-marked-sexp-silently)
 
-(defun juvi-eval-last-sexp-to-kill-ring ()
-  (interactive)
+(defun juvi-result-to-kill-ring (code)
   (cider-interactive-eval
-   (cider-last-sexp)
+   code
    (nrepl-make-response-handler (current-buffer)
                                 (lambda (_buffer value)
-                                  (message "result is now in the kill ring")
                                   (kill-new value))
                                 (lambda (_buffer out)
                                   (cider-emit-interactive-eval-output out))
@@ -567,12 +578,9 @@
    nil
    (cider--nrepl-print-request-map fill-column)))
 
-(define-key cider-mode-map (kbd "C-o C-p") 'juvi-eval-last-sexp-to-kill-ring)
-
-(defun juvi-eval-last-sexp-output-to-kill-ring ()
-  (interactive)
+(defun juvi-output-to-kill-ring (code)
   (kill-new "")
-  (cider-interactive-eval (cider-last-sexp)
+  (cider-interactive-eval code
                           (nrepl-make-response-handler (current-buffer)
                                                        (lambda (_buffer _value))
                                                        (lambda (_buffer output)
@@ -581,7 +589,18 @@
                                                          (cider-emit-interactive-eval-err-output err))
                                                        '())
                           nil
-                          (cider--nrepl-print-request-map fill-column))
+                          (cider--nrepl-print-request-map fill-column)))
+
+(defun juvi-eval-last-sexp-to-kill-ring ()
+  (interactive)
+  (juvi-result-to-kill-ring (cider-last-sexp))
+  (message "result is now in the kill ring 2"))
+
+(define-key cider-mode-map (kbd "C-o C-p") 'juvi-eval-last-sexp-to-kill-ring)
+
+(defun juvi-eval-last-sexp-output-to-kill-ring ()
+  (interactive)
+  (juvi-output-to-kill-ring (cider-last-sexp))
   (message "evaluation output is now in the kill ring"))
 
 (define-key cider-mode-map (kbd "C-S-o C-S-p") 'juvi-eval-last-sexp-output-to-kill-ring)
@@ -822,6 +841,20 @@
   (paredit-forward-slurp-sexp))
 
 (define-key cider-mode-map (kbd "C-S-q C-S-f") 'juvi-wrap-with-def-locals)
+
+(defun juvi-copy-string-with-fixed-indentation ()
+  (interactive)
+  (juvi-output-to-kill-ring (concat "(let [string " (cider-last-sexp) "
+                                           rows (string/split string #\"\\n\")
+                                           minimum-indentation (apply min
+                                                                      (map #(count (take-while #{\\space}
+                                                                                               %))
+                                                                           (rest rows)))]
+                                             (println (string/join \"\\n\"
+                                                        (concat [(first rows)]
+                                                                (map #(subs % minimum-indentation)
+                                                                     (rest rows))))))")))
+
 
 (add-to-list 'load-path "~/.emacs.d/vendor/iedit/")
 (require 'iedit)
@@ -1900,7 +1933,8 @@ process running; defaults to t when called interactively."
    ("s" "split-sexps-to-lines" juvi-split-sexps-to-lines)
    ("S" "just-one-space-in-region" juvi-just-one-space-in-region)
    ("e" "remove-sexp-prefix" juvi-remove-sexp-prefix)
-   ("x" "restore-sexp-prefix" juvi-restore-sexp-prefix)])
+   ("x" "restore-sexp-prefix" juvi-restore-sexp-prefix)
+   ("F" "copy-string-with-fixed-indentation" juvi-copy-string-with-fixed-indentation)])
 
 (define-key python-mode-map (kbd "C-M-w") 'juvi-format-python-region-to-clipboard)
 
@@ -1958,6 +1992,11 @@ process running; defaults to t when called interactively."
   ("s" (kmacro-start-macro nil) "start")
   ("e" (kmacro-end-or-call-macro nil) "end or call"))
 
+(defun juvi-insert-comment-macro ()
+  (interactive)
+  (insert "#_"))
+
+(global-set-key (kbd "C-j C-c") 'juvi-insert-comment-macro)
 
 ;; comment-or-uncomment-sexp from https://endlessparentheses.com/a-comment-or-uncomment-sexp-command.html?source=rss
 
@@ -2046,3 +2085,5 @@ With a prefix argument N, (un)comment that many sexps."
       (uncomment-sexp n)
     (dotimes (_ (or n 1))
       (comment-sexp--raw))))
+
+(define-key cider-mode-map (kbd "C-o c") 'comment-or-uncomment-sexp)
