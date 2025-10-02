@@ -59,9 +59,11 @@
  '(ivy-use-virtual-buffers t)
  '(ivy-virtual-abbreviate 'full)
  '(js-indent-level 2)
+ '(lsp-completion-enable nil)
  '(lsp-enable-symbol-highlighting nil)
  '(lsp-keymap-prefix "C-o RET")
  '(lsp-lens-enable nil)
+ '(lsp-ui-doc-show-with-mouse nil)
  '(mc/always-run-for-all t)
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
@@ -270,6 +272,7 @@
 (add-hook 'clojurec-mode-hook 'lsp)
 
 (setq lsp-enable-indentation nil)
+(setq lsp-enable-completion-at-point nil)
 
 ;; (setq lsp-keymap-prefix "M-l"
 ;;  lsp-lens-enable nil
@@ -499,7 +502,7 @@
                                                          (cider-emit-into-popup-buffer buffer err))
                                                        '())
                           nil
-                          (cider--nrepl-print-request-map fill-column)))
+                          (cider--nrepl-print-request-plist fill-column)))
 
 (defun juvi-pprint-eval-last-sexp-to-result-buffer ()
   (interactive)
@@ -562,7 +565,8 @@
                                                          nil)))
   (message "Ran marked sexp."))
 
-(define-key cider-mode-map (kbd "M-o M-i") 'juvi-eval-marked-sexp-silently)
+(global-set-key (kbd "M-o M-i") 'juvi-eval-marked-sexp-silently)
+;; (define-key cider-mode-map (kbd "M-o M-i") 'juvi-eval-marked-sexp-silently)
 
 (defun juvi-result-to-kill-ring (code)
   (cider-interactive-eval
@@ -576,7 +580,7 @@
                                   (cider-emit-interactive-eval-err-output err))
                                 '())
    nil
-   (cider--nrepl-print-request-map fill-column)))
+   (cider--nrepl-print-request-plist fill-column)))
 
 (defun juvi-output-to-kill-ring (code)
   (kill-new "")
@@ -589,7 +593,7 @@
                                                          (cider-emit-interactive-eval-err-output err))
                                                        '())
                           nil
-                          (cider--nrepl-print-request-map fill-column)))
+                          (cider--nrepl-print-request-plist fill-column)))
 
 (defun juvi-eval-last-sexp-to-kill-ring ()
   (interactive)
@@ -1304,7 +1308,7 @@
 (global-set-key (kbd "C-M-l") 'juvi-clean-white-space)
 
 ;; auto-revert-mode
-(global-auto-revert-mode)
+(global-auto-revert-mode 1)
 
 ;; misc
 (global-set-key (kbd "C-o C-b") 'previous-buffer)
@@ -1865,12 +1869,15 @@ process running; defaults to t when called interactively."
 (defun juvi-format-region-to-clipboard (mode)
   (let ((formatted-buffer (get-buffer-create "formatted-region"))
         (code-to-be-formatted (buffer-substring (mark) (point))))
+    (message code-to-be-formatted)
     (set-buffer formatted-buffer)
     (funcall mode)
+    (paredit-mode nil)
     (erase-buffer)
     (insert code-to-be-formatted)
     (indent-region (point-min) (point-max) nil)
     (clipboard-kill-ring-save (point-min) (point-max))))
+
 
 (defun juvi-format-clojure-region-to-clipboard ()
   (interactive)
@@ -1881,6 +1888,11 @@ process running; defaults to t when called interactively."
 (defun juvi-format-python-region-to-clipboard ()
   (interactive)
   (juvi-format-region-to-clipboard 'python-mode))
+
+(defun juvi-downcase-clipboard ()
+  "Take the last string from the kill ring, downcase it, and add it to the kill ring."
+  (interactive)
+  (kill-new (downcase (current-kill 0))))
 
 ;; https://stackoverflow.com/a/3417473
 (defun kill-other-buffers ()
@@ -1918,6 +1930,35 @@ process running; defaults to t when called interactively."
 (defalias 'juvi-restore-sexp-prefix
    (kmacro "<backspace> <backspace> C-M-f <return> C-p C-e C-b C-c l f <backspace>"))
 
+(defun juvi-append-region-to-list ()
+  (interactive)
+  (if (use-region-p)
+      (let ((region-text (buffer-substring (region-beginning) (region-end))))
+        (if (boundp 'juvi-region-list)
+            (setq juvi-region-list (concat juvi-region-list "\n" region-text))
+          (setq juvi-region-list region-text))
+        (message "Region appended to region list"))
+    (message "No active region")))
+
+(defun juvi-yank-region-list ()
+  (interactive)
+  (if (boundp 'juvi-region-list)
+      (progn
+        (insert juvi-region-list)
+        (message "Yanked contents of region list"))
+    (message "region list is not defined")))
+
+(defun juvi-clear-region-list ()
+  (interactive)
+  (makunbound 'juvi-region-list)
+  (message "juvi-region-list has been cleared"))
+
+(transient-define-prefix transient-prefix-region-list ()
+  "region-list"
+  [("a" "append-region-to-list" juvi-append-region-to-list)
+   ("c" "clear-region-list" juvi-clear-region-list)
+   ("y" "yank-region-list" juvi-yank-region-list)])
+
 (transient-define-prefix transient-prefix-juvi ()
   "juvi"
   [("p" "put-file-path-on-clipboard" juvi-put-file-path-on-clipboard)
@@ -1929,12 +1970,17 @@ process running; defaults to t when called interactively."
    ("i" "execute-integration-tests" juvi-execute-integration-tests)
    ("f" "format-clojure-region-to-clipboard" juvi-format-clojure-region-to-clipboard)
    ("o" "insert-now" juvi-insert-now)
+   ("O" "overwrite-mode" overwrite-mode)
    ("k" "kill-other-buffers" kill-other-buffers)
    ("s" "split-sexps-to-lines" juvi-split-sexps-to-lines)
    ("S" "just-one-space-in-region" juvi-just-one-space-in-region)
    ("e" "remove-sexp-prefix" juvi-remove-sexp-prefix)
    ("x" "restore-sexp-prefix" juvi-restore-sexp-prefix)
-   ("F" "copy-string-with-fixed-indentation" juvi-copy-string-with-fixed-indentation)])
+   ("F" "copy-string-with-fixed-indentation" juvi-copy-string-with-fixed-indentation)
+   ("d" "downcase-clipboard" juvi-downcase-clipboard)
+   ("l" "region-list-transient" transient-prefix-region-list)])
+
+(global-set-key (kbd "C-M-j") 'transient-prefix-juvi)
 
 (define-key python-mode-map (kbd "C-M-w") 'juvi-format-python-region-to-clipboard)
 
@@ -1971,7 +2017,7 @@ process running; defaults to t when called interactively."
 
 ;; smerge
 
-(global-set-key (kbd "C-M-j") 'transient-prefix-juvi)
+
 
 ;; gptel
 
