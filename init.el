@@ -6,7 +6,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(ansi-color-names-vector
-   ["black" "#d55e00" "#009e73" "#f8ec59" "#0072b2" "#cc79a7" "#56b4e9" "white"])
+   ["black" "#d55e00" "#009e73" "#f8ec59" "#0072b2" "#cc79a7" "#56b4e9"
+    "white"])
  '(beacon-blink-delay 0.3)
  '(beacon-blink-duration 0.1)
  '(beacon-blink-when-focused t)
@@ -17,6 +18,8 @@
  '(cider-auto-select-error-buffer nil)
  '(cider-dynamic-indentation nil)
  '(cider-enhanced-cljs-completion-p nil)
+ '(cider-font-lock-dynamically nil)
+ '(cider-font-lock-reader-conditionals t)
  '(cider-interactive-eval-output-destination 'repl-buffer)
  '(cider-jack-in-default 'lein)
  '(cider-ns-refresh-after-fn "dev/start" t)
@@ -32,17 +35,38 @@
  '(cljr-auto-clean-ns nil)
  '(cljr-favor-prefix-notation nil)
  '(cljr-magic-require-namespaces
-   '(("io" . "clojure.java.io")
-     ("set" . "clojure.set")
-     ("string" . "clojure.string")
-     ("walk" . "clojure.walk")
+   '(("io" . "clojure.java.io") ("set" . "clojure.set")
+     ("string" . "clojure.string") ("walk" . "clojure.walk")
      ("zip" . "clojure.zip")))
  '(cljr-warn-on-eval nil)
  '(clojure-thread-all-but-last t)
  '(clojure-toplevel-inside-comment-form t)
  '(custom-enabled-themes '(juvi-deeper-blue))
  '(custom-safe-themes
-   '("46be98fa0dc7d07ab63f765ca9f01cadc0e73febf080d39802cf4dc356ded626" "8a3c4b0e97c2007655aa56e4201cfb592b75d01804b6968fb2b5e4e93d9818ee" "a60c1317f8a048ff232de128974f1e0219e99a8f4032069eef1a96d62c9e16da" "5252c9e5f25ccb15ba0e2c6890770534499f430c202588d6adb82739de5a2f15" "64510b8379398428665d62469a65f1f26a143f50bdfd75aa08ab82c58666a16a" "b32cf217327b6b6b2c4fc7e917fb04626a1a081c164059c58f81447639085c6f" "1ff292adb82d413c3b540f1936df0a6ec953f1e9b53a0e1b1331c626b288a80f" "e1c652f78f723bee2c626d6b11444b9e064ab6fe941306ee72a7a1ff8c2762dc" "4e6439567a7d852cb5e4b916ec5f8d2567ac1b8f51bbe92bc75e1c47564fed54" "ff5e537e366db140285c24ca399abfe116379abfb83ce42fdd0844ace47d9d63" "d7ddab1ce8e1eac362036a647955790d897db221a8f18757415af4bcf934a76d" "c0579966a5f9f1d9f7d499f4869278073b913bcc12a98f4dce9b7590939d34fe" "f9a3cd3ecf80347e2716daf7f8f929adecd3efcafe660ae7785172d11b17fa49" "df3a0d74d0294a7a4fbb566975ab1659e8f75e2c020067c2a3becf0a5e4b1d84" "78459fbbfc2c176ca5c481e429598e2f1b644e5f2d610679d379d75ef3c0dc9a" "faeec12e44d84a02a578d16460e7b00d491fca28b109d6fc9301e6aa45145492" "6fac5cd7353e2ab050b80923147c4846afac198c6c757c9eaa5736a5d1e52218" "2d44815daa6caa2341cf1abae1713315e17b3eca394cbccb8ed5929022f30538" "48455a96d7234093c0b5a156f0dc9b8ceb6c8a99e32beca521395ff973828ad5" "24c251a53f48fc529805aa4d567d212a4837eba475ce22992e448b210f51867e" "7205b1e53c3255ee0da478ca2c51e4ddf30a71a659802e0dbfae8a83d8662703" "ec0a8caf37e3df9c0911ee8e83068dde5808270687751de995c17609150bf342" "f366d4bc6d14dcac2963d45df51956b2409a15b770ec2f6d730e73ce0ca5c8a7" default))
+   '("46be98fa0dc7d07ab63f765ca9f01cadc0e73febf080d39802cf4dc356ded626"
+     "8a3c4b0e97c2007655aa56e4201cfb592b75d01804b6968fb2b5e4e93d9818ee"
+     "a60c1317f8a048ff232de128974f1e0219e99a8f4032069eef1a96d62c9e16da"
+     "5252c9e5f25ccb15ba0e2c6890770534499f430c202588d6adb82739de5a2f15"
+     "64510b8379398428665d62469a65f1f26a143f50bdfd75aa08ab82c58666a16a"
+     "b32cf217327b6b6b2c4fc7e917fb04626a1a081c164059c58f81447639085c6f"
+     "1ff292adb82d413c3b540f1936df0a6ec953f1e9b53a0e1b1331c626b288a80f"
+     "e1c652f78f723bee2c626d6b11444b9e064ab6fe941306ee72a7a1ff8c2762dc"
+     "4e6439567a7d852cb5e4b916ec5f8d2567ac1b8f51bbe92bc75e1c47564fed54"
+     "ff5e537e366db140285c24ca399abfe116379abfb83ce42fdd0844ace47d9d63"
+     "d7ddab1ce8e1eac362036a647955790d897db221a8f18757415af4bcf934a76d"
+     "c0579966a5f9f1d9f7d499f4869278073b913bcc12a98f4dce9b7590939d34fe"
+     "f9a3cd3ecf80347e2716daf7f8f929adecd3efcafe660ae7785172d11b17fa49"
+     "df3a0d74d0294a7a4fbb566975ab1659e8f75e2c020067c2a3becf0a5e4b1d84"
+     "78459fbbfc2c176ca5c481e429598e2f1b644e5f2d610679d379d75ef3c0dc9a"
+     "faeec12e44d84a02a578d16460e7b00d491fca28b109d6fc9301e6aa45145492"
+     "6fac5cd7353e2ab050b80923147c4846afac198c6c757c9eaa5736a5d1e52218"
+     "2d44815daa6caa2341cf1abae1713315e17b3eca394cbccb8ed5929022f30538"
+     "48455a96d7234093c0b5a156f0dc9b8ceb6c8a99e32beca521395ff973828ad5"
+     "24c251a53f48fc529805aa4d567d212a4837eba475ce22992e448b210f51867e"
+     "7205b1e53c3255ee0da478ca2c51e4ddf30a71a659802e0dbfae8a83d8662703"
+     "ec0a8caf37e3df9c0911ee8e83068dde5808270687751de995c17609150bf342"
+     "f366d4bc6d14dcac2963d45df51956b2409a15b770ec2f6d730e73ce0ca5c8a7"
+     default))
  '(ediff-merge-split-window-function 'split-window-horizontally)
  '(ediff-split-window-function 'split-window-horizontally)
  '(ediff-window-setup-function 'ediff-setup-windows-plain)
@@ -68,13 +92,26 @@
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
-   '(which-key gptel symbol-overlay flycheck python-mode python-pytest gnu-elpa-keyring-update pytest xml-format lsp-ui lsp-mode yaml-mode typescript-mode wgsl-mode zenburn-theme terraform-mode change-case quelpa python helm-gtags irony-eldoc irony sync-recentf zettelkasten flycheck-clj-kondo re-jump rg ag ivy-rich counsel councel ivy projectile ace-mc intero flx-ido rust-mode cider minimap beacon wgrep-helm cider-macroexpansion epl yasnippet wgrep web-mode slamhound scala-mode racer pixie-mode php-mode paredit nodejs-repl multiple-cursors multi-web-mode markdown-mode magit inflections hydra htmlize highlight-symbol helm-projectile ggtags exec-path-from-shell edn company avy))
+   '(ace-mc ag avy beacon change-case cider cider-macroexpansion company
+            councel counsel edn epl exec-path-from-shell flx-ido
+            flycheck flycheck-clj-kondo ggtags gnu-elpa-keyring-update
+            gptel helm-gtags helm-projectile highlight-symbol htmlize
+            hydra inflections intero irony irony-eldoc ivy ivy-rich
+            lsp-mode lsp-ui magit markdown-mode minimap multi-web-mode
+            multiple-cursors nodejs-repl paredit php-mode pixie-mode
+            projectile pytest python python-mode python-pytest quelpa
+            racer re-jump rg rust-mode scala-mode slamhound
+            symbol-overlay sync-recentf terraform-mode typescript-mode
+            web-mode wgrep wgrep-helm wgsl-mode which-key xml-format
+            yaml-mode yasnippet zenburn-theme zettelkasten))
  '(projectile-enable-caching nil)
  '(projectile-globally-ignored-directories
-   '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "target"))
+   '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_"
+     ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "target"))
  '(projectile-mode t nil (projectile))
  '(projectile-project-root-files-bottom-up
-   '(".projectile" "build.sh" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs"))
+   '(".projectile" "build.sh" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr"
+     "_darcs"))
  '(projectile-use-git-grep nil)
  '(python-pytest-executable "python -m pytest ")
  '(recentf-max-menu-items 100)
@@ -82,29 +119,26 @@
  '(recentf-mode t)
  '(safe-local-variable-values
    '((eval progn
-           (setenv "VK_LAYER_PATH" "/Users/jukka/VulkanSDK/1.2.198.0/macOS/share/vulkan/explicit_layer.d")
-           (setenv "VK_ICD_FILENAMES" "/Users/jukka/VulkanSDK/1.2.198.0/macOS/share/vulkan/icd.d/MoltenVK_icd.json")
+           (setenv "VK_LAYER_PATH"
+                   "/Users/jukka/VulkanSDK/1.2.198.0/macOS/share/vulkan/explicit_layer.d")
+           (setenv "VK_ICD_FILENAMES"
+                   "/Users/jukka/VulkanSDK/1.2.198.0/macOS/share/vulkan/icd.d/MoltenVK_icd.json")
            (setenv "VK_LOADER_DEBUG" "all"))
-     (eval progn
-           (setenv "MY_VAR_1" "VALUE 1")
+     (eval progn (setenv "MY_VAR_1" "VALUE 1")
            (setenv "MY_VAR_2" "VALUE 2"))
-     (elisp-lint-indent-specs
-      (if-let* . 2)
-      (when-let* . 1)
-      (let* . defun)
-      (nrepl-dbind-response . 2)
-      (cider-save-marker . 1)
-      (cider-propertize-region . 1)
-      (cider-map-repls . 1)
-      (cider--jack-in . 1)
-      (cider--make-result-overlay . 1)
-      (insert-label . defun)
-      (insert-align-label . defun)
-      (insert-rect . defun)
-      (cl-defun . 2)
-      (with-parsed-tramp-file-name . 2)
-      (thread-first . 1)
-      (thread-last . 1))
+     (elisp-lint-indent-specs (if-let* . 2) (when-let* . 1)
+                              (let* . defun)
+                              (nrepl-dbind-response . 2)
+                              (cider-save-marker . 1)
+                              (cider-propertize-region . 1)
+                              (cider-map-repls . 1)
+                              (cider--jack-in . 1)
+                              (cider--make-result-overlay . 1)
+                              (insert-label . defun)
+                              (insert-align-label . defun)
+                              (insert-rect . defun) (cl-defun . 2)
+                              (with-parsed-tramp-file-name . 2)
+                              (thread-first . 1) (thread-last . 1))
      (checkdoc-package-keywords-flag)))
  '(show-paren-mode t)
  '(symbol-overlay-idle-time 0.2)
@@ -112,7 +146,8 @@
  '(whitespace-action nil)
  '(whitespace-line-column 1000)
  '(whitespace-style
-   '(face tabs trailing lines-tail space-before-tab empty space-after-tab tab-mark)))
+   '(face tabs trailing lines-tail space-before-tab empty space-after-tab
+          tab-mark)))
 
 ;; (custom-set-faces
 ;;  ;; custom-set-faces was added by Custom.
@@ -157,6 +192,7 @@
 (global-unset-key (kbd "C-o"))
 
 (global-set-key (kbd "M-z") 'undo)
+(global-set-key (kbd "S-M-z") 'undo-redo)
 
 (require-packages 'parseedn 'cider)
 ;; (require 'cider)
@@ -266,10 +302,15 @@
 
 (require-packages 'lsp-mode)
 
+(defun juvi-maybe-start-lsp ()
+  "Run `lsp` unless visiting a file from ~/.m2 (e.g. JAR sources)."
+  (unless (and buffer-file-name
+               (string-match-p "/\\.m2/" buffer-file-name))
+    (lsp)))
 
-(add-hook 'clojure-mode-hook 'lsp)
-(add-hook 'clojurescript-mode-hook 'lsp)
-(add-hook 'clojurec-mode-hook 'lsp)
+(add-hook 'clojure-mode-hook 'juvi-maybe-start-lsp)
+(add-hook 'clojurescript-mode-hook 'juvi-maybe-start-lsp)
+(add-hook 'clojurec-mode-hook 'juvi-maybe-start-lsp)
 
 (setq lsp-enable-indentation nil)
 (setq lsp-enable-completion-at-point nil)
@@ -349,7 +390,7 @@
 
 (defun juvi-jira-id (string)
   (when (string-match "\\`[[:alpha:]]\\{3\\}-[[:digit:]]\\{1,\\}" string)
-     (match-string 0 string)))
+    (match-string 0 string)))
 
 (defun juvi-git-commit-setup-handler ()
   (when (and (looking-at-p "$") ;; the message is empty i.e. we are not amending a commit
@@ -1470,8 +1511,6 @@
   :format literal
   :flags '("--context 1"))
 
-(global-set-key (kbd "C-o M-z") 'juvi-rg-parent-project)
-
 
 (global-set-key (kbd "C-c M-s") #'rg-menu)
 (define-key cider-mode-map (kbd "C-c M-s") #'rg-menu)
@@ -1485,10 +1524,10 @@
 (defhydra juvi-hydra-font-size (global-map "C-o f")
   "font-size"
 
-  ("l" (juvi-set-font-size 120) "laptop")
-  ("s" (juvi-set-font-size 90) "small laptop")
-  ("d" (juvi-set-font-size 180) "desktop")
-  ("f" (juvi-set-font-size 160) "small desktop"))
+  ("a" (juvi-set-font-size 100) "100")
+  ("s" (juvi-set-font-size 120) "120")
+  ("d" (juvi-set-font-size 150) "150")
+  ("f" (juvi-set-font-size 180) "180"))
 
 (add-to-list 'load-path "~/.emacs.d/vendor/re-jump.el/")
 (load "re-jump")
@@ -1924,11 +1963,21 @@ process running; defaults to t when called interactively."
     (kill-buffer temp-buffer))               ; Clean up the temporary buffer
   )
 
+;; https://emacs.stackexchange.com/a/46352
+(defun juvi-yank-rectangle-push-lines ()
+  "Yank a rectangle as if it was an ordinary kill. Useful with multicursor."
+  (interactive "*")
+  (when (and (use-region-p) (delete-selection-mode))
+    (delete-region (region-beginning) (region-end)))
+  (save-restriction
+    (narrow-to-region (point) (mark))
+    (yank-rectangle)))
+
 (defalias 'juvi-remove-sexp-prefix
-   (kmacro "M-<return> C-w C-p C-e C-M-k C-f SPC C-y C-M-b C-M-b # _ C-c b"))
+  (kmacro "M-<return> C-w C-p C-e C-M-k C-f SPC C-y C-M-b C-M-b # _ C-c b"))
 
 (defalias 'juvi-restore-sexp-prefix
-   (kmacro "<backspace> <backspace> C-M-f <return> C-p C-e C-b C-c l f <backspace>"))
+  (kmacro "<backspace> <backspace> C-M-f <return> C-p C-e C-b C-c l f <backspace>"))
 
 (defun juvi-append-region-to-list ()
   (interactive)
@@ -1978,7 +2027,8 @@ process running; defaults to t when called interactively."
    ("x" "restore-sexp-prefix" juvi-restore-sexp-prefix)
    ("F" "copy-string-with-fixed-indentation" juvi-copy-string-with-fixed-indentation)
    ("d" "downcase-clipboard" juvi-downcase-clipboard)
-   ("l" "region-list-transient" transient-prefix-region-list)])
+   ("l" "region-list-transient" transient-prefix-region-list)
+   ("y" "yank-rectangle-push-lines" juvi-yank-rectangle-push-lines)])
 
 (global-set-key (kbd "C-M-j") 'transient-prefix-juvi)
 
@@ -2025,9 +2075,9 @@ process running; defaults to t when called interactively."
 
 (setq gptel-backend
       (gptel-make-ollama "Ollama"
-                         :host "localhost:11434"
-                         :models '("qwen2.5-coder-7b-instruct-q4_k_m")
-                         :stream t))
+        :host "localhost:11434"
+        :models '("qwen2.5-coder-7b-instruct-q4_k_m")
+        :stream t))
 (setq gptel-model "qwen2.5-coder-7b-instruct-q4_k_m")
 
 ;; macros
@@ -2133,3 +2183,9 @@ With a prefix argument N, (un)comment that many sexps."
       (comment-sexp--raw))))
 
 (define-key cider-mode-map (kbd "C-o c") 'comment-or-uncomment-sexp)
+
+;; cider extensions
+
+(load "~/.emacs.d/cider-extensions/init.el")
+(define-key cider-mode-map (kbd "C-o j") 'cider-extensions-autocompletions)
+
