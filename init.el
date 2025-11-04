@@ -2002,6 +2002,23 @@ process running; defaults to t when called interactively."
   (makunbound 'juvi-region-list)
   (message "juvi-region-list has been cleared"))
 
+(defun juvi-rg-recentf (pattern)
+  "Run ripgrep on existing files in `recentf-list`."
+  (interactive "sSearch pattern: ")
+  (require 'recentf)
+  (recentf-mode 1)
+  (let* ((cmd (concat "rg --no-heading --color never "
+                      (shell-quote-argument pattern)
+                      " "
+                      (mapconcat #'shell-quote-argument
+                                 (mapcar #'expand-file-name
+                                         (seq-filter (lambda (f)
+                                                       (and (not (string-prefix-p "/ssh:" f))
+                                                            (file-exists-p f)))
+                                                     (seq-take recentf-list 100000)))
+                                 " "))))
+    (compilation-start cmd 'grep-mode)))
+
 (transient-define-prefix transient-prefix-region-list ()
   "region-list"
   [("a" "append-region-to-list" juvi-append-region-to-list)
@@ -2028,7 +2045,8 @@ process running; defaults to t when called interactively."
    ("F" "copy-string-with-fixed-indentation" juvi-copy-string-with-fixed-indentation)
    ("d" "downcase-clipboard" juvi-downcase-clipboard)
    ("l" "region-list-transient" transient-prefix-region-list)
-   ("y" "yank-rectangle-push-lines" juvi-yank-rectangle-push-lines)])
+   ("y" "yank-rectangle-push-lines" juvi-yank-rectangle-push-lines)
+   ("g" "rg-recentf" juvi-rg-recentf)])
 
 (global-set-key (kbd "C-M-j") 'transient-prefix-juvi)
 
@@ -2188,4 +2206,3 @@ With a prefix argument N, (un)comment that many sexps."
 
 (load "~/.emacs.d/cider-extensions/init.el")
 (define-key cider-mode-map (kbd "C-o j") 'cider-extensions-autocompletions)
-
