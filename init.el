@@ -2005,19 +2005,17 @@ process running; defaults to t when called interactively."
 (defun juvi-rg-recentf (pattern)
   "Run ripgrep on existing files in `recentf-list`."
   (interactive "sSearch pattern: ")
-  (require 'recentf)
-  (recentf-mode 1)
-  (let* ((cmd (concat "rg --no-heading --color never "
-                      (shell-quote-argument pattern)
-                      " "
-                      (mapconcat #'shell-quote-argument
-                                 (mapcar #'expand-file-name
-                                         (seq-filter (lambda (f)
-                                                       (and (not (string-prefix-p "/ssh:" f))
-                                                            (file-exists-p f)))
-                                                     (seq-take recentf-list 100000)))
-                                 " "))))
-    (compilation-start cmd 'grep-mode)))
+  (compilation-start (concat "rg --no-heading --color never "
+                             (shell-quote-argument pattern)
+                             " "
+                             (mapconcat #'shell-quote-argument
+                                        (mapcar #'expand-file-name
+                                                (seq-filter (lambda (f)
+                                                              (and (not (string-prefix-p "/ssh:" f))
+                                                                   (file-exists-p f)))
+                                                            recentf-list))
+                                        " "))
+                     'grep-mode))
 
 (transient-define-prefix transient-prefix-region-list ()
   "region-list"
