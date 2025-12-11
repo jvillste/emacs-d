@@ -1,5 +1,4 @@
 (package-initialize)
-
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -91,19 +90,7 @@
  '(mc/always-run-for-all t)
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
- '(package-selected-packages
-   '(ace-mc ag avy beacon change-case cider cider-macroexpansion company
-            councel counsel edn epl exec-path-from-shell flx-ido
-            flycheck flycheck-clj-kondo ggtags gnu-elpa-keyring-update
-            gptel helm-gtags helm-projectile highlight-symbol htmlize
-            hydra inflections intero irony irony-eldoc ivy ivy-rich
-            lsp-mode lsp-ui magit markdown-mode minimap multi-web-mode
-            multiple-cursors nodejs-repl paredit php-mode pixie-mode
-            projectile pytest python python-mode python-pytest quelpa
-            racer re-jump rg rust-mode scala-mode slamhound
-            symbol-overlay sync-recentf terraform-mode typescript-mode
-            web-mode wgrep wgrep-helm wgsl-mode which-key xml-format
-            yaml-mode yasnippet zenburn-theme zettelkasten))
+ '(package-selected-packages nil)
  '(projectile-enable-caching nil)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_"
@@ -192,7 +179,7 @@
 (global-unset-key (kbd "C-o"))
 
 (global-set-key (kbd "M-z") 'undo)
-(global-set-key (kbd "S-M-z") 'undo-redo)
+(global-set-key (kbd "M-Z") 'undo-redo)
 
 (require-packages 'parseedn 'cider)
 ;; (require 'cider)
@@ -887,6 +874,15 @@
 
 (define-key cider-mode-map (kbd "C-S-q C-S-f") 'juvi-wrap-with-def-locals)
 
+(defun juvi-wrap-with-try-catch ()
+  (interactive)
+  (let ((sexp (thing-at-point 'sexp)))
+    (when sexp
+      (backward-sexp)
+      (kill-sexp)
+      (insert "(try\n" sexp "\n(catch Throwable throwable\n(throw throwable)))")
+      (indent-region (point-min) (point-max)))))
+
 (defun juvi-copy-string-with-fixed-indentation ()
   (interactive)
   (juvi-output-to-kill-ring (concat "(let [string " (cider-last-sexp) "
@@ -1521,13 +1517,22 @@
 (defun juvi-set-font-size (height)
   (set-face-attribute 'default nil :height height))
 
+(defun juvi-adjust-font-size (delta)
+    (set-face-attribute 'default
+                        nil
+                        :height
+                        (+ (face-attribute 'default :height)
+                           delta)))
+
 (defhydra juvi-hydra-font-size (global-map "C-o f")
   "font-size"
 
   ("a" (juvi-set-font-size 100) "100")
   ("s" (juvi-set-font-size 120) "120")
   ("d" (juvi-set-font-size 150) "150")
-  ("f" (juvi-set-font-size 180) "180"))
+  ("f" (juvi-set-font-size 180) "180")
+  ("j" (juvi-adjust-font-size -10) "-")
+  ("k" (juvi-adjust-font-size 10) "+"))
 
 (add-to-list 'load-path "~/.emacs.d/vendor/re-jump.el/")
 (load "re-jump")
@@ -2042,9 +2047,12 @@ process running; defaults to t when called interactively."
    ("x" "restore-sexp-prefix" juvi-restore-sexp-prefix)
    ("F" "copy-string-with-fixed-indentation" juvi-copy-string-with-fixed-indentation)
    ("d" "downcase-clipboard" juvi-downcase-clipboard)
+   ("D" "magit-diff-buffer-file" magit-diff-buffer-file)
    ("l" "region-list-transient" transient-prefix-region-list)
    ("y" "yank-rectangle-push-lines" juvi-yank-rectangle-push-lines)
-   ("g" "rg-recentf" juvi-rg-recentf)])
+   ("g" "rg-recentf" juvi-rg-recentf)
+   ("G" "gptel-menu" gptel-menu)
+   ("c" "wrap-with-try-catch" juvi-wrap-with-try-catch)])
 
 (global-set-key (kbd "C-M-j") 'transient-prefix-juvi)
 
@@ -2083,18 +2091,28 @@ process running; defaults to t when called interactively."
 
 ;; smerge
 
-
+(defun get-api-key (host)
+  (auth-source-pick-first-password
+   :host host
+   :user "apikey"
+   :port "https"))
 
 ;; gptel
+(add-to-list 'load-path "~/.emacs.d/vendor/gptel/")
 
 (require-packages 'gptel)
 
-(setq gptel-backend
-      (gptel-make-ollama "Ollama"
-        :host "localhost:11434"
-        :models '("qwen2.5-coder-7b-instruct-q4_k_m")
-        :stream t))
-(setq gptel-model "qwen2.5-coder-7b-instruct-q4_k_m")
+(setq gptel-model 'grok-code-fast-1
+      gptel-backend (gptel-make-xai "xAI"
+                      :stream t
+                      :key (lambda () (get-api-key "api.x.ai"))))
+
+;; (setq gptel-backend
+;;       (gptel-make-ollama "Ollama"
+;;         :host "localhost:11434"
+;;         :models '("qwen2.5-coder-7b-instruct-q4_k_m")
+;;         :stream t))
+;; (setq gptel-model "qwen2.5-coder-7b-instruct-q4_k_m")
 
 ;; macros
 
@@ -2204,3 +2222,15 @@ With a prefix argument N, (un)comment that many sexps."
 
 (load "~/.emacs.d/cider-extensions/init.el")
 (define-key cider-mode-map (kbd "C-o j") 'cider-extensions-autocompletions)
+
+(defun juvi-randomize-lines-in-region ()
+  "Randomize the order of lines in the region, omitting blank lines."
+  (interactive)
+  (let ((beg (region-beginning))
+        (end (region-end)))
+    (let* ((text (buffer-substring beg end))
+           (lines (split-string text "\n" t)))
+      (delete-region beg end)
+      (insert (string-join
+               (sort lines (lambda (a b) (< (random) (random))))
+               "\n")))))
