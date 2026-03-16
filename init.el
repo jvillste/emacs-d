@@ -90,7 +90,16 @@
  '(mc/always-run-for-all t)
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
- '(package-selected-packages nil)
+ '(package-selected-packages
+   '(ace-mc avy change-case clj-refactor counsel edn elpy epl
+            exec-path-from-shell flx-ido flycheck-clj-kondo git-gutter
+            gnu-elpa-keyring-update gptel helm-gtags helm-projectile
+            highlight-symbol htmlize intero irony-eldoc ivy-rich
+            lsp-ui magit minimap nodejs-repl pytest python python-mode
+            python-pytest quelpa racer rg scala-mode symbol-overlay
+            sync-recentf terraform-mode typescript-mode web-mode
+            wgrep-helm wgsl-mode which-key xml-format yaml-mode
+            zenburn-theme zettelkasten))
  '(projectile-enable-caching nil)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_"
@@ -596,12 +605,41 @@
 (global-set-key (kbd "M-o M-i") 'juvi-eval-marked-sexp-silently)
 ;; (define-key cider-mode-map (kbd "M-o M-i") 'juvi-eval-marked-sexp-silently)
 
+;; hot-right-now TODO: remove me
+
+(defun juvi-format-code-to-kill-ring (mode code-to-be-formatted)
+  (let ((formatted-buffer (get-buffer-create "formatted-region")))
+    (message code-to-be-formatted)
+    (set-buffer formatted-buffer)
+    (funcall mode)
+    (paredit-mode nil)
+    (erase-buffer)
+    (insert code-to-be-formatted)
+    (indent-region (point-min) (point-max) nil)
+    (clipboard-kill-ring-save (point-min) (point-max))))
+
+
 (defun juvi-result-to-kill-ring (code)
   (cider-interactive-eval
    code
    (nrepl-make-response-handler (current-buffer)
                                 (lambda (_buffer value)
-                                  (kill-new value))
+                                  (juvi-format-code-to-kill-ring 'clojure-mode value))
+                                (lambda (_buffer out)
+                                  (cider-emit-interactive-eval-output out))
+                                (lambda (_buffer err)
+                                  (cider-emit-interactive-eval-err-output err))
+                                '())
+   nil
+   (cider--nrepl-print-request-plist fill-column)))
+
+
+(defun juvi-format-result-to-kill-ring (code)
+  (cider-interactive-eval
+   code
+   (nrepl-make-response-handler (current-buffer)
+                                (lambda (_buffer value)
+                                  (juvi-format-code-to-kill-ring 'clojure-mode value))
                                 (lambda (_buffer out)
                                   (cider-emit-interactive-eval-output out))
                                 (lambda (_buffer err)
@@ -616,7 +654,8 @@
                           (nrepl-make-response-handler (current-buffer)
                                                        (lambda (_buffer _value))
                                                        (lambda (_buffer output)
-                                                         (kill-append output nil))
+                                                         ;;(kill-append output nil)
+                                                         (juvi-format-code-to-kill-ring 'clojure-mode output))
                                                        (lambda (_buffer err)
                                                          (cider-emit-interactive-eval-err-output err))
                                                        '())
@@ -626,9 +665,14 @@
 (defun juvi-eval-last-sexp-to-kill-ring ()
   (interactive)
   (juvi-result-to-kill-ring (cider-last-sexp))
-  (message "result is now in the kill ring 2"))
+  (message "result is now in the kill ring"))
 
 (define-key cider-mode-map (kbd "C-o C-p") 'juvi-eval-last-sexp-to-kill-ring)
+
+(defun juvi-eval-last-sexp-to-kill-ring-formatted ()
+  (interactive)
+  (juvi-format-result-to-kill-ring (cider-last-sexp))
+  (message "result is now in the kill ring"))
 
 (defun juvi-eval-last-sexp-output-to-kill-ring ()
   (interactive)
@@ -1439,11 +1483,13 @@
 
 ;; profiling
 
+(global-set-key (kbd "C-o C-s") 'profiler-start)
+
 (global-set-key (kbd "C-o C-q")
                 (lambda ()
                   (interactive)
-                  (profiler-report)
-                  (profiler-stop)))
+                  (profiler-stop)
+                  (profiler-report)))
 
 (global-set-key (kbd "C-o C-w")
                 (lambda ()
@@ -1518,11 +1564,11 @@
   (set-face-attribute 'default nil :height height))
 
 (defun juvi-adjust-font-size (delta)
-    (set-face-attribute 'default
-                        nil
-                        :height
-                        (+ (face-attribute 'default :height)
-                           delta)))
+  (set-face-attribute 'default
+                      nil
+                      :height
+                      (+ (face-attribute 'default :height)
+                         delta)))
 
 (defhydra juvi-hydra-font-size (global-map "C-o f")
   "font-size"
@@ -1533,6 +1579,26 @@
   ("f" (juvi-set-font-size 180) "180")
   ("j" (juvi-adjust-font-size -10) "-")
   ("k" (juvi-adjust-font-size 10) "+"))
+
+(defun juvi-indent-next-line-to-current-column ()
+  (interactive)
+  (let ((col (current-column)))
+    (next-line)
+    (beginning-of-line)
+    (skip-chars-forward " \t")
+    (indent-to-column col)))
+
+(defun juvi-indent-current-line-to-previous-line-column ()
+  (interactive)
+  (previous-line)
+  (beginning-of-line)
+  (skip-chars-forward " \t")
+  (juvi-indent-next-line-to-current-column))
+
+(defhydra juvi-hydra-indent-next-line (global-map "C-o i")
+  "indent-next-line-to-current-column"
+  ("n" (juvi-indent-next-line-to-current-column) "indent-next-line-to-current-column")
+  ("c" (juvi-indent-current-line-to-previous-line-column) "indent-current-line-to-previous-line-column"))
 
 (add-to-list 'load-path "~/.emacs.d/vendor/re-jump.el/")
 (load "re-jump")
@@ -1601,6 +1667,8 @@
 (add-hook 'elpy-mode-hook 'flycheck-mode)
 ;; (add-hook 'elpy-mode-hook (lambda () (elpy-shell-toggle-dedicated-shell 1)))
 (setq elpy-shell-use-project-root nil)
+
+(define-key elpy-mode-map (kbd "M-.") 'elpy-goto-definition)
 
 (defun juvi-initialize-python-repl ()
   (interactive)
@@ -1832,6 +1900,8 @@ process running; defaults to t when called interactively."
 
 (define-key elpy-mode-map (kbd "C-c C-p") 'juvi-python-shell-send-region)
 
+;; (setq elpy-rpc-virtualenv-path 'current)
+
 ;; overtone
 
 
@@ -1910,18 +1980,10 @@ process running; defaults to t when called interactively."
  '(highlight-symbol-face ((t (:background "dark cyan"))))
  '(magit-hash ((t (:foreground "grey60")))))
 
-(defun juvi-format-region-to-clipboard (mode)
-  (let ((formatted-buffer (get-buffer-create "formatted-region"))
-        (code-to-be-formatted (buffer-substring (mark) (point))))
-    (message code-to-be-formatted)
-    (set-buffer formatted-buffer)
-    (funcall mode)
-    (paredit-mode nil)
-    (erase-buffer)
-    (insert code-to-be-formatted)
-    (indent-region (point-min) (point-max) nil)
-    (clipboard-kill-ring-save (point-min) (point-max))))
+;; hot-right-now TODO: remove me
 
+(defun juvi-format-region-to-clipboard (mode)
+  (juvi-format-code-to-kill-ring mode (buffer-substring (mark) (point))))
 
 (defun juvi-format-clojure-region-to-clipboard ()
   (interactive)
@@ -2102,10 +2164,26 @@ process running; defaults to t when called interactively."
 
 (require-packages 'gptel)
 
-(setq gptel-model 'grok-code-fast-1
-      gptel-backend (gptel-make-xai "xAI"
+;; (setq gptel-model 'grok-code-fast-1
+;;       gptel-backend (gptel-make-xai "xAI"
+;;                       :stream t
+;;                       :key (lambda () (get-api-key "api.x.ai"))))
+
+(gptel-make-xai "xAI"
+  :stream t
+  :key (lambda () (get-api-key "api.x.ai")))
+
+(setq gptel-model "qwen/qwen3-coder-next"
+      gptel-backend (gptel-make-openai "LM Studio"
+                      :host "127.0.0.1:1234"
+                      :protocol "http"
+                      :endpoint "/v1/chat/completions"
                       :stream t
-                      :key (lambda () (get-api-key "api.x.ai"))))
+                      :key "your-api-key" ;can be a function that returns the key
+                      :models '("qwen3.5-35b-a3b" "qwen/qwen3-coder-next")))
+
+;; AI/ML API offers an OpenAI compatible API
+
 
 ;; (setq gptel-backend
 ;;       (gptel-make-ollama "Ollama"
