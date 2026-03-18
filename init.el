@@ -2164,33 +2164,29 @@ process running; defaults to t when called interactively."
 
 (require-packages 'gptel)
 
-;; (setq gptel-model 'grok-code-fast-1
-;;       gptel-backend (gptel-make-xai "xAI"
-;;                       :stream t
-;;                       :key (lambda () (get-api-key "api.x.ai"))))
+(setq gptel-model "nitor-openai:gpt-5-nano")
+
+(gptel-make-openai "nitor-openai"
+  :key (lambda () (get-api-key "nitor.api.openai.com"))
+  :stream t)
 
 (gptel-make-xai "xAI"
   :stream t
   :key (lambda () (get-api-key "api.x.ai")))
 
-(setq gptel-model "qwen/qwen3-coder-next"
-      gptel-backend (gptel-make-openai "LM Studio"
-                      :host "127.0.0.1:1234"
-                      :protocol "http"
-                      :endpoint "/v1/chat/completions"
-                      :stream t
-                      :key "your-api-key" ;can be a function that returns the key
-                      :models '("qwen3.5-35b-a3b" "qwen/qwen3-coder-next")))
+(gptel-make-openai "LM Studio"
+  :host "127.0.0.1:1234"
+  :protocol "http"
+  :stream t
+;;  :models '("qwen3.5-35b-a3b" "qwen/qwen3-coder-next")
+  )
 
-;; AI/ML API offers an OpenAI compatible API
-
-
-;; (setq gptel-backend
-;;       (gptel-make-ollama "Ollama"
-;;         :host "localhost:11434"
-;;         :models '("qwen2.5-coder-7b-instruct-q4_k_m")
-;;         :stream t))
-;; (setq gptel-model "qwen2.5-coder-7b-instruct-q4_k_m")
+(gptel-make-openai "llama.cpp"
+  :host "127.0.0.1:8080"
+  :protocol "http"
+  :stream t
+  :models '("unsloth_gpt-oss-120b-GGUF_Q6_K_gpt-oss-120b-Q6_K-00001-of-00002.gguf")
+  )
 
 ;; macros
 
