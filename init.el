@@ -2180,14 +2180,18 @@ process running; defaults to t when called interactively."
 (require-packages 'gptel)
 
 (setq gptel-backend (gptel-make-openai "nitor-openai"
-  :key (lambda () (get-api-key "nitor.api.openai.com"))
-  :stream t
-  :models '("gpt-5.4-mini" "gpt-5.4-nano" "gpt-5.4" "gpt-5.4-pro")))
+                      :key (lambda () ;;(get-api-key "nitor.api.openai.com")
+                             (shell-command-to-string "security find-generic-password -s \"nitor-openai-api-key\" -a \"nitor-openai-api-key\" -w"))
+                      :stream t
+                      :models '("gpt-5.4-mini" "gpt-5.4-nano" "gpt-5.4" "gpt-5.4-pro")))
 
 (setq gptel-backend (gptel-make-openai "jukka-openai"
-  :key (lambda () (get-api-key "jukka.api.openai.com"))
-  :stream t
-  :models '("gpt-5.4-mini" "gpt-5.4-nano" "gpt-5.4" "gpt-5.4-pro")))
+                      :key (lambda ()
+                             (shell-command-to-string "security find-generic-password -s \"jukka-openai-api-key\" -a \"jukka-openai-api-key\" -w")
+                             ;;(get-api-key "jukka.api.openai.com")
+                             )
+                      :stream t
+                      :models '("gpt-5.4-mini" "gpt-5.4-nano" "gpt-5.4" "gpt-5.4-pro")))
 
 (setq gptel-model "gpt-5.4")
 
@@ -2199,7 +2203,7 @@ process running; defaults to t when called interactively."
   :host "127.0.0.1:1234"
   :protocol "http"
   :stream t
-;;  :models '("qwen3.5-35b-a3b" "qwen/qwen3-coder-next")
+  ;;  :models '("qwen3.5-35b-a3b" "qwen/qwen3-coder-next")
   )
 
 (gptel-make-openai "llama.cpp"
