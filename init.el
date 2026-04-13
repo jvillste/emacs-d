@@ -605,8 +605,6 @@
 (global-set-key (kbd "M-o M-i") 'juvi-eval-marked-sexp-silently)
 ;; (define-key cider-mode-map (kbd "M-o M-i") 'juvi-eval-marked-sexp-silently)
 
-;; hot-right-now TODO: remove me
-
 (defun juvi-format-code-to-kill-ring (mode code-to-be-formatted)
   (let ((formatted-buffer (get-buffer-create "formatted-region")))
     (message code-to-be-formatted)
@@ -1039,6 +1037,11 @@
   ("i" juvi-insert-now "insert-now")
   ("n" juvi-search-now-forward "search-now-forward")
   ("p" juvi-search-now-backward "search-now-backward"))
+
+(defhydra hydra-now (markdown-mode-map "C-o h")
+  "markdown headings"
+  ("n" markdown-next-visible-heading "markdown-next-visible-heading")
+  ("p" markdown-previous-visible-heading "markdown-previous-visible-heading"))
 
 (defun juvi-insert-comment-block ()
   (interactive)
@@ -1585,7 +1588,7 @@
   (let ((col (current-column)))
     (next-line)
     (beginning-of-line)
-    (skip-chars-forward " \t")
+    (delete-horizontal-space)
     (indent-to-column col)))
 
 (defun juvi-indent-current-line-to-previous-line-column ()
@@ -1954,6 +1957,17 @@ process running; defaults to t when called interactively."
         (clipboard-kill-region (point-min) (point-max)))
       (message filename))))
 
+(defun juvi-project-root-relative-path-to-kill-ring ()
+  "Copy current buffer file path relative to the Git repository root to the kill ring."
+  (interactive)
+  (if-let* ((file (buffer-file-name))
+            (root (locate-dominating-file file ".git"))
+            (relative (and root (file-relative-name file root))))
+      (progn
+        (kill-new relative)
+        (message "Copied: %s" relative))
+    (user-error "Current buffer is not visiting a file in a Git repository")))
+
 (defun juvi-put-file-path-on-clipboard ()
   "Put the current file name on the clipboard"
   (interactive)
@@ -2092,7 +2106,8 @@ process running; defaults to t when called interactively."
 
 (transient-define-prefix transient-prefix-juvi ()
   "juvi"
-  [("p" "put-file-path-on-clipboard" juvi-put-file-path-on-clipboard)
+  [("P" "put-file-path-on-clipboard" juvi-put-file-path-on-clipboard)
+   ("p" "put-file-path-on-clipboard" juvi-project-root-relative-path-to-kill-ring)
    ("n" "put-file-name-on-clipboard" juvi-put-file-name-on-clipboard)
    ("m" "put-file-name-without-extension-on-clipboard" juvi-put-file-name-without-extension-on-clipboard)
    ("h" "hide-result-buffer-cursor" juvi-hide-result-buffer-cursor)
@@ -2164,11 +2179,17 @@ process running; defaults to t when called interactively."
 
 (require-packages 'gptel)
 
-(setq gptel-model "nitor-openai:gpt-5-nano")
-
-(gptel-make-openai "nitor-openai"
+(setq gptel-backend (gptel-make-openai "nitor-openai"
   :key (lambda () (get-api-key "nitor.api.openai.com"))
-  :stream t)
+  :stream t
+  :models '("gpt-5.4-mini" "gpt-5.4-nano" "gpt-5.4" "gpt-5.4-pro")))
+
+(setq gptel-backend (gptel-make-openai "jukka-openai"
+  :key (lambda () (get-api-key "jukka.api.openai.com"))
+  :stream t
+  :models '("gpt-5.4-mini" "gpt-5.4-nano" "gpt-5.4" "gpt-5.4-pro")))
+
+(setq gptel-model "gpt-5.4")
 
 (gptel-make-xai "xAI"
   :stream t
@@ -2185,7 +2206,7 @@ process running; defaults to t when called interactively."
   :host "127.0.0.1:8080"
   :protocol "http"
   :stream t
-  :models '("unsloth_gpt-oss-120b-GGUF_Q6_K_gpt-oss-120b-Q6_K-00001-of-00002.gguf")
+  :models '("unsloth_Qwen3-Coder-Next-GGUF_Qwen3-Coder-Next-UD-Q4_K_M.gguf")
   )
 
 ;; macros
