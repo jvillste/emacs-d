@@ -1957,7 +1957,7 @@ process running; defaults to t when called interactively."
         (clipboard-kill-region (point-min) (point-max)))
       (message filename))))
 
-(defun juvi-project-root-relative-path-to-kill-ring ()
+(defun juvi-put-project-root-relative-path-to-clipboard ()
   "Copy current buffer file path relative to the Git repository root to the kill ring."
   (interactive)
   (if-let* ((file (buffer-file-name))
@@ -2107,7 +2107,7 @@ process running; defaults to t when called interactively."
 (transient-define-prefix transient-prefix-juvi ()
   "juvi"
   [("P" "put-file-path-on-clipboard" juvi-put-file-path-on-clipboard)
-   ("p" "put-file-path-on-clipboard" juvi-project-root-relative-path-to-kill-ring)
+   ("p" "put-project-root-relative-path-to-clipboard" juvi-put-project-root-relative-path-to-clipboard)
    ("n" "put-file-name-on-clipboard" juvi-put-file-name-on-clipboard)
    ("m" "put-file-name-without-extension-on-clipboard" juvi-put-file-name-without-extension-on-clipboard)
    ("h" "hide-result-buffer-cursor" juvi-hide-result-buffer-cursor)
