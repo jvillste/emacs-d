@@ -2109,6 +2109,7 @@ process running; defaults to t when called interactively."
   [("P" "put-file-path-on-clipboard" juvi-put-file-path-on-clipboard)
    ("p" "put-project-root-relative-path-to-clipboard" juvi-put-project-root-relative-path-to-clipboard)
    ("n" "put-file-name-on-clipboard" juvi-put-file-name-on-clipboard)
+   ("N" "copy-fully-qualified-name" juvi-copy-fully-qualified-name)
    ("m" "put-file-name-without-extension-on-clipboard" juvi-put-file-name-without-extension-on-clipboard)
    ("h" "hide-result-buffer-cursor" juvi-hide-result-buffer-cursor)
    ("r" "copy-result-buffer" juvi-copy-result-buffer)
@@ -2129,6 +2130,7 @@ process running; defaults to t when called interactively."
    ("y" "yank-rectangle-push-lines" juvi-yank-rectangle-push-lines)
    ("g" "rg-recentf" juvi-rg-recentf)
    ("G" "gptel-menu" gptel-menu)
+   ("a" "gptel-abort" gptel-abort)
    ("c" "wrap-with-try-catch" juvi-wrap-with-try-catch)])
 
 (global-set-key (kbd "C-M-j") 'transient-prefix-juvi)
@@ -2210,8 +2212,20 @@ process running; defaults to t when called interactively."
   :host "127.0.0.1:8080"
   :protocol "http"
   :stream t
-  :models '("unsloth_Qwen3-Coder-Next-GGUF_Qwen3-Coder-Next-UD-Q4_K_M.gguf")
+  :models '(;; "unsloth_Qwen3-Coder-Next-GGUF_Qwen3-Coder-Next-UD-Q4_K_M.gguf"
+            ;; "unsloth_Qwen3.6-35B-A3B-GGUF_Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf"
+            "unsloth_Qwen3.6-27B-GGUF_Qwen3.6-27B-UD-Q8_K_XL.gguf")
   )
+
+(gptel-make-openai "openrouter"
+  :host "openrouter.ai"
+  :endpoint "/api/v1/chat/completions"
+  :key (lambda ()
+         (shell-command-to-string "security find-generic-password -s \"jukka-openrouter-api-key\" -a \"jukka-openrouter-api-key\" -w"))
+  :stream t
+  :models '("qwen/qwen3.6-plus" "minimax/minimax-m2.7"))
+
+
 
 ;; macros
 
