@@ -157,6 +157,7 @@
 
 (require 'package)
 
+
 (defun require-packages (&rest packages)
   (dolist (package packages)
     (unless (package-installed-p package)
@@ -183,7 +184,7 @@
 ;; (setq package-archive-enable-alist '(("melpa"
 ;;                                       iedit-mode
 ;;                                       melpa)))
-;;(package-refresh-contents)
+(package-refresh-contents)
 
 (global-unset-key (kbd "C-o"))
 
@@ -420,8 +421,8 @@
 
 ;; (setq cider-lein-parameters "with-profile +dev repl :headless")
 
-(add-to-list 'load-path "~/.emacs.d/vendor/highlight2clipboard/")
-(require 'highlight2clipboard)
+;; (add-to-list 'load-path "~/.emacs.d/vendor/highlight2clipboard/")
+(require-packages 'highlight2clipboard)
 
 
 
@@ -939,8 +940,8 @@
                                                                      (rest rows))))))")))
 
 
-(add-to-list 'load-path "~/.emacs.d/vendor/iedit/")
-(require 'iedit)
+;; (add-to-list 'load-path "~/.emacs.d/vendor/iedit/")
+(require-packages 'iedit)
 ;;(require-packages 'iedit)
 ;; (define-key cider-mode-map (kbd "C-c C-y") 'iedit-mode)
 (global-set-key (kbd "C-c C-y") 'iedit-mode)
@@ -1442,8 +1443,8 @@
 (global-set-key (kbd "M-u") 'upcase-dwim)
 
 ;; haskell
-(require-packages 'intero)
-(add-hook 'haskell-mode-hook 'intero-mode)
+;; (require-packages 'intero)
+;; (add-hook 'haskell-mode-hook 'intero-mode)
 
 ;; multiple-cursors
 (require-packages 'multiple-cursors 'ace-mc)
@@ -1603,8 +1604,8 @@
   ("n" (juvi-indent-next-line-to-current-column) "indent-next-line-to-current-column")
   ("c" (juvi-indent-current-line-to-previous-line-column) "indent-current-line-to-previous-line-column"))
 
-(add-to-list 'load-path "~/.emacs.d/vendor/re-jump.el/")
-(load "re-jump")
+;; (add-to-list 'load-path "~/.emacs.d/vendor/re-jump.el/")
+;; (load "re-jump")
 
 (global-set-key (kbd "M-F") 'end-of-buffer)
 (global-set-key (kbd "M-B") 'beginning-of-buffer)
@@ -1936,9 +1937,8 @@ process running; defaults to t when called interactively."
 (add-hook 'irony-mode-hook #'irony-eldoc)
 
 
-(require 'quelpa)
-
-(quelpa '(change-case :fetcher git :url "git@gist.github.com:e8a10244aac6308de1323d1f6685658b.git"))
+;; (require 'quelpa)
+;; (quelpa '(change-case :fetcher git :url "git@gist.github.com:e8a10244aac6308de1323d1f6685658b.git"))
 
 ;; emacs
 
@@ -2151,8 +2151,8 @@ process running; defaults to t when called interactively."
 
 ;; odin
 
-(add-to-list 'load-path "~/.emacs.d/vendor/odin-mode/")
-(require 'odin-mode)
+;; (add-to-list 'load-path "~/.emacs.d/vendor/odin-mode/")
+;; (require 'odin-mode)
 
 ;; With odin-mode (https://github.com/mattt-b/odin-mode) and lsp-mode already added to your init.el of course!.
 (setq-default lsp-auto-guess-root t) ;; if you work with Projectile/project.el this will help find the ols.json file.

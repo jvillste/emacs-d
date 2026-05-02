@@ -7,3 +7,5 @@
 /projectile.cache
 /recentf~
 /.mc-lists.el
+/transient/
+/cider-extensions/
