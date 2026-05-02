@@ -21,8 +21,8 @@
  '(cider-font-lock-reader-conditionals t)
  '(cider-interactive-eval-output-destination 'repl-buffer)
  '(cider-jack-in-default 'lein)
- '(cider-ns-refresh-after-fn "dev/start" t)
- '(cider-ns-refresh-before-fn "dev/stop" t)
+ '(cider-ns-refresh-after-fn "dev/start")
+ '(cider-ns-refresh-before-fn "dev/stop")
  '(cider-ns-refresh-show-log-buffer nil)
  '(cider-output-std-streams-to-popup t)
  '(cider-refresh-show-log-buffer nil)
@@ -93,13 +93,13 @@
  '(package-selected-packages
    '(ace-mc avy change-case clj-refactor counsel edn elpy epl
             exec-path-from-shell flx-ido flycheck-clj-kondo git-gutter
-            gnu-elpa-keyring-update gptel helm-gtags helm-projectile
-            highlight-symbol htmlize intero irony-eldoc ivy-rich
-            lsp-ui magit minimap nodejs-repl pytest python python-mode
-            python-pytest quelpa racer rg scala-mode symbol-overlay
-            sync-recentf terraform-mode typescript-mode web-mode
-            wgrep-helm wgsl-mode which-key xml-format yaml-mode
-            zenburn-theme zettelkasten))
+            gnu-elpa-keyring-update gptel gptel-commit helm-gtags
+            helm-projectile highlight-symbol htmlize intero
+            irony-eldoc ivy-rich lsp-ui magit minimap nodejs-repl
+            pytest python python-mode python-pytest quelpa racer rg
+            scala-mode symbol-overlay sync-recentf terraform-mode
+            typescript-mode web-mode wgrep-helm wgsl-mode which-key
+            xml-format yaml-mode zenburn-theme zettelkasten))
  '(projectile-enable-caching nil)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_"
@@ -2212,10 +2212,7 @@ process running; defaults to t when called interactively."
   :host "127.0.0.1:8080"
   :protocol "http"
   :stream t
-  :models '(;; "unsloth_Qwen3-Coder-Next-GGUF_Qwen3-Coder-Next-UD-Q4_K_M.gguf"
-            ;; "unsloth_Qwen3.6-35B-A3B-GGUF_Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf"
-            "unsloth_Qwen3.6-27B-GGUF_Qwen3.6-27B-UD-Q8_K_XL.gguf")
-  )
+  :models '("local-llama"))
 
 (gptel-make-openai "openrouter"
   :host "openrouter.ai"
@@ -2226,6 +2223,15 @@ process running; defaults to t when called interactively."
   :models '("qwen/qwen3.6-plus" "minimax/minimax-m2.7"))
 
 
+(use-package gptel-commit
+  :ensure t
+  :after (gptel magit)
+  :custom
+  (gptel-commit-stream t))
+
+(with-eval-after-load 'magit
+  (define-key git-commit-mode-map (kbd "C-c g") #'gptel-commit)
+  (define-key git-commit-mode-map (kbd "C-c G") #'gptel-commit-rationale))
 
 ;; macros
 
