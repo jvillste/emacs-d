@@ -184,7 +184,9 @@
 ;; (setq package-archive-enable-alist '(("melpa"
 ;;                                       iedit-mode
 ;;                                       melpa)))
-(package-refresh-contents)
+
+;; uncomment this when setting up emacs on a new machine
+;;(package-refresh-contents)
 
 (global-unset-key (kbd "C-o"))
 
