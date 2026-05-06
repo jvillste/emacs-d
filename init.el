@@ -1959,16 +1959,22 @@ process running; defaults to t when called interactively."
         (clipboard-kill-region (point-min) (point-max)))
       (message filename))))
 
-(defun juvi-put-project-root-relative-path-to-clipboard ()
+
+(defun juvi-put-relative-path-to-clipboard (root-files)
   "Copy current buffer file path relative to the Git repository root to the kill ring."
   (interactive)
   (if-let* ((file (buffer-file-name))
-            (root (locate-dominating-file file ".git"))
+            (root (cl-some (lambda (rf) (locate-dominating-file file rf)) root-files))
             (relative (and root (file-relative-name file root))))
       (progn
         (kill-new relative)
         (message "Copied: %s" relative))
-    (user-error "Current buffer is not visiting a file in a Git repository")))
+    (user-error "None of the root files were found")))
+
+(defun juvi-put-project-root-relative-path-to-clipboard ()
+  "Copy current buffer file path relative to the Git repository root to the kill ring."
+  (interactive)
+  (juvi-put-relative-path-to-clipboard '("deps.edn" "project.clj" ".git")))
 
 (defun juvi-put-file-path-on-clipboard ()
   "Put the current file name on the clipboard"
