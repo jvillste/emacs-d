@@ -423,10 +423,6 @@
 
 ;; (setq cider-lein-parameters "with-profile +dev repl :headless")
 
-;; (add-to-list 'load-path "~/.emacs.d/vendor/highlight2clipboard/")
-(require-packages 'highlight2clipboard)
-
-
 
 ;; (setq cider-test-infer-test-ns (lambda (ns) ns))
 
