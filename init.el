@@ -2176,30 +2176,18 @@ process running; defaults to t when called interactively."
 
 (require-packages 'xml-format)
 
-;; smerge
-
-(defun get-api-key (host)
-  (auth-source-pick-first-password
-   :host host
-   :user "apikey"
-   :port "https"))
-
 ;; gptel
 (add-to-list 'load-path "~/.emacs.d/vendor/gptel/")
 
 (require-packages 'gptel)
 
 (setq gptel-backend (gptel-make-openai "nitor-openai"
-                      :key (lambda () ;;(get-api-key "nitor.api.openai.com")
-                             (shell-command-to-string "security find-generic-password -s \"nitor-openai-api-key\" -a \"nitor-openai-api-key\" -w"))
+                      :key (lambda () (shell-command-to-string "security find-generic-password -s \"nitor-openai-api-key\" -a \"nitor-openai-api-key\" -w"))
                       :stream t
                       :models '("gpt-5.4-mini" "gpt-5.4-nano" "gpt-5.4" "gpt-5.4-pro")))
 
 (setq gptel-backend (gptel-make-openai "jukka-openai"
-                      :key (lambda ()
-                             (shell-command-to-string "security find-generic-password -s \"jukka-openai-api-key\" -a \"jukka-openai-api-key\" -w")
-                             ;;(get-api-key "jukka.api.openai.com")
-                             )
+                      :key (lambda () (shell-command-to-string "security find-generic-password -s \"jukka-openai-api-key\" -a \"jukka-openai-api-key\" -w"))
                       :stream t
                       :models '("gpt-5.4-mini" "gpt-5.4-nano" "gpt-5.4" "gpt-5.4-pro")))
 
@@ -2207,7 +2195,7 @@ process running; defaults to t when called interactively."
 
 (gptel-make-xai "xAI"
   :stream t
-  :key (lambda () (get-api-key "api.x.ai")))
+  :key (lambda () (shell-command-to-string "security find-generic-password -s \"xai-api-key\" -a \"xai-api-key\" -w")))
 
 (gptel-make-openai "LM Studio"
   :host "127.0.0.1:1234"
