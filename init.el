@@ -2359,3 +2359,6 @@ With a prefix argument N, (un)comment that many sexps."
       (insert (string-join
                (sort lines (lambda (a b) (< (random) (random))))
                "\n")))))
+
+;; for yabai
+(menu-bar-mode t)
