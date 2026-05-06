@@ -2210,6 +2210,16 @@ process running; defaults to t when called interactively."
   :stream t
   :models '("local-llama"))
 
+(gptel-make-openai "omlx"
+  :host "127.0.0.1:8888"
+  :protocol "http"
+  :stream t
+  :key (lambda () (shell-command-to-string "security find-generic-password -s \"omlx-api-key\" -a \"omlx-api-key\" -w"))
+  :models '("Qwen3.6-35B-A3B-MLX-8bit"
+            "Qwen3.6-35B-A3B-UD-MLX-4bit"
+            "Qwen3.6-27B-MLX-8bit"
+            "Qwen3.6-27B-UD-MLX-4bit"))
+
 (gptel-make-openai "openrouter"
   :host "openrouter.ai"
   :endpoint "/api/v1/chat/completions"
