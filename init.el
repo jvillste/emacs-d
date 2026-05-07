@@ -21,8 +21,8 @@
  '(cider-font-lock-reader-conditionals t)
  '(cider-interactive-eval-output-destination 'repl-buffer)
  '(cider-jack-in-default 'lein)
- '(cider-ns-refresh-after-fn "dev/start")
- '(cider-ns-refresh-before-fn "dev/stop")
+ '(cider-ns-refresh-after-fn "dev/start" t)
+ '(cider-ns-refresh-before-fn "dev/stop" t)
  '(cider-ns-refresh-show-log-buffer nil)
  '(cider-output-std-streams-to-popup t)
  '(cider-refresh-show-log-buffer nil)
@@ -95,8 +95,8 @@
             exec-path-from-shell flx-ido flycheck-clj-kondo git-gutter
             gnu-elpa-keyring-update gptel gptel-commit helm-gtags
             helm-projectile highlight-symbol htmlize intero
-            irony-eldoc ivy-rich lsp-ui magit minimap nodejs-repl
-            pytest python python-mode python-pytest quelpa racer rg
+            irony-eldoc ivy-rich lsp-ui minimap nodejs-repl pytest
+            python python-mode python-pytest quelpa racer rg
             scala-mode symbol-overlay sync-recentf terraform-mode
             typescript-mode web-mode wgrep-helm wgsl-mode which-key
             xml-format yaml-mode zenburn-theme zettelkasten))
@@ -167,11 +167,12 @@
 ;; (add-to-list 'package-archives
 ;;              '("melpa-stable" . "http://stable.melpa.org/packages/") t)
 
-(add-to-list 'package-archives
-             '("melpa" . "http://melpa.org/packages/") t)
 
 (add-to-list 'package-archives
              '("melpa-stable" . "http://stable.melpa.org/packages/") t)
+
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.org/packages/") t)
 
 ;; (add-to-list 'package-archives
 ;;           '("marmalade" . "http://marmalade-repo.org/packages/"))
@@ -265,13 +266,13 @@
 (ivy-mode)
 (setq ivy-use-virtual-buffers t)
 
-(require-packages 'ivy-rich)
-(ivy-rich-mode 1)
+;; (require-packages 'ivy-rich)
+;; (ivy-rich-mode 1)
 
-(require-packages 'counsel)
-(counsel-mode)
+;; (require-packages 'counsel)
+;; (counsel-mode)
 (global-set-key (kbd "C-x b") 'ivy-switch-buffer)
-(global-set-key (kbd "C-x n") 'counsel-recentf)
+;; (global-set-key (kbd "C-x n") 'counsel-recentf)
 
 (require-packages 'projectile)
 (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
