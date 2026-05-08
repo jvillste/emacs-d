@@ -752,7 +752,7 @@
 
 (defun juvi-execute-all-but-integration-tests ()
   (interactive)
-  (juvi-execute-tests nil '("integration-test")))
+  (juvi-execute-tests nil '("integration-test" "integration")))
 
 (define-key cider-mode-map (kbd "C-o C-t C-o") 'juvi-execute-all-but-integration-tests)
 
@@ -1955,7 +1955,6 @@ process running; defaults to t when called interactively."
         (insert filename)
         (clipboard-kill-region (point-min) (point-max)))
       (message filename))))
-
 
 (defun juvi-put-relative-path-to-clipboard (root-files)
   "Copy current buffer file path relative to the Git repository root to the kill ring."
