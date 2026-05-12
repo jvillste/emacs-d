@@ -954,37 +954,13 @@
 
 (define-key clojure-mode-map (kbd "C-<tab>") 'company-complete)
 
-;; (require-packages 'highlight-symbol)
-;; (global-set-key (kbd "C-c h") 'highlight-symbol-mode)
-;; (defhydra hydra-highlight-symbol (global-map "C-c j")
-;;   "highlight-symbol"
-;;   ("n" highlight-symbol-next "next")
-;;   ("p" highlight-symbol-prev "previous"))
-
 (require-packages 'symbol-overlay)
-;; originally from https://github.com/wolray/symbol-overlay/issues/59
-;; (transient-define-prefix symbol-overlay-transient ()
-;;   "Symbol Overlay transient"
-;;   ["Symbol Overlay"
-;;    ["Overlays"
-;;     ("." "Add/Remove at point" symbol-overlay-put)
-;;     ("k" "Remove All" symbol-overlay-remove-all)
-;;     ]
-;;    ["Move to Symbol"
-;;     ("n" "Next" symbol-overlay-jump-next)
-;;     ("p" "Previous" symbol-overlay-jump-prev)
-;;     ]
-;;    ["Other"
-;;     ("h" "Highlight symbol-at-point" symbol-overlay-mode)
-;;     ]
-;;    ]
-;;   )
-;; (global-set-key (kbd "C-c j") 'symbol-overlay-transient)
-
 (defhydra hydra-symbol-overlay (global-map "C-c j")
   "symbol-overlay"
-  ("n" highlight-symbol-next "next")
-  ("p" highlight-symbol-prev "previous"))
+  ("n" symbol-overlay-jump-next "next")
+  ("M-n" symbol-overlay-jump-last "last")
+  ("p" symbol-overlay-jump-prev "previous")
+  ("M-p" symbol-overlay-jump-first "first"))
 
 (global-set-key (kbd "C-c h") 'symbol-overlay-mode)
 
