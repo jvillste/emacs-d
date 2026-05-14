@@ -2334,3 +2334,9 @@ With a prefix argument N, (un)comment that many sexps."
 
 ;; for yabai
 (menu-bar-mode t)
+
+
+;; typescript
+
+(require-packages 'typescript-mode)
+(add-hook 'typescript-mode-hook #'lsp)
