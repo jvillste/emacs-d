@@ -91,7 +91,7 @@
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
-   '(ace-mc avy change-case clj-refactor counsel edn elpy epl
+   '(ace-mc avy change-case cider clj-refactor counsel edn elpy epl
             exec-path-from-shell flx-ido flycheck-clj-kondo git-gutter
             gnu-elpa-keyring-update gptel gptel-commit helm-gtags
             helm-projectile highlight-symbol htmlize intero
@@ -114,7 +114,9 @@
  '(recentf-max-saved-items 10000)
  '(recentf-mode t)
  '(safe-local-variable-values
-   '((eval progn
+   '((cider-jack-in-cmd . "temp/start-repl.sh")
+     (cider-jack-in-args . "AWS_REGION=eu-west-1 lein repl :headless")
+     (eval progn
            (setenv "VK_LAYER_PATH"
                    "/Users/jukka/VulkanSDK/1.2.198.0/macOS/share/vulkan/explicit_layer.d")
            (setenv "VK_ICD_FILENAMES"
@@ -1121,9 +1123,6 @@
 
 
 (define-key clojure-mode-map (kbd "M-q") 'lisp-fill-paragraph)
-
-(auto-revert-mode 1)
-
 
 (defun delete-this-buffer-and-file ()
   "Removes file connected to current buffer and kills buffer."
