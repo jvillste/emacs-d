@@ -1566,6 +1566,13 @@
     (delete-horizontal-space)
     (indent-to-column col)))
 
+(defun juvi-incrementally-indent-next-line-to-current-column ()
+  (interactive)
+  (let ((col (current-column)))
+    (next-line)
+    (beginning-of-line)
+    (indent-to-column col)))
+
 (defun juvi-indent-current-line-to-previous-line-column ()
   (interactive)
   (previous-line)
@@ -1576,6 +1583,7 @@
 (defhydra juvi-hydra-indent-next-line (global-map "C-o i")
   "indent-next-line-to-current-column"
   ("n" (juvi-indent-next-line-to-current-column) "indent-next-line-to-current-column")
+  ("N" (juvi-indent-next-line-to-current-column) "juvi-incrementally-indent-next-line-to-current-column")
   ("c" (juvi-indent-current-line-to-previous-line-column) "indent-current-line-to-previous-line-column"))
 
 ;; (add-to-list 'load-path "~/.emacs.d/vendor/re-jump.el/")
@@ -2166,7 +2174,8 @@ process running; defaults to t when called interactively."
 
 (gptel-make-xai "xAI"
   :stream t
-  :key (lambda () (shell-command-to-string "security find-generic-password -s \"xai-api-key\" -a \"xai-api-key\" -w")))
+  :key (lambda () (shell-command-to-string "security find-generic-password -s \"xai-api-key\" -a \"xai-api-key\" -w"))
+  :models '("grok-4.3"))
 
 (gptel-make-openai "LM Studio"
   :host "127.0.0.1:1234"
@@ -2197,7 +2206,7 @@ process running; defaults to t when called interactively."
   :key (lambda ()
          (shell-command-to-string "security find-generic-password -s \"jukka-openrouter-api-key\" -a \"jukka-openrouter-api-key\" -w"))
   :stream t
-  :models '("qwen/qwen3.6-plus" "minimax/minimax-m2.7"))
+  :models '("qwen/qwen3.6-plus" "minimax/minimax-m2.7" "z-ai/glm-5.1"))
 
 
 (use-package gptel-commit
