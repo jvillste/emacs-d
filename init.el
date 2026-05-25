@@ -1369,6 +1369,19 @@
 ;; auto-revert-mode
 (global-auto-revert-mode 1)
 
+(defun juvi-revert-all-unmodified-buffers ()
+  (interactive)
+  (let ((count 0))
+    (dolist (buf (buffer-list))
+      (with-current-buffer buf
+        (when (and buffer-file-name
+                   (not (buffer-modified-p))
+                   (not (verify-visited-file-modtime buf)))
+          (message "Reverting buffer: %s" (buffer-name buf))
+          (revert-buffer :ignore-auto :noconfirm)
+          (setq count (1+ count)))))
+    (message "Reverted %d buffer(s)" count)))
+
 ;; misc
 (global-set-key (kbd "C-o C-b") 'previous-buffer)
 
@@ -1568,10 +1581,10 @@
 
 (defun juvi-incrementally-indent-next-line-to-current-column ()
   (interactive)
-  (let ((col (current-column)))
+  (let ((column (current-column)))
     (next-line)
     (beginning-of-line)
-    (indent-to-column col)))
+    (insert (make-string column ?\s))))
 
 (defun juvi-indent-current-line-to-previous-line-column ()
   (interactive)
@@ -1583,7 +1596,7 @@
 (defhydra juvi-hydra-indent-next-line (global-map "C-o i")
   "indent-next-line-to-current-column"
   ("n" (juvi-indent-next-line-to-current-column) "indent-next-line-to-current-column")
-  ("N" (juvi-indent-next-line-to-current-column) "juvi-incrementally-indent-next-line-to-current-column")
+  ("N" (juvi-incrementally-indent-next-line-to-current-column) "incrementally-indent-next-line-to-current-column")
   ("c" (juvi-indent-current-line-to-previous-line-column) "indent-current-line-to-previous-line-column"))
 
 ;; (add-to-list 'load-path "~/.emacs.d/vendor/re-jump.el/")
@@ -2100,6 +2113,7 @@ process running; defaults to t when called interactively."
    ("m" "put-file-name-without-extension-on-clipboard" juvi-put-file-name-without-extension-on-clipboard)
    ("h" "hide-result-buffer-cursor" juvi-hide-result-buffer-cursor)
    ("r" "copy-result-buffer" juvi-copy-result-buffer)
+   ("R" "revert-all-unmodified-buffers" juvi-revert-all-unmodified-buffers)
    ("t" "execute-all-but-integration-tests" juvi-execute-all-but-integration-tests)
    ("i" "execute-integration-tests" juvi-execute-integration-tests)
    ("f" "format-clojure-region-to-clipboard" juvi-format-clojure-region-to-clipboard)
