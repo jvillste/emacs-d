@@ -609,7 +609,6 @@
 
 (defun juvi-format-code-to-kill-ring (mode code-to-be-formatted)
   (let ((formatted-buffer (get-buffer-create "formatted-region")))
-    (message code-to-be-formatted)
     (set-buffer formatted-buffer)
     (funcall mode)
     (paredit-mode nil)
@@ -619,20 +618,47 @@
     (clipboard-kill-ring-save (point-min) (point-max))))
 
 
-(defun juvi-result-to-kill-ring (code)
-  (cider-interactive-eval
-   code
-   (nrepl-make-response-handler (current-buffer)
-                                (lambda (_buffer value)
-                                  (juvi-format-code-to-kill-ring 'clojure-mode value))
-                                (lambda (_buffer out)
-                                  (cider-emit-interactive-eval-output out))
-                                (lambda (_buffer err)
-                                  (cider-emit-interactive-eval-err-output err))
-                                '())
-   nil
-   (cider--nrepl-print-request-plist fill-column)))
+(defvar-local juvi-accumulated-value nil
+  "Buffer-local variable to accumulate nREPL value response chunks.")
 
+(defvar-local juvi-callback nil
+  "Buffer-local variable holding the callback for the current accumulating handler.")
+
+(defun juvi-accumulating-handler (buffer callback)
+  "Return an nREPL response handler for BUFFER that accumulates value chunks.
+When the response is done, calls CALLBACK with BUFFER and the complete
+accumulated value string."
+  (setq juvi-accumulated-value "")
+  (setq juvi-callback callback)
+  (nrepl-make-response-handler buffer
+                               ;; value handler: accumulate chunks
+                               (lambda (buffer value-string)
+                                 (with-current-buffer buffer
+                                   (setq juvi-accumulated-value
+                                         (concat juvi-accumulated-value value-string))))
+                               (lambda (_buffer _output))
+                               (lambda (_buffer err)
+                                 (cider-emit-interactive-eval-err-output err))
+                               ;; done handler: call callback with the complete value
+                               (lambda (buffer)
+                                 (with-current-buffer buffer
+                                   (funcall juvi-callback buffer juvi-accumulated-value)))))
+
+(defun juvi-cider-eval (expr callback)
+  "Evaluate EXPR via nREPL and call CALLBACK with the result value string.
+CALLBACK is called with two arguments: BUFFER and the complete accumulated
+value string."
+  (cider-interactive-eval expr
+                          (juvi-accumulating-handler (current-buffer)
+                                                     callback)
+                          nil
+                          (cider--nrepl-print-request-plist fill-column)))
+
+(defun juvi-result-to-kill-ring (code)
+  (juvi-cider-eval code
+                   (lambda (buffer value)
+                     (juvi-format-code-to-kill-ring 'clojure-mode value)
+                     (message "result is now in the kill ring"))))
 
 (defun juvi-format-result-to-kill-ring (code)
   (cider-interactive-eval
@@ -662,10 +688,10 @@
                           nil
                           (cider--nrepl-print-request-plist fill-column)))
 
+
 (defun juvi-eval-last-sexp-to-kill-ring ()
   (interactive)
-  (juvi-result-to-kill-ring (cider-last-sexp))
-  (message "result is now in the kill ring"))
+  (juvi-result-to-kill-ring (cider-last-sexp)))
 
 (define-key cider-mode-map (kbd "C-o C-p") 'juvi-eval-last-sexp-to-kill-ring)
 
@@ -2340,7 +2366,7 @@ With a prefix argument N, (un)comment that many sexps."
 ;; cider extensions
 
 (load "~/.emacs.d/cider-extensions/init.el")
-(define-key cider-mode-map (kbd "C-o j") 'cider-extensions-autocompletions)
+(define-key cider-mode-map (kbd "C-o j") 'juvi-autocompletions)
 
 (defun juvi-randomize-lines-in-region ()
   "Randomize the order of lines in the region, omitting blank lines."
