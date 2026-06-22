@@ -2403,3 +2403,16 @@ With a prefix argument N, (un)comment that many sexps."
 
 (require-packages 'typescript-mode)
 (add-hook 'typescript-mode-hook #'lsp)
+
+;; clerk
+
+(defun clerk-show ()
+  (interactive)
+  (when-let
+      ((filename
+        (buffer-file-name)))
+    (save-buffer)
+    (cider-interactive-eval
+     (concat "(nextjournal.clerk/show! \"" filename "\")"))))
+
+(define-key cider-mode-map (kbd "C-M-i") 'clerk-show)
