@@ -1963,6 +1963,36 @@ process running; defaults to t when called interactively."
 
 ;; emacs
 
+
+(defun juvi-relative-path (root-files)
+  (if-let* ((file (buffer-file-name))
+            (root (cl-some (lambda (rf) (locate-dominating-file file rf)) root-files))
+            (relative (and root (file-relative-name file root))))
+      relative
+    (user-error "None of the root files were found")))
+
+(defun juvi-put-relative-path-to-clipboard (root-files)
+  "Copy current buffer file path relative to the Git repository root to the kill ring."
+  (interactive)
+  (when-let ((relative-path (juvi-relative-path root-files)))
+    (kill-new relative-path)
+    (message "Copied: %s" relative-path)))
+
+(defun juvi-put-project-root-relative-path-to-clipboard ()
+  "Copy current buffer file path relative to the Git repository root to the kill ring."
+  (interactive)
+  (when-let ((relative-path (juvi-relative-path '("deps.edn" "project.clj" ".git"))))
+    (kill-new relative-path)
+    (message "Copied: %s" relative-path)))
+
+(defun juvi-put-project-root-relative-path-and-line-number-to-clipboard ()
+  "Copy current buffer file path relative to the Git repository root to the kill ring."
+  (interactive)
+  (when-let ((relative-path (juvi-relative-path '("deps.edn" "project.clj" ".git"))))
+    (let ((copied-value (concat relative-path ":" (line-number-at-pos))))
+      (kill-new copied-value)
+      (message "Copied: %s" copied-value))))
+
 ;; originally from https://stackoverflow.com/a/2417617
 (defun juvi-put-file-on-clipboard (include-path include-extension)
   (let ((filename (if (equal major-mode 'dired-mode)
@@ -1977,22 +2007,6 @@ process running; defaults to t when called interactively."
         (insert filename)
         (clipboard-kill-region (point-min) (point-max)))
       (message filename))))
-
-(defun juvi-put-relative-path-to-clipboard (root-files)
-  "Copy current buffer file path relative to the Git repository root to the kill ring."
-  (interactive)
-  (if-let* ((file (buffer-file-name))
-            (root (cl-some (lambda (rf) (locate-dominating-file file rf)) root-files))
-            (relative (and root (file-relative-name file root))))
-      (progn
-        (kill-new relative)
-        (message "Copied: %s" relative))
-    (user-error "None of the root files were found")))
-
-(defun juvi-put-project-root-relative-path-to-clipboard ()
-  "Copy current buffer file path relative to the Git repository root to the kill ring."
-  (interactive)
-  (juvi-put-relative-path-to-clipboard '("deps.edn" "project.clj" ".git")))
 
 (defun juvi-put-file-path-on-clipboard ()
   "Put the current file name on the clipboard"
@@ -2134,6 +2148,7 @@ process running; defaults to t when called interactively."
   "juvi"
   [("P" "put-file-path-on-clipboard" juvi-put-file-path-on-clipboard)
    ("p" "put-project-root-relative-path-to-clipboard" juvi-put-project-root-relative-path-to-clipboard)
+   ("L" "put-project-root-relative-path-and-line-number-to-clipboard" juvi-put-project-root-relative-path-and-line-number-to-clipboard)
    ("n" "put-file-name-on-clipboard" juvi-put-file-name-on-clipboard)
    ("N" "copy-fully-qualified-name" juvi-copy-fully-qualified-name)
    ("m" "put-file-name-without-extension-on-clipboard" juvi-put-file-name-without-extension-on-clipboard)
@@ -2366,7 +2381,7 @@ With a prefix argument N, (un)comment that many sexps."
 ;; cider extensions
 
 (load "~/.emacs.d/cider-extensions/init.el")
-(define-key cider-mode-map (kbd "C-o j") 'juvi-autocompletions)
+(define-key cider-mode-map (kbd "C-o j") 'cider-extensions-autocompletions)
 
 (defun juvi-randomize-lines-in-region ()
   "Randomize the order of lines in the region, omitting blank lines."
