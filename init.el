@@ -1989,7 +1989,7 @@ process running; defaults to t when called interactively."
   "Copy current buffer file path relative to the Git repository root to the kill ring."
   (interactive)
   (when-let ((relative-path (juvi-relative-path '("deps.edn" "project.clj" ".git"))))
-    (let ((copied-value (concat relative-path ":" (line-number-at-pos))))
+    (let ((copied-value (concat relative-path ":" (number-to-string (line-number-at-pos)))))
       (kill-new copied-value)
       (message "Copied: %s" copied-value))))
 
