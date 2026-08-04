@@ -157,6 +157,12 @@
 ;;  '(minimap-font-face ((t (:height 20 :family "DejaVu Sans Mono"))))
 ;;  '(region ((t (:background "dark green")))))
 
+;;; Set command as meta
+(setq mac-option-key-is-meta nil
+      mac-command-key-is-meta t
+      mac-command-modifier 'meta
+      mac-option-modifier 'none)
+
 (require 'package)
 
 
@@ -189,7 +195,7 @@
 ;;                                       melpa)))
 
 ;; uncomment this when setting up emacs on a new machine
-;;(package-refresh-contents)
+;; (package-refresh-contents)
 
 (global-unset-key (kbd "C-o"))
 
@@ -280,7 +286,7 @@
 (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
 (setq projectile-indexing-method 'hybrid)
 (setq projectile-completion-system 'ivy)
-(projectile-global-mode)
+;; (projectile-global-mode)
 
 
 ;; (helm-projectile-on)
@@ -1126,12 +1132,6 @@ value string."
 
 ;; Delete selection
 (delete-selection-mode 1)
-
-;;; Set command as meta
-(setq mac-option-key-is-meta nil
-      mac-command-key-is-meta t
-      mac-command-modifier 'meta
-      mac-option-modifier 'none)
 
 (defun open-init ()
   (interactive)
