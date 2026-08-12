@@ -210,6 +210,8 @@
 
 ;;(require 'cider-macroexpansion)
 
+(setq cider-clojure-cli-aliases ":dev") ;; for this to work in deps.edn: :aliases {:dev {:jvm-opts ["-Djdk.attach.allowAttachSelf"]}}
+
 (setq cider-dynamic-indentation nil)
 
 (define-key cider-mode-map (kbd "C-c C-i") 'cider-pprint-eval-last-sexp-to-comment)
