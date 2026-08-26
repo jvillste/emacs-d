@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 (package-initialize)
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -17,6 +19,7 @@
  '(cider-auto-select-error-buffer nil)
  '(cider-dynamic-indentation nil)
  '(cider-enhanced-cljs-completion-p nil)
+ '(cider-eval-output-destination 'repl-buffer)
  '(cider-font-lock-dynamically nil)
  '(cider-font-lock-reader-conditionals t)
  '(cider-interactive-eval-output-destination 'repl-buffer)
@@ -114,7 +117,11 @@
  '(recentf-max-saved-items 10000)
  '(recentf-mode t)
  '(safe-local-variable-values
-   '((cider-jack-in-cmd . "temp/start-repl.sh")
+   '((eval setq-local cider-lein-command
+           (expand-file-name "temp/start-repl.sh"
+                             (locate-dominating-file default-directory
+                                                     ".dir-locals.el")))
+     (cider-jack-in-cmd . "temp/start-repl.sh")
      (cider-jack-in-args . "AWS_REGION=eu-west-1 lein repl :headless")
      (eval progn
            (setenv "VK_LAYER_PATH"
@@ -2411,10 +2418,18 @@ With a prefix argument N, (un)comment that many sexps."
 (defun clerk-show ()
   (interactive)
   (when-let
-      ((filename
-        (buffer-file-name)))
+      ((filename (buffer-file-name)))
     (save-buffer)
-    (cider-interactive-eval
-     (concat "(nextjournal.clerk/show! \"" filename "\")"))))
+    (cider-interactive-eval (concat "(nextjournal.clerk/show! \"" filename "\")"))))
+
+(defun clerk-show-without-cache ()
+  (interactive)
+  (when-let
+      ((filename (buffer-file-name)))
+    (save-buffer)
+    (cider-interactive-eval "(nextjournal.clerk/clear-cache!)")
+    (cider-interactive-eval (concat "(nextjournal.clerk/show! \"" filename "\")"))))
 
 (define-key cider-mode-map (kbd "C-M-i") 'clerk-show)
+
+(define-key cider-mode-map (kbd "C-M-S-i") 'clerk-show-without-cache)
