@@ -97,12 +97,15 @@
    '(ace-mc avy change-case cider clj-refactor counsel edn elpy epl
             exec-path-from-shell flx-ido flycheck-clj-kondo git-gutter
             gnu-elpa-keyring-update gptel gptel-commit helm-gtags
-            helm-projectile highlight-symbol htmlize intero
-            irony-eldoc ivy-rich lsp-ui minimap nodejs-repl pytest
-            python python-mode python-pytest quelpa racer rg
-            scala-mode symbol-overlay sync-recentf terraform-mode
-            typescript-mode web-mode wgrep-helm wgsl-mode which-key
-            xml-format yaml-mode zenburn-theme zettelkasten))
+            helm-projectile highlight-symbol htmlize intero irony
+            irony-eldoc irony-mode ivy-rich lsp-ui minimap nodejs-repl
+            odin-mode odin-ts-mode pytest python python-mode
+            python-pytest quelpa racer rg scala-mode symbol-overlay
+            sync-recentf terraform-mode typescript-mode web-mode
+            wgrep-helm wgsl-mode which-key xml-format yaml-mode
+            zenburn-theme zettelkasten))
+ '(package-vc-selected-packages
+   '((odin-ts-mode :url "https://github.com/Sampie159/odin-ts-mode")))
  '(projectile-enable-caching nil)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_"
@@ -110,7 +113,7 @@
  '(projectile-mode t nil (projectile))
  '(projectile-project-root-files-bottom-up
    '(".projectile" "build.sh" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr"
-     "_darcs"))
+     "_darcs" "project.clj"))
  '(projectile-use-git-grep nil)
  '(python-pytest-executable "python -m pytest ")
  '(recentf-max-menu-items 100)
@@ -1628,11 +1631,17 @@ value string."
   (skip-chars-forward " \t")
   (juvi-indent-next-line-to-current-column))
 
+(defun juvi-new-line-and-indent ()
+  (interactive)
+  (insert "\n")
+  (juvi-indent-current-line-to-previous-line-column))
+
 (defhydra juvi-hydra-indent-next-line (global-map "C-o i")
   "indent-next-line-to-current-column"
   ("n" (juvi-indent-next-line-to-current-column) "indent-next-line-to-current-column")
   ("N" (juvi-incrementally-indent-next-line-to-current-column) "incrementally-indent-next-line-to-current-column")
-  ("c" (juvi-indent-current-line-to-previous-line-column) "indent-current-line-to-previous-line-column"))
+  ("c" (juvi-indent-current-line-to-previous-line-column) "indent-current-line-to-previous-line-column")
+  ("m" (juvi-new-line-and-indent) "new-line-and-indent"))
 
 ;; (add-to-list 'load-path "~/.emacs.d/vendor/re-jump.el/")
 ;; (load "re-jump")
@@ -1779,6 +1788,21 @@ value string."
 (define-key elpy-mode-map (kbd "C-M-o C-M-e") 'juvi-mark-python-region-for-eval)
 
 (define-key elpy-mode-map (kbd "C-c C-k") 'python-shell-send-buffer)
+
+(defun juvi-build-python-project ()
+  "Change directory to '../' and run the build.sh script."
+  (interactive)
+  (save-buffer)
+  (let* ((parent-dir (expand-file-name "../" default-directory))
+         (script-path (expand-file-name "build.sh" parent-dir)))
+    (if (file-exists-p script-path)
+        (let ((default-directory parent-dir))
+          (compile "./build.sh"))
+      (error "Build script not found at: %s" script-path))))
+
+(define-key elpy-mode-map
+            (kbd "C-c C-b")
+            'juvi-build-python-project)
 
 (defun juvi-send-marked-python-code ()
   (interactive)
@@ -1962,7 +1986,7 @@ process running; defaults to t when called interactively."
 
 
 ;; c
-
+(require-packages 'irony)
 (add-hook 'c-mode-hook 'irony-mode)
 (add-hook 'irony-mode-hook #'irony-eldoc)
 
@@ -2147,44 +2171,6 @@ process running; defaults to t when called interactively."
                                         " "))
                      'grep-mode))
 
-(transient-define-prefix transient-prefix-region-list ()
-  "region-list"
-  [("a" "append-region-to-list" juvi-append-region-to-list)
-   ("c" "clear-region-list" juvi-clear-region-list)
-   ("y" "yank-region-list" juvi-yank-region-list)])
-
-(transient-define-prefix transient-prefix-juvi ()
-  "juvi"
-  [("P" "put-file-path-on-clipboard" juvi-put-file-path-on-clipboard)
-   ("p" "put-project-root-relative-path-to-clipboard" juvi-put-project-root-relative-path-to-clipboard)
-   ("L" "put-project-root-relative-path-and-line-number-to-clipboard" juvi-put-project-root-relative-path-and-line-number-to-clipboard)
-   ("n" "put-file-name-on-clipboard" juvi-put-file-name-on-clipboard)
-   ("N" "copy-fully-qualified-name" juvi-copy-fully-qualified-name)
-   ("m" "put-file-name-without-extension-on-clipboard" juvi-put-file-name-without-extension-on-clipboard)
-   ("h" "hide-result-buffer-cursor" juvi-hide-result-buffer-cursor)
-   ("r" "copy-result-buffer" juvi-copy-result-buffer)
-   ("R" "revert-all-unmodified-buffers" juvi-revert-all-unmodified-buffers)
-   ("t" "execute-all-but-integration-tests" juvi-execute-all-but-integration-tests)
-   ("i" "execute-integration-tests" juvi-execute-integration-tests)
-   ("f" "format-clojure-region-to-clipboard" juvi-format-clojure-region-to-clipboard)
-   ("o" "insert-now" juvi-insert-now)
-   ("O" "overwrite-mode" overwrite-mode)
-   ("k" "kill-other-buffers" kill-other-buffers)
-   ("s" "split-sexps-to-lines" juvi-split-sexps-to-lines)
-   ("S" "just-one-space-in-region" juvi-just-one-space-in-region)
-   ("e" "remove-sexp-prefix" juvi-remove-sexp-prefix)
-   ("x" "restore-sexp-prefix" juvi-restore-sexp-prefix)
-   ("F" "copy-string-with-fixed-indentation" juvi-copy-string-with-fixed-indentation)
-   ("d" "downcase-clipboard" juvi-downcase-clipboard)
-   ("D" "magit-diff-buffer-file" magit-diff-buffer-file)
-   ("l" "region-list-transient" transient-prefix-region-list)
-   ("y" "yank-rectangle-push-lines" juvi-yank-rectangle-push-lines)
-   ("g" "rg-recentf" juvi-rg-recentf)
-   ("G" "gptel-menu" gptel-menu)
-   ("a" "gptel-abort" gptel-abort)
-   ("c" "wrap-with-try-catch" juvi-wrap-with-try-catch)])
-
-(global-set-key (kbd "C-M-j") 'transient-prefix-juvi)
 
 (define-key python-mode-map (kbd "C-M-w") 'juvi-format-python-region-to-clipboard)
 
@@ -2202,8 +2188,38 @@ process running; defaults to t when called interactively."
 
 ;; odin
 
-;; (add-to-list 'load-path "~/.emacs.d/vendor/odin-mode/")
-;; (require 'odin-mode)
+(setq treesit-language-source-alist
+      '((odin "https://github.com/tree-sitter-grammars/tree-sitter-odin")))
+
+(use-package odin-ts-mode
+  :vc (:url "https://github.com/Sampie159/odin-ts-mode")
+  :mode "\\.odin\\'")
+
+;; (defun juvi-odin-mode-tab-settings ()
+;;   (setq indent-tabs-mode t)
+;;   (setq tab-width 8)
+;;   (setq odin-indent-level 8))
+
+;; (add-hook 'odin-mode-hook #'my-odin-mode-tab-settings)
+
+(defun my-force-odin-tabs ()
+  "Force both classic odin-mode and tree-sitter odin-ts-mode to strictly use tabs."
+  (setq-local indent-tabs-mode t)   ; Use tabs locally in this buffer
+  (setq-local tab-width 4)         ; Show tabs as 4 columns
+  (setq-local backward-delete-char-untabify-method nil)
+
+  ;; Fallback variable for the classic non-ts odin-mode
+  (when (boundp 'odin-indent-level)
+    (setq-local odin-indent-level 4)))
+
+;; Bind to BOTH hooks to ensure it catches whatever mode your Emacs is loading
+(add-hook 'odin-mode-hook #'my-force-odin-tabs)
+(add-hook 'odin-ts-mode-hook #'my-force-odin-tabs)
+
+(defun juvi-compile-odin ()
+  "Compile and run the current Odin project."
+  (interactive)
+  (compile "ODIN=~/bin/odin ../../compile-odin.sh"))
 
 ;; With odin-mode (https://github.com/mattt-b/odin-mode) and lsp-mode already added to your init.el of course!.
 (setq-default lsp-auto-guess-root t) ;; if you work with Projectile/project.el this will help find the ols.json file.
@@ -2433,3 +2449,47 @@ With a prefix argument N, (un)comment that many sexps."
 (define-key cider-mode-map (kbd "C-M-i") 'clerk-show)
 
 (define-key cider-mode-map (kbd "C-M-S-i") 'clerk-show-without-cache)
+
+(transient-define-prefix transient-prefix-region-list ()
+  "region-list"
+  [("a" "append-region-to-list" juvi-append-region-to-list)
+   ("c" "clear-region-list" juvi-clear-region-list)
+   ("y" "yank-region-list" juvi-yank-region-list)])
+
+(transient-define-prefix transient-prefix-juvi ()
+  "juvi"
+  [("b" "compile-odin" juvi-compile-odin)
+   ("P" "put-file-path-on-clipboard" juvi-put-file-path-on-clipboard)
+   ("p" "put-project-root-relative-path-to-clipboard" juvi-put-project-root-relative-path-to-clipboard)
+   ("L" "put-project-root-relative-path-and-line-number-to-clipboard" juvi-put-project-root-relative-path-and-line-number-to-clipboard)
+   ("n" "put-file-name-on-clipboard" juvi-put-file-name-on-clipboard)
+   ("N" "copy-fully-qualified-name" juvi-copy-fully-qualified-name)
+   ("m" "put-file-name-without-extension-on-clipboard" juvi-put-file-name-without-extension-on-clipboard)
+   ("h" "hide-result-buffer-cursor" juvi-hide-result-buffer-cursor)
+   ("r" "copy-result-buffer" juvi-copy-result-buffer)
+   ("R" "revert-all-unmodified-buffers" juvi-revert-all-unmodified-buffers)
+   ("t" "execute-all-but-integration-tests" juvi-execute-all-but-integration-tests)
+   ("i" "execute-integration-tests" juvi-execute-integration-tests)
+   ("f" "format-clojure-region-to-clipboard" juvi-format-clojure-region-to-clipboard)
+   ("o" "insert-now" juvi-insert-now)
+   ("O" "overwrite-mode" overwrite-mode)
+   ("k" "kill-other-buffers" kill-other-buffers)
+   ("s" "split-sexps-to-lines" juvi-split-sexps-to-lines)
+   ("S" "just-one-space-in-region" juvi-just-one-space-in-region)
+   ("e" "remove-sexp-prefix" juvi-remove-sexp-prefix)
+   ("x" "restore-sexp-prefix" juvi-restore-sexp-prefix)
+   ("F" "copy-string-with-fixed-indentation" juvi-copy-string-with-fixed-indentation)
+   ("d" "downcase-clipboard" juvi-downcase-clipboard)
+   ("D" "magit-diff-buffer-file" magit-diff-buffer-file)
+   ("l" "region-list-transient" transient-prefix-region-list)
+   ("y" "yank-rectangle-push-lines" juvi-yank-rectangle-push-lines)
+   ("g" "rg-recentf" juvi-rg-recentf)
+   ("G" "gptel-menu" gptel-menu)
+   ("a" "gptel-abort" gptel-abort)
+   ("c" "wrap-with-try-catch" juvi-wrap-with-try-catch)])
+
+(global-set-key (kbd "C-M-j") 'transient-prefix-juvi)
+
+;; Set a reasonable threshold for regular interactive use (e.g., 16MB to 32MB)
+(setq gc-cons-threshold (* 16 1024 1024))
+(setq read-process-output-max (* 1024 1024)) ; 1MB chunks
