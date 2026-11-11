@@ -247,7 +247,9 @@
 ;; flash evaluted code
 
 (setq eval-sexp-fu-flash-duration 0.15)
-(custom-set-faces '(eval-sexp-fu-flash ((t (:background "#6d0373" :foreground "white" :weight bold)))))
+;; (custom-set-faces '(eval-sexp-fu-flash ((t (:background "#1a001c" :foreground "white" :weight bold)))))
+;; (custom-set-faces '(eval-sexp-fu-flash ((t (:background "#1a001c" :weight bold)))))
+(custom-set-faces '(eval-sexp-fu-flash ((t (:background "#3c0040")))))
 
 (require-packages 'cider-eval-sexp-fu)
 
@@ -584,6 +586,7 @@
   (juvi-pprint-eval-to-result-buffer (cider-last-sexp)))
 
 (define-key cider-mode-map (kbd "C-c C-p") 'juvi-pprint-eval-last-sexp-to-result-buffer)
+(define-key cider-mode-map (kbd "C-c M-C-p") 'cider-pprint-eval-last-sexp)
 
 (defun juvi-pprint-eval-defun-at-point-to-result-buffer ()
   (interactive)
@@ -599,12 +602,12 @@
 
 (define-key cider-mode-map (kbd "C-M-o C-M-e") 'juvi-mark-function-for-eval)
 
-(defun juvi-eval-marked-function ()
+(defun juvi-eval-marked-function-to-result-buffer ()
   (interactive)
   (cider-load-buffer)
   (juvi-pprint-eval-to-result-buffer (concat "(" juvi-marked-ns "/" juvi-marked-function ")")))
 
-(define-key cider-mode-map (kbd "C-M-o C-M-i") 'juvi-eval-marked-function)
+(define-key cider-mode-map (kbd "C-M-o C-M-i") 'juvi-eval-marked-function-to-result-buffer)
 
 (defun juvi-eval-function-at-point ()
   (interactive)
@@ -758,61 +761,9 @@ value string."
 (define-key cider-mode-map (kbd "M-.") 'cider-find-var)
 
 (defun juvi-execute-tests (include-selectors exclude-selectors)
-  "based on cider-test-execute"
-  (cider-test-clear-highlights)
-  (cider-map-repls :clj-strict
-    (lambda (conn)
-      (message "Running tests including: %s and excluding %s" include-selectors exclude-selectors)
-      (setq cider-test--current-repl conn)
-      (let* ((request '("op" "test-all"
-                        "load?" "true"
-                        "fail-fast" "false")))
-        (when (and (listp include-selectors) include-selectors)
-          (setq request (append request `("include" ,include-selectors))))
-        (when (and (listp exclude-selectors) exclude-selectors)
-          (setq request (append request `("exclude" ,exclude-selectors))))
-        (cider-nrepl-send-request
-         request
-         (lambda (response)
-           (nrepl-dbind-response response (summary results status out err elapsed-time ns-elapsed-time var-elapsed-time)
-             (cond ((member "namespace-not-found" status)
-                    (unless silent
-                      (message "No test namespace: %s" (cider-propertize ns 'ns))))
-                   (out (cider-emit-interactive-eval-output out))
-                   (err (cider-emit-interactive-eval-err-output err))
-                   (results
-                    (nrepl-dbind-response summary (error fail)
-                      (setq cider-test-last-summary summary)
-                      (setq cider-test-last-results results)
-                      (cider-test-highlight-problems results)
-                      (cider-test-echo-summary summary results elapsed-time)
-                      (if (or (not (zerop (+ error fail)))
-                              cider-test-show-report-on-success)
-                          (let ((b (cider-popup-buffer
-                                    cider-test-report-buffer
-                                    cider-auto-select-test-report-buffer)))
-                            (with-current-buffer b
-                              ;; Change the default-directory so that it doesn't affect `sesman--linked-sessions` logic:
-                              (setq-local default-directory
-                                          (with-current-buffer "*Messages*" default-directory)))
-                            (cider-test-render-report
-                             b
-                             summary
-                             results
-                             elapsed-time
-                             ns-elapsed-time
-                             var-elapsed-time))
-                        (when (get-buffer cider-test-report-buffer)
-                          (with-current-buffer cider-test-report-buffer
-                            (let ((inhibit-read-only t))
-                              (erase-buffer)))
-                          (cider-test-render-report
-                           cider-test-report-buffer
-                           summary
-                           results
-                           elapsed-time
-                           ns-elapsed-time))))))))
-         conn)))))
+  (let ((cider-test-default-include-selectors include-selectors)
+        (cider-test-default-exclude-selectors exclude-selectors))
+    (cider-test-execute :project)))
 
 (defun juvi-execute-all-but-integration-tests ()
   (interactive)
