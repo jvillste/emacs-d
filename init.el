@@ -1691,6 +1691,11 @@ value string."
   (interactive)
   (setq cider-clojure-cli-global-options ""))
 
+;; clojure shell scripts
+
+(add-to-list 'load-path (expand-file-name "clojure-shell-script" user-emacs-directory))
+(require 'clojure-shell-script)
+(add-hook 'clojure-mode-hook #'clojure-shell-script-setup)
 
 ;; python
 
@@ -2250,7 +2255,7 @@ process running; defaults to t when called interactively."
                       :stream t
                       :models '("gpt-5.4-mini" "gpt-5.4-nano" "gpt-5.4" "gpt-5.4-pro")))
 
-(setq gptel-model "gpt-5.4")
+(setq gptel-model "Qwen3.6-35B-A3B-oQ4e-mtp")
 
 (gptel-make-xai "xAI"
   :stream t
@@ -2275,10 +2280,8 @@ process running; defaults to t when called interactively."
   :protocol "http"
   :stream t
   :key (lambda () (shell-command-to-string "security find-generic-password -s \"omlx-api-key\" -a \"omlx-api-key\" -w"))
-  :models '("Qwen3.6-35B-A3B-MLX-8bit"
-            "Qwen3.6-35B-A3B-UD-MLX-4bit"
-            "Qwen3.6-27B-MLX-8bit"
-            "Qwen3.6-27B-UD-MLX-4bit"))
+  :models '("Qwen3.8-27B-oQ4e-mtp"
+            "Qwen3.6-35B-A3B-oQ4e-mtp"))
 
 (gptel-make-openai "openrouter"
   :host "openrouter.ai"
