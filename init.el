@@ -94,16 +94,17 @@
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
-   '(ace-mc avy change-case cider clj-refactor counsel edn elpy epl
-            exec-path-from-shell flx-ido flycheck-clj-kondo git-gutter
-            gnu-elpa-keyring-update gptel gptel-commit helm-gtags
-            helm-projectile highlight-symbol htmlize intero irony
-            irony-eldoc irony-mode ivy-rich lsp-ui minimap nodejs-repl
-            odin-mode odin-ts-mode pytest python python-mode
-            python-pytest quelpa racer rg scala-mode symbol-overlay
-            sync-recentf terraform-mode typescript-mode web-mode
-            wgrep-helm wgsl-mode which-key xml-format yaml-mode
-            zenburn-theme zettelkasten))
+   '(ace-mc avy change-case cider cider-eval-sexp-fu clj-refactor counsel
+            edn elpy epl exec-path-from-shell flx-ido
+            flycheck-clj-kondo git-gutter gnu-elpa-keyring-update
+            gptel gptel-commit helm-gtags helm-projectile
+            highlight-symbol htmlize intero irony irony-eldoc
+            irony-mode ivy-rich lsp-ui minimap nodejs-repl odin-mode
+            odin-ts-mode pytest python python-mode python-pytest
+            quelpa racer rg scala-mode symbol-overlay sync-recentf
+            terraform-mode typescript-mode web-mode wgrep-helm
+            wgsl-mode which-key xml-format yaml-mode zenburn-theme
+            zettelkasten))
  '(package-vc-selected-packages
    '((odin-ts-mode :url "https://github.com/Sampie159/odin-ts-mode")))
  '(projectile-enable-caching nil)
@@ -242,6 +243,20 @@
 (define-key clojure-mode-map (kbd "M-k M-j") 'cider-jack-in-clj&cljs)
 (define-key clojure-mode-map (kbd "M-k M-q") 'sesman-quit)
 (define-key clojure-mode-map (kbd "C-t") 'transpose-sexps)
+
+;; flash evaluted code
+
+(setq eval-sexp-fu-flash-duration 0.15)
+(custom-set-faces '(eval-sexp-fu-flash ((t (:background "#6d0373" :foreground "white" :weight bold)))))
+
+(require-packages 'cider-eval-sexp-fu)
+
+(define-eval-sexp-fu-flash-command cider-pprint-eval-last-sexp-to-comment
+  (eval-sexp-fu-flash (cider-esf--bounds-of-last-sexp)))
+
+(define-eval-sexp-fu-flash-command cider-load-buffer
+  (eval-sexp-fu-flash (cons (window-start)
+                            (window-end))))
 
 (require-packages 'hydra)
 
