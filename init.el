@@ -258,6 +258,9 @@
   (eval-sexp-fu-flash (cons (window-start)
                             (window-end))))
 
+(define-eval-sexp-fu-flash-command juvi-pprint-eval-last-sexp-to-result-buffer
+  (eval-sexp-fu-flash (cider-esf--bounds-of-last-sexp)))
+
 (require-packages 'hydra)
 
 
