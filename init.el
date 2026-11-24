@@ -24,8 +24,8 @@
  '(cider-font-lock-reader-conditionals t)
  '(cider-interactive-eval-output-destination 'repl-buffer)
  '(cider-jack-in-default 'lein)
- '(cider-ns-refresh-after-fn "dev/start" t)
- '(cider-ns-refresh-before-fn "dev/stop" t)
+ '(cider-ns-refresh-after-fn "dev/start")
+ '(cider-ns-refresh-before-fn "dev/stop")
  '(cider-ns-refresh-show-log-buffer nil)
  '(cider-output-std-streams-to-popup t)
  '(cider-refresh-show-log-buffer nil)
@@ -249,7 +249,14 @@
 (setq eval-sexp-fu-flash-duration 0.15)
 ;; (custom-set-faces '(eval-sexp-fu-flash ((t (:background "#1a001c" :foreground "white" :weight bold)))))
 ;; (custom-set-faces '(eval-sexp-fu-flash ((t (:background "#1a001c" :weight bold)))))
-(custom-set-faces '(eval-sexp-fu-flash ((t (:background "#3c0040")))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(eval-sexp-fu-flash ((t (:background "#3c0040"))))
+ '(highlight-symbol-face ((t (:background "dark cyan"))))
+ '(magit-hash ((t (:foreground "grey60")))))
 
 (require-packages 'cider-eval-sexp-fu)
 
@@ -1865,7 +1872,7 @@ the python shell:
                         (make-string
                          ;; Subtract 2 because of the coding cookie.
                          (- (line-number-at-pos start) 2) ?\n)))))
-    (with-temp-buffer
+    (with-temp-bufer
       (python-mode)
       (when fillstr
         (insert fillstr))
@@ -1936,7 +1943,6 @@ process running; defaults to t when called interactively."
 
 ;; overtone
 
-
 (defun juvi-stop-overtone ()
   (interactive)
   (cider-interactive-eval "(overtone.sc.server/stop)"
@@ -1964,9 +1970,10 @@ process running; defaults to t when called interactively."
 (add-hook 'c-mode-hook 'irony-mode)
 (add-hook 'irony-mode-hook #'irony-eldoc)
 
+;; change case
 
-;; (require 'quelpa)
-;; (quelpa '(change-case :fetcher git :url "git@gist.github.com:e8a10244aac6308de1323d1f6685658b.git"))
+(add-to-list 'load-path "~/.emacs.d/vendor/change-case.el/")
+(require 'change-case)
 
 ;; emacs
 
@@ -2033,13 +2040,7 @@ process running; defaults to t when called interactively."
 (global-set-key (kbd "C-M-j") 'transient-prefix-juvi)
 
 (setq-default frame-title-format '("%b"))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(highlight-symbol-face ((t (:background "dark cyan"))))
- '(magit-hash ((t (:foreground "grey60")))))
+
 
 ;; hot-right-now TODO: remove me
 
