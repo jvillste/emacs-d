@@ -24,8 +24,8 @@
  '(cider-font-lock-reader-conditionals t)
  '(cider-interactive-eval-output-destination 'repl-buffer)
  '(cider-jack-in-default 'lein)
- '(cider-ns-refresh-after-fn "dev/start")
- '(cider-ns-refresh-before-fn "dev/stop")
+ '(cider-ns-refresh-after-fn "dev/start" t)
+ '(cider-ns-refresh-before-fn "dev/stop" t)
  '(cider-ns-refresh-show-log-buffer nil)
  '(cider-output-std-streams-to-popup t)
  '(cider-refresh-show-log-buffer nil)
@@ -90,21 +90,22 @@
  '(lsp-keymap-prefix "C-o RET")
  '(lsp-lens-enable nil)
  '(lsp-ui-doc-show-with-mouse nil)
+ '(markdown-link-space-sub-char " ")
  '(mc/always-run-for-all t)
  '(minimap-minimum-width 20)
  '(minimap-width-fraction 0.05)
  '(package-selected-packages
    '(ace-mc avy change-case cider cider-eval-sexp-fu clj-refactor counsel
-            edn elpy epl exec-path-from-shell flx-ido
-            flycheck-clj-kondo git-gutter gnu-elpa-keyring-update
-            gptel gptel-commit helm-gtags helm-projectile
-            highlight-symbol htmlize intero irony irony-eldoc
-            irony-mode ivy-rich lsp-ui minimap nodejs-repl odin-mode
-            odin-ts-mode pytest python python-mode python-pytest
-            quelpa racer rg scala-mode symbol-overlay sync-recentf
-            terraform-mode typescript-mode web-mode wgrep-helm
-            wgsl-mode which-key xml-format yaml-mode zenburn-theme
-            zettelkasten))
+            denote denote-markdown edn elpy epl exec-path-from-shell
+            flx-ido flycheck-clj-kondo git-gutter
+            gnu-elpa-keyring-update gptel gptel-commit helm-gtags
+            helm-projectile highlight-symbol htmlize intero irony
+            irony-eldoc irony-mode ivy-rich lsp-ui minimap nodejs-repl
+            obsidian odin-mode odin-ts-mode pytest python python-mode
+            python-pytest quelpa racer rg scala-mode symbol-overlay
+            sync-recentf terraform-mode typescript-mode web-mode
+            wgrep-helm wgsl-mode which-key xml-format yaml-mode
+            zenburn-theme zettelkasten))
  '(package-vc-selected-packages
    '((odin-ts-mode :url "https://github.com/Sampie159/odin-ts-mode")))
  '(projectile-enable-caching nil)
@@ -278,6 +279,54 @@
 (add-hook 'markdown-mode-hook
           (lambda ()
             (visual-line-mode)))
+
+;; (use-package markdown-mode
+;;   :ensure t
+;; ;;  :mode ("\\.md\\'" . gfm-mode) ; GitHub Flavored Markdown works best with Obsidian syntax
+;;   :hook (markdown-mode . eglot-ensure))
+
+(setq markdown-enable-wiki-links t)
+(setq markdown-wiki-link-alias-first nil)
+(setq markdown-wiki-link-search-subdirectories t)
+(setq markdown-link-space-sub-char " ")
+
+(defun juvi-my-markdown-follow-thing-at-point ()
+  "Follow the link at point, remembering the current position for \\[xref-go-back]."
+  (interactive)
+  (xref-push-marker-stack (point-marker))
+  (markdown-follow-thing-at-point current-prefix-arg))
+
+(with-eval-after-load 'markdown-mode
+  (setq-local markdown-link-space-sub-char " ")
+  (define-key markdown-mode-map (kbd "M-.") #'juvi-my-markdown-follow-thing-at-point))
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(markdown-mode . ("marksman"))))
+
+(defun juvi-markdown-backlinks-regexp (file)
+  "Return a regexp matching Markdown links that point to FILE."
+  (let* ((name (file-name-base file))
+         (extension (file-name-extension file))
+         ;; wiki links substitute whitespace, inline links do not
+         (wiki-name (replace-regexp-in-string
+                     " " markdown-link-space-sub-char name t t)))
+    (concat "\\[\\[[^]]*" (regexp-quote wiki-name) "[^]]*\\]\\]"
+            "\\|\\][^)]*" (regexp-quote (concat name "." extension)))))
+
+(defun juvi-markdown-backlinks ()
+  "Show the places in the project that link to the current Markdown file."
+  (interactive)
+  (unless buffer-file-name
+    (user-error "Current buffer is not visiting a file"))
+  (let* ((regexp (juvi-markdown-backlinks-regexp buffer-file-name))
+         (project (project-current))
+         (files (if project
+                    (project-files project)
+                  (directory-files-recursively
+                   default-directory
+                   "\\.\\(?:md\\|markdown\\|mkd\\|mdown\\)\\'"))))
+    (xref-show-xrefs (lambda () (xref-matches-in-files regexp files)) nil)))
 
 (defhydra juvi-move-markdown-list-item (markdown-mode-map "C-c l")
   "move list item"
@@ -1873,42 +1922,42 @@ the python shell:
                          ;; Subtract 2 because of the coding cookie.
                          (- (line-number-at-pos start) 2) ?\n)))))
     (with-temp-bufer
-      (python-mode)
-      (when fillstr
-        (insert fillstr))
-      (insert substring)
-      (goto-char (point-min))
-      ;; (when (not toplevel-p)
-      ;;   (insert "if True:")
-      ;;   (delete-region (point) (line-end-position)))
-      (when nomain
-        (let* ((if-name-main-start-end
-                (and nomain
-                     (save-excursion
-                       (when (python-nav-if-name-main)
-                         (cons (point)
-                               (progn (python-nav-forward-sexp-safe)
-                                      ;; Include ending newline
-                                      (forward-line 1)
-                                      (point)))))))
-               ;; Oh destructuring bind, how I miss you.
-               (if-name-main-start (car if-name-main-start-end))
-               (if-name-main-end (cdr if-name-main-start-end))
-               (fillstr (make-string
-                         (- (line-number-at-pos if-name-main-end)
-                            (line-number-at-pos if-name-main-start)) ?\n)))
-          (when if-name-main-start-end
-            (goto-char if-name-main-start)
-            (delete-region if-name-main-start if-name-main-end)
-            (insert fillstr))))
-      ;; Ensure there's only one coding cookie in the generated string.
-      (goto-char (point-min))
-      (when (looking-at-p (python-rx coding-cookie))
-        (forward-line 1)
-        (when (looking-at-p (python-rx coding-cookie))
-          (delete-region
-           (line-beginning-position) (line-end-position))))
-      (buffer-substring-no-properties (point-min) (point-max)))))
+     (python-mode)
+     (when fillstr
+       (insert fillstr))
+     (insert substring)
+     (goto-char (point-min))
+     ;; (when (not toplevel-p)
+     ;;   (insert "if True:")
+     ;;   (delete-region (point) (line-end-position)))
+     (when nomain
+       (let* ((if-name-main-start-end
+               (and nomain
+                    (save-excursion
+                      (when (python-nav-if-name-main)
+                        (cons (point)
+                              (progn (python-nav-forward-sexp-safe)
+                                     ;; Include ending newline
+                                     (forward-line 1)
+                                     (point)))))))
+              ;; Oh destructuring bind, how I miss you.
+              (if-name-main-start (car if-name-main-start-end))
+              (if-name-main-end (cdr if-name-main-start-end))
+              (fillstr (make-string
+                        (- (line-number-at-pos if-name-main-end)
+                           (line-number-at-pos if-name-main-start)) ?\n)))
+         (when if-name-main-start-end
+           (goto-char if-name-main-start)
+           (delete-region if-name-main-start if-name-main-end)
+           (insert fillstr))))
+     ;; Ensure there's only one coding cookie in the generated string.
+     (goto-char (point-min))
+     (when (looking-at-p (python-rx coding-cookie))
+       (forward-line 1)
+       (when (looking-at-p (python-rx coding-cookie))
+         (delete-region
+          (line-beginning-position) (line-end-position))))
+     (buffer-substring-no-properties (point-min) (point-max)))))
 
 (defun juvi-python-shell-send-region (start end &optional send-main msg no-cookie)
   "The same as python-shell-send-region except calls juvi-python-shell-buffer-substring
@@ -2429,9 +2478,15 @@ With a prefix argument N, (un)comment that many sexps."
    ("c" "clear-region-list" juvi-clear-region-list)
    ("y" "yank-region-list" juvi-yank-region-list)])
 
+(transient-define-prefix transient-zettelkasten ()
+  "zettelkasten"
+  [("b" "markdown-backlinks" juvi-markdown-backlinks)
+   ("i" "obsidian-insert-wikilink" obsidian-insert-wikilink)])
+
 (transient-define-prefix transient-prefix-juvi ()
   "juvi"
   [("b" "compile-odin" juvi-compile-odin)
+   ("z" "transient-zettelkasten" transient-zettelkasten)
    ("P" "put-file-path-on-clipboard" juvi-put-file-path-on-clipboard)
    ("p" "put-project-root-relative-path-to-clipboard" juvi-put-project-root-relative-path-to-clipboard)
    ("L" "put-project-root-relative-path-and-line-number-to-clipboard" juvi-put-project-root-relative-path-and-line-number-to-clipboard)
@@ -2466,3 +2521,10 @@ With a prefix argument N, (un)comment that many sexps."
 ;; Set a reasonable threshold for regular interactive use (e.g., 16MB to 32MB)
 (setq gc-cons-threshold (* 16 1024 1024))
 (setq read-process-output-max (* 1024 1024)) ; 1MB chunks
+
+
+;; clodin
+
+(with-eval-after-load 'clojure-mode
+  (put-clojure-indent 'procedure '((:inner 0)))
+  (put-clojure-indent 'struct '((:inner 0))))
